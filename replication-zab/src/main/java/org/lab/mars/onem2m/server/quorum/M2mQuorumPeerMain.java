@@ -17,9 +17,15 @@
  */
 package org.lab.mars.onem2m.server.quorum;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.persistence.DSDatabaseImpl;
 import lab.mars.ds.register.ZooKeeperRegister;
+
 import org.lab.mars.onem2m.OneM2m;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.NettyServerCnxnFactory;
@@ -30,37 +36,6 @@ import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumMaj;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-/**
- * <h2>Configuration file</h2>
- * <p>
- * When the main() method of this class is used to start the program, the first
- * argument is used as a path to the config file, which will be used to obtain
- * configuration information. This file is a Properties file, so keys and values
- * are separated by equals (=) and the key/value pairs are separated by new
- * lines. The following is a general summary of keys used in the configuration
- * file. For full details on this see the documentation in docs/index.html
- * <ol>
- * <li>dataDir - The directory where the ZooKeeper data is stored.</li>
- * <li>dataLogDir - The directory where the ZooKeeper transaction log is stored.
- * </li>
- * <li>clientPort - The port used to communicate with clients.</li>
- * <li>tickTime - The duration of a tick in milliseconds. This is the basic unit
- * of time in ZooKeeper.</li>
- * <li>initLimit - The maximum number of ticks that a follower will wait to
- * initially synchronize with a leader.</li>
- * <li>syncLimit - The maximum number of ticks that a follower will wait for a
- * message (including heartbeats) from the leader.</li>
- * <li>server.<i>id</i> - This is the host:port[:port] that the server with the
- * given id will use for the quorum protocol.</li>
- * </ol>
- * In addition to the config file. There is a file in the data directory called
- * "myid" that contains the server id as an ASCII decimal value.
- */
 public class M2mQuorumPeerMain extends Thread {
     private static final Logger LOG = LoggerFactory
             .getLogger(M2mQuorumPeerMain.class);
@@ -78,7 +53,8 @@ public class M2mQuorumPeerMain extends Thread {
      * To start the replicated server specify the configuration file name on the
      * command line.
      *
-     * @param args path to the configfile
+     * @param args
+     *            path to the configfile
      */
     public static void main(String[] args) {
         M2mQuorumPeerMain main = new M2mQuorumPeerMain();
@@ -165,11 +141,11 @@ public class M2mQuorumPeerMain extends Thread {
 
                 quorumPeer.setZKDatabase(new ZKDatabase(
                         config.getNetworkPool(), new DSDatabaseImpl(
-                        config.m2mDataBase.isClean(),
-                        config.m2mDataBase.getKeyspace(),
-                        config.m2mDataBase.getTable(),
-                        config.m2mDataBase.getNode()), quorumPeer
-                        .getHandleIp()));
+                                config.m2mDataBase.isClean(),
+                                config.m2mDataBase.getKeyspace(),
+                                config.m2mDataBase.getTable(),
+                                config.m2mDataBase.getNode()), quorumPeer
+                                .getHandleIp()));
                 quorumPeer.setMyid(config.getServerId());
                 quorumPeer.setTickTime(config.getTickTime());
                 quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());
@@ -187,7 +163,7 @@ public class M2mQuorumPeerMain extends Thread {
 
                 quorumPeer.start();
                 M2mQuorumPeerStatistics.quorums.put(m2mQuorumServer
-                                .getServers().get(Integer.valueOf((i) + "")),
+                        .getServers().get(Integer.valueOf((i) + "")),
                         quorumPeer);
                 quorumPeers.add(quorumPeer);
 

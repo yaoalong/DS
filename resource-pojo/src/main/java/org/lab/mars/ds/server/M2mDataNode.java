@@ -12,8 +12,8 @@ import org.lab.mars.onem2m.jute.M2mRecord;
 public class M2mDataNode implements M2mRecord {
 
     /**
-  * 
-  */
+     *
+     */
     private static final long serialVersionUID = 3291328270207258803L;
     public int label;
     public long zxid;
@@ -26,6 +26,10 @@ public class M2mDataNode implements M2mRecord {
 
     public Integer getLabel() {
         return label;
+    }
+
+    public void setLabel(Integer label) {
+        this.label = label;
     }
 
     public Long getZxid() {
@@ -44,10 +48,6 @@ public class M2mDataNode implements M2mRecord {
         this.id = id;
     }
 
-    public void setLabel(Integer label) {
-        this.label = label;
-    }
-
     @Override
     public void serialize(M2mOutputArchive archive, String tag)
             throws IOException {
@@ -56,6 +56,7 @@ public class M2mDataNode implements M2mRecord {
         archive.writeLong(zxid, "zxid");
         archive.writeString(id, "id");
         archive.writeBuffer(data, "data");
+        archive.writeLong(value, "value");
         archive.endRecord(this, tag);
 
     }
@@ -64,12 +65,11 @@ public class M2mDataNode implements M2mRecord {
     public void deserialize(M2mInputArchive archive, String tag)
             throws IOException {
         archive.startRecord("node");
-
         label = archive.readInt("label");
-
         zxid = archive.readLong("zxid");
         id = archive.readString("id");
         data = archive.readBuffer("data");
+        value = archive.readLong("value");
         archive.endRecord(tag);
     }
 

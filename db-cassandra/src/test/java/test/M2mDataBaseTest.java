@@ -1,14 +1,6 @@
 package test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import lab.mars.ds.persistence.DSDatabaseImpl;
-
 import org.junit.Test;
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.onem2m.M2mKeeperException;
@@ -16,6 +8,13 @@ import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class M2mDataBaseTest {
     DSDatabaseImpl m2mDataBase = new DSDatabaseImpl(false, "tests", "onem2m1",
@@ -35,17 +34,17 @@ public class M2mDataBaseTest {
 
     @Test
     public void testDelete() {
-        m2mDataBase.delete("3333431");
+        m2mDataBase.delete("3333433");
     }
 
     @Test
     public void testRetrieve1() {
 
         List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(634L);
-        for (M2mDataNode m2mDataNode : m2mDataNodes) {
-
+        m2mDataNodes.forEach(m2mDataNode -> {
             TraversalAllFields.getObjAttr(m2mDataNode);
-        }
+        });
+
     }
 
     @Test
