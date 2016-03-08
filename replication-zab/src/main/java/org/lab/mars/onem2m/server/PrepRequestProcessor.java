@@ -72,17 +72,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
         this.zks = zks;
     }
 
-    /**
-     * method for tests to set failCreate
-     * 
-     * @param b
-     */
-    public static void setFailCreate(boolean b) {
-    }
-
-    /**
-     * 不断从submitedRequests中取出
-     */
     @Override
     public void run() {
         try {

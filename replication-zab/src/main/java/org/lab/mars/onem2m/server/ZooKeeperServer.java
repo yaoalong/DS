@@ -504,8 +504,9 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        M2mRequest m2mRequest = new M2mRequest(ctx, m2mRequestHeader.getXid(),
-                m2mRequestHeader.getType(), ByteBuffer.wrap(baos.toByteArray()));
+        M2mRequest m2mRequest = new M2mRequest(ctx.channel(),
+                m2mRequestHeader.getXid(), m2mRequestHeader.getType(),
+                ByteBuffer.wrap(baos.toByteArray()));
         submitRequest(m2mRequest);
     }
 

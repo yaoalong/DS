@@ -27,12 +27,6 @@ import org.lab.mars.onem2m.server.RequestProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * This RequestProcessor matches the incoming committed requests with the
- * locally submitted requests. The trick is that locally submitted requests that
- * change the state of the system will come back as incoming committed requests,
- * so we need to match them up.
- */
 public class M2mCommitProcessor extends Thread implements RequestProcessor {
     private static final Logger LOG = LoggerFactory
             .getLogger(M2mCommitProcessor.class);
@@ -59,7 +53,7 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
     boolean matchSyncs;
 
     public M2mCommitProcessor(RequestProcessor nextProcessor, String id,
-                              boolean matchSyncs) {
+            boolean matchSyncs) {
         super("CommitProcessor:" + id);
         this.nextProcessor = nextProcessor;
         this.matchSyncs = matchSyncs;
@@ -168,7 +162,6 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
     }
 
     synchronized public void processRequest(M2mRequest request) {
-        // request.addRQRec(">commit");
         if (LOG.isDebugEnabled()) {
             LOG.debug("Processing request:: " + request);
         }

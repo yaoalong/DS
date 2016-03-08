@@ -18,8 +18,12 @@
 
 package org.lab.mars.onem2m.server;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
+
+import java.nio.ByteBuffer;
+
 import lab.mars.ds.reflection.ResourceReflection;
+
 import org.lab.mars.ds.server.DataTree.ProcessTxnResult;
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.onem2m.KeeperException;
@@ -27,13 +31,16 @@ import org.lab.mars.onem2m.KeeperException.Code;
 import org.lab.mars.onem2m.KeeperException.SessionMovedException;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mRecord;
-import org.lab.mars.onem2m.proto.*;
+import org.lab.mars.onem2m.proto.M2mCreateResponse;
+import org.lab.mars.onem2m.proto.M2mGetDataRequest;
+import org.lab.mars.onem2m.proto.M2mGetDataResponse;
+import org.lab.mars.onem2m.proto.M2mPacket;
+import org.lab.mars.onem2m.proto.M2mReplyHeader;
+import org.lab.mars.onem2m.proto.M2mSetDataResponse;
 import org.lab.mars.onem2m.server.ZooKeeperServer.ChangeRecord;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
 
 /**
  * This Request processor actually applies any transaction associated with a
@@ -83,21 +90,20 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
         if (request.m2mTxnHeader != null
                 && request.m2mTxnHeader.getType() == OpCode.closeSession) {
             ServerCnxnFactory scxn = zks.getServerCnxnFactory();
-            if (scxn != null && request.ctx == null) {
+            if (scxn != null && request.channel == null) {
                 return;
             }
         }
 
-        if (request.ctx == null) {
+        if (request.channel == null) {
             return;
         }
-        ChannelHandlerContext ctx = request.ctx;
+        Channel channel = request.channel;
 
         zks.decInProcess();
         Code err = Code.OK;
         M2mRecord rsp = null;
         try {
-
 
             KeeperException ke = request.getException();
             if (ke != null && request.type != OpCode.multi) {
@@ -108,32 +114,32 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 LOG.debug("{}", request);
             }
             switch (request.type) {
-                case OpCode.create: {
-                    rsp = new M2mCreateResponse(rc.path);
-                    err = Code.get(rc.err);
-                    break;
+            case OpCode.create: {
+                rsp = new M2mCreateResponse(rc.path);
+                err = Code.get(rc.err);
+                break;
+            }
+            case OpCode.delete: {
+                err = Code.get(rc.err);
+                break;
+            }
+            case OpCode.setData: {
+                rsp = new M2mSetDataResponse();
+                err = Code.get(rc.err);
+                break;
+            }
+            case OpCode.getData: {
+                M2mGetDataRequest getDataRequest = new M2mGetDataRequest();
+                M2mByteBufferInputStream.byteBuffer2Record(request.request,
+                        getDataRequest);
+                M2mDataNode m2mDataNode = (M2mDataNode) zks.getZKDatabase()
+                        .getData(getDataRequest.getPath());
+                if (m2mDataNode != null) {
+                    rsp = new M2mGetDataResponse(
+                            ResourceReflection.serializeKryo(m2mDataNode));
                 }
-                case OpCode.delete: {
-                    err = Code.get(rc.err);
-                    break;
-                }
-                case OpCode.setData: {
-                    rsp = new M2mSetDataResponse();
-                    err = Code.get(rc.err);
-                    break;
-                }
-                case OpCode.getData: {
-                    M2mGetDataRequest getDataRequest = new M2mGetDataRequest();
-                    M2mByteBufferInputStream.byteBuffer2Record(request.request,
-                            getDataRequest);
-                    M2mDataNode m2mDataNode = (M2mDataNode) zks.getZKDatabase()
-                            .getData(getDataRequest.getPath());
-                    if (m2mDataNode != null) {
-                        rsp = new M2mGetDataResponse(
-                                ResourceReflection.serializeKryo(m2mDataNode));
-                    }
-                    break;
-                }
+                break;
+            }
             }
         } catch (SessionMovedException e) {
             return;
@@ -154,7 +160,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
         M2mReplyHeader hdr = new M2mReplyHeader(request.cxid, lastZxid,
                 err.intValue());
         M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);
-        ctx.writeAndFlush(m2mPacket);
+        channel.writeAndFlush(m2mPacket);
     }
 
     public void shutdown() {

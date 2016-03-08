@@ -44,7 +44,7 @@ public class M2mFollowerRequestProcessor extends Thread implements
     boolean finished = false;
 
     public M2mFollowerRequestProcessor(M2mFollowerZooKeeperServer zks,
-                                       RequestProcessor nextProcessor) {
+            RequestProcessor nextProcessor) {
         super("FollowerRequestProcessor:" + zks.getServerId());
         this.zks = zks;
         this.nextProcessor = nextProcessor;
@@ -64,10 +64,6 @@ public class M2mFollowerRequestProcessor extends Thread implements
                 case OpCode.create:
                 case OpCode.delete:
                 case OpCode.setData:
-                case OpCode.setACL:
-                case OpCode.createSession:
-                case OpCode.closeSession:
-                case OpCode.multi:
                     zks.getFollower().request(request);
                     break;
                 }

@@ -65,29 +65,12 @@ public class M2mLeaderZooKeeperServer extends QuorumZooKeeperServer {
         return super.getGlobalOutstandingLimit() / (self.getQuorumSize() - 1);
     }
 
-    @Override
-    public void createSessionTracker() {
-
-    }
-
-    @Override
-    protected void startSessionTracker() {
-    }
-
     public boolean touch(long sess, int to) {
         return sessionTracker.touchSession(sess, to);
     }
 
     @Override
-    protected void registerJMX() {
-
-    }
-
-    @Override
     protected void unregisterJMX() {
-    }
-
-    protected void unregisterJMX(M2mLeader leader) {
     }
 
     @Override

@@ -1,6 +1,6 @@
 package org.lab.mars.onem2m.server;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 
 import java.nio.ByteBuffer;
 
@@ -25,9 +25,8 @@ public class M2mRequest {
      * @param type
      * @param bb
      */
-    public M2mRequest(ChannelHandlerContext ctx, int xid, int type,
-            ByteBuffer bb) {
-        this.ctx = ctx;
+    public M2mRequest(Channel channel, int xid, int type, ByteBuffer bb) {
+        this.channel = channel;
         this.cxid = xid;
         this.type = type;
         this.request = bb;
@@ -37,7 +36,7 @@ public class M2mRequest {
 
     public final int type;
 
-    public ChannelHandlerContext ctx;
+    public Channel channel;
 
     public M2mTxnHeader m2mTxnHeader;
 
