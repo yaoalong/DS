@@ -310,26 +310,6 @@ public class DSDatabaseImpl implements DSDatabase {
     }
 
     @Override
-    public String getTable() {
-        return table;
-    }
-
-    @Override
-    public String getNode() {
-        return node;
-    }
-
-    @Override
-    public boolean isClean() {
-        return clean;
-    }
-
-    @Override
-    public String getKeyspace() {
-        return keyspace;
-    }
-
-    @Override
     public List<M2mDataNode> getCertainData(Long low, Long high) {
         try {
             Select.Selection selection = query().select();

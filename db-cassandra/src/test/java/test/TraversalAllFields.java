@@ -1,13 +1,9 @@
 package test;
 
-import org.junit.Test;
-
 import java.lang.reflect.Field;
 
 /**
- * Author:yaoalong.
- * Date:2016/3/4.
- * Email:yaoalong@foxmail.com
+ * Author:yaoalong. Date:2016/3/4. Email:yaoalong@foxmail.com
  */
 public class TraversalAllFields {
     public static void getObjAttr(Object obj) {
@@ -34,6 +30,4 @@ public class TraversalAllFields {
         }
     }
 
-
 }
-

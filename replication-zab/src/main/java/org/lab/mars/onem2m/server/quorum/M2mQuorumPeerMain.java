@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import lab.mars.ds.loadbalance.impl.NetworkPool;
-import lab.mars.ds.persistence.DSDatabaseImpl;
 import lab.mars.ds.register.ZooKeeperRegister;
 
 import org.lab.mars.onem2m.OneM2m;
@@ -120,10 +119,7 @@ public class M2mQuorumPeerMain extends Thread {
                 quorumPeer.setElectionType(config.getElectionAlg());
                 quorumPeer.setCnxnFactory(cnxnFactory);
 
-                quorumPeer.setZKDatabase(new DSDatabase(new DSDatabaseImpl(
-                        config.m2mDataBase.isClean(), config.m2mDataBase
-                                .getKeyspace(), config.m2mDataBase.getTable(),
-                        config.m2mDataBase.getNode())));
+                quorumPeer.setZKDatabase(new DSDatabase(config.m2mDataBase));
                 quorumPeer.setMyid(config.getServerId());
                 quorumPeer.setTickTime(config.getTickTime());
                 quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());

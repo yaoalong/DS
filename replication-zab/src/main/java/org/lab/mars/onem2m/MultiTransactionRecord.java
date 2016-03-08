@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.lab.mars.onem2m.jute.InputArchive;
-import org.lab.mars.onem2m.jute.OutputArchive;
-import org.lab.mars.onem2m.jute.Record;
+import org.lab.mars.onem2m.jute.M2mInputArchive;
+import org.lab.mars.onem2m.jute.M2mOutputArchive;
+import org.lab.mars.onem2m.jute.M2mRecord;
 
 /**
  * Encodes a composite transaction. In the wire format, each transaction
@@ -32,7 +32,11 @@ import org.lab.mars.onem2m.jute.Record;
  * these MultiHeaders has a type which indicates the type of the following
  * transaction or a negative number if no more transactions are included.
  */
-public class MultiTransactionRecord implements Record, Iterable<Op> {
+public class MultiTransactionRecord implements M2mRecord, Iterable<Op> {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2454649678656901857L;
     private List<Op> ops = new ArrayList<Op>();
 
     public MultiTransactionRecord() {
@@ -58,7 +62,8 @@ public class MultiTransactionRecord implements Record, Iterable<Op> {
     }
 
     @Override
-    public void serialize(OutputArchive archive, String tag) throws IOException {
+    public void serialize(M2mOutputArchive archive, String tag)
+            throws IOException {
         archive.startRecord(this, tag);
         int index = 0;
         for (Op op : ops) {
@@ -80,7 +85,7 @@ public class MultiTransactionRecord implements Record, Iterable<Op> {
     }
 
     @Override
-    public void deserialize(InputArchive archive, String tag)
+    public void deserialize(M2mInputArchive archive, String tag)
             throws IOException {
         archive.startRecord(tag);
         archive.endRecord(tag);

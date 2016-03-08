@@ -17,8 +17,7 @@
 
 package org.lab.mars.onem2m;
 
-import org.lab.mars.onem2m.jute.Record;
-
+import org.lab.mars.onem2m.jute.M2mRecord;
 
 public abstract class Op {
     private int type;
@@ -30,9 +29,9 @@ public abstract class Op {
         this.path = path;
     }
 
-
     /**
-     * Gets the integer type code for an Op.  This code should be as from ZooDefs.OpCode
+     * Gets the integer type code for an Op. This code should be as from
+     * ZooDefs.OpCode
      *
      * @return The type code.
      * @see ZooDefs.OpCode
@@ -55,7 +54,7 @@ public abstract class Op {
      *
      * @return An appropriate Record structure.
      */
-    public abstract Record toRequestRecord();
+    public abstract M2mRecord toRequestRecord();
 
     /**
      * Reconstructs the transaction with the chroot prefix.
@@ -67,15 +66,17 @@ public abstract class Op {
     /**
      * Performs client path validations.
      *
-     * @throws IllegalArgumentException              if an invalid path is specified
-     * @throws KeeperException.BadArgumentsException if an invalid create mode flag is specified
+     * @throws IllegalArgumentException
+     *             if an invalid path is specified
+     * @throws KeeperException.BadArgumentsException
+     *             if an invalid create mode flag is specified
      */
     void validate() throws KeeperException {
     }
 
-    //////////////////
-    // these internal classes are public, but should not generally be referenced.
+    // ////////////////
+    // these internal classes are public, but should not generally be
+    // referenced.
     //
-
 
 }

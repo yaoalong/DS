@@ -24,7 +24,7 @@ import java.nio.ByteBuffer;
 
 import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
-import org.lab.mars.onem2m.jute.Record;
+import org.lab.mars.onem2m.jute.M2mRecord;
 
 /**
  * This is the structure that represents a request moving through a chain of
@@ -54,7 +54,7 @@ public class Request {
 
     public ChannelHandlerContext ctx;
 
-    public Record txn;
+    public M2mRecord txn;
 
     public long zxid = -1;
 

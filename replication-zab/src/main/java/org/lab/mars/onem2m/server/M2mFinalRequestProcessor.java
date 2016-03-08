@@ -82,7 +82,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 hdr.setZxid(request.zxid);
                 rc = zks.processTxn(hdr, txn);
             }
-            if (Request.isQuorum(request.type)) {
+            if (M2mRequest.isQuorum(request.type)) {
                 zks.getZKDatabase().addCommittedProposal(request);
             }
         }

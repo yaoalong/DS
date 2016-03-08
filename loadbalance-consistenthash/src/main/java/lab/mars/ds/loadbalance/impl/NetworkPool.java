@@ -40,7 +40,6 @@ public class NetworkPool implements NetworkInterface {
     public volatile TreeMap<Long, String> consistentBuckets; // TODO 临时打开的
     public volatile TreeMap<Long, String> allConsistentBuckets;// TODO 临时打开的
     private int factor = 1;
-    private volatile List<String> allServers;
     private volatile boolean initialized = false;
     private volatile List<String> servers;
     private ConcurrentHashMap<Long, String> allpositionToServer = new ConcurrentHashMap<>();
@@ -107,10 +106,6 @@ public class NetworkPool implements NetworkInterface {
                 }
             }
         }
-        long position = 0;
-        for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
-            position++;
-        }
         this.consistentBuckets = newConsistentBuckets;
         initialized = true;
     }
@@ -121,7 +116,6 @@ public class NetworkPool implements NetworkInterface {
     }
 
     public void setAllServers(List<String> allServers) {
-        this.allServers = allServers;
         TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
         MessageDigest md5 = MD5.get();
 

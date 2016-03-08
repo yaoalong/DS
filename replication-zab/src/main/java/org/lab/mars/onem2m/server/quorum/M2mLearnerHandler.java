@@ -18,10 +18,24 @@
 
 package org.lab.mars.onem2m.server.quorum;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-import org.lab.mars.onem2m.jute.Record;
+import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.server.M2mByteBufferInputStream;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.ZooTrace;
@@ -29,14 +43,6 @@ import org.lab.mars.onem2m.server.quorum.M2mLeader.Proposal;
 import org.lab.mars.onem2m.server.util.ZxidUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.util.LinkedList;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 /**
  * There will be an instance of this class created by the Leader for each
@@ -212,7 +218,8 @@ public class M2mLearnerHandler extends Thread {
                 byte ver[] = new byte[4];
                 ByteBuffer.wrap(ver).putInt(0x10000);
                 M2mQuorumPacket newEpochPacket = new M2mQuorumPacket(
-                        M2mLeader.LEADERINFO, ZxidUtils.makeZxid(newEpoch, 0), ver);
+                        M2mLeader.LEADERINFO, ZxidUtils.makeZxid(newEpoch, 0),
+                        ver);
                 oa.writeRecord(newEpochPacket, "packet");
                 bufferedOutput.flush();// 发送newEpoch给follower
                 M2mQuorumPacket ackEpochPacket = new M2mQuorumPacket();
@@ -333,7 +340,7 @@ public class M2mLearnerHandler extends Thread {
                     // is empty. We don't need to send snapshot if the follow
                     // is already sync with in-memory db.
                     LOG.debug("committedLog is empty but leader and follower "
-                                    + "are in sync, zxid=0x{}",
+                            + "are in sync, zxid=0x{}",
                             Long.toHexString(peerLastZxid));
                     packetToSend = M2mLeader.DIFF;
                     zxidToSend = peerLastZxid;
@@ -348,8 +355,8 @@ public class M2mLearnerHandler extends Thread {
             } finally {
                 rl.unlock();
             }
-            M2mQuorumPacket newLeaderQP = new M2mQuorumPacket(M2mLeader.NEWLEADER,
-                    ZxidUtils.makeZxid(newEpoch, 0), null);
+            M2mQuorumPacket newLeaderQP = new M2mQuorumPacket(
+                    M2mLeader.NEWLEADER, ZxidUtils.makeZxid(newEpoch, 0), null);
             if (getVersion() < 0x10000) {
                 oa.writeRecord(newLeaderQP, "packet");
             } else {
@@ -358,8 +365,7 @@ public class M2mLearnerHandler extends Thread {
             bufferedOutput.flush();
             // Need to set the zxidToSend to the latest zxid
             if (packetToSend == M2mLeader.SNAP) {
-                zxidToSend = leader.zk.getZKDatabase()
-                        .getLastProcessedZxid();// 获取对应的zxid
+                zxidToSend = leader.zk.getZKDatabase().getLastProcessedZxid();// 获取对应的zxid
             }
             oa.writeRecord(new M2mQuorumPacket(packetToSend, zxidToSend, null),
                     "packet");
@@ -422,7 +428,8 @@ public class M2mLearnerHandler extends Thread {
             // so we need to mark when the peer can actually start
             // using the data
             //
-            queuedPackets.add(new M2mQuorumPacket(M2mLeader.UPTODATE, -1, null));
+            queuedPackets
+                    .add(new M2mQuorumPacket(M2mLeader.UPTODATE, -1, null));
             // 读取消息然后进行处理
             while (true) {
                 qp = new M2mQuorumPacket();
@@ -443,58 +450,58 @@ public class M2mLearnerHandler extends Thread {
                 int type;
 
                 switch (qp.getType()) {
-                    case M2mLeader.ACK:
-                        syncLimitCheck.updateAck(qp.getZxid());
-                        leader.processAck(this.sid, qp.getZxid(),
-                                sock.getLocalSocketAddress());
-                        break;
-                    case M2mLeader.PING:
-                        // Process the touches
-                        ByteArrayInputStream bis = new ByteArrayInputStream(
-                                qp.getData());
-                        DataInputStream dis = new DataInputStream(bis);
-                        while (dis.available() > 0) {
-                            long sess = dis.readLong();
-                            int to = dis.readInt();
-                            leader.zk.touch(sess, to);
-                        }
-                        break;
-                    case M2mLeader.REVALIDATE:
-                        bis = new ByteArrayInputStream(qp.getData());
-                        dis = new DataInputStream(bis);
-                        long id = dis.readLong();
+                case M2mLeader.ACK:
+                    syncLimitCheck.updateAck(qp.getZxid());
+                    leader.processAck(this.sid, qp.getZxid(),
+                            sock.getLocalSocketAddress());
+                    break;
+                case M2mLeader.PING:
+                    // Process the touches
+                    ByteArrayInputStream bis = new ByteArrayInputStream(
+                            qp.getData());
+                    DataInputStream dis = new DataInputStream(bis);
+                    while (dis.available() > 0) {
+                        long sess = dis.readLong();
                         int to = dis.readInt();
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        DataOutputStream dos = new DataOutputStream(bos);
-                        dos.writeLong(id);
-                        boolean valid = leader.zk.touch(id, to);
-                        if (valid) {
-                        }
-                        if (LOG.isTraceEnabled()) {
-                            ZooTrace.logTraceMessage(LOG,
-                                    ZooTrace.SESSION_TRACE_MASK, "Session 0x"
-                                            + Long.toHexString(id) + " is valid: "
-                                            + valid);
-                        }
-                        dos.writeBoolean(valid);
-                        qp.setData(bos.toByteArray());
-                        queuedPackets.add(qp);
-                        break;
-                    case M2mLeader.REQUEST:
-                        bb = ByteBuffer.wrap(qp.getData());
-                        cxid = bb.getInt();
-                        type = bb.getInt();
-                        bb = bb.slice();
-                        M2mRequest si = null;
-                        if (type == OpCode.sync) {
-                            // si = new LearnerSyncRequest(this, sessionId, cxid,
-                            // type, bb);
-                        } else {
-                            si = new M2mRequest(null, cxid, type, bb);
-                        }
-                        leader.zk.submitRequest(si);
-                        break;
-                    default:
+                        leader.zk.touch(sess, to);
+                    }
+                    break;
+                case M2mLeader.REVALIDATE:
+                    bis = new ByteArrayInputStream(qp.getData());
+                    dis = new DataInputStream(bis);
+                    long id = dis.readLong();
+                    int to = dis.readInt();
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    DataOutputStream dos = new DataOutputStream(bos);
+                    dos.writeLong(id);
+                    boolean valid = leader.zk.touch(id, to);
+                    if (valid) {
+                    }
+                    if (LOG.isTraceEnabled()) {
+                        ZooTrace.logTraceMessage(LOG,
+                                ZooTrace.SESSION_TRACE_MASK, "Session 0x"
+                                        + Long.toHexString(id) + " is valid: "
+                                        + valid);
+                    }
+                    dos.writeBoolean(valid);
+                    qp.setData(bos.toByteArray());
+                    queuedPackets.add(qp);
+                    break;
+                case M2mLeader.REQUEST:
+                    bb = ByteBuffer.wrap(qp.getData());
+                    cxid = bb.getInt();
+                    type = bb.getInt();
+                    bb = bb.slice();
+                    M2mRequest si = null;
+                    if (type == OpCode.sync) {
+                        // si = new LearnerSyncRequest(this, sessionId, cxid,
+                        // type, bb);
+                    } else {
+                        si = new M2mRequest(null, cxid, type, bb);
+                    }
+                    leader.zk.submitRequest(si);
+                    break;
+                default:
                 }
             }
         } catch (IOException e) {
@@ -523,10 +530,10 @@ public class M2mLearnerHandler extends Thread {
      * 将QuorumPacket转化为Request
      */
     protected void pRequest2Txn(int type, long zxid, M2mRequest nM2mRequest,
-                                Record record) {
+            M2mRecord record) {
 
         switch (type) {
-            case OpCode.create:
+        case OpCode.create:
         }
 
     }

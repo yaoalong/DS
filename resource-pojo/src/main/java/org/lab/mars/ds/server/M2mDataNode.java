@@ -7,7 +7,9 @@ import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 
 /**
- * Author:yaoalong. Date:2016/3/5. Email:yaoalong@foxmail.com
+ * Author:yaoalong.
+ * Date:2016/3/5.
+ * Email:yaoalong@foxmail.com
  */
 public class M2mDataNode implements M2mRecord {
 
