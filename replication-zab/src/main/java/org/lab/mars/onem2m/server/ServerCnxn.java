@@ -19,7 +19,6 @@
 package org.lab.mars.onem2m.server;
 
 import org.lab.mars.onem2m.Watcher;
-import org.lab.mars.onem2m.proto.RequestHeader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -208,9 +207,6 @@ public abstract class ServerCnxn implements Stats, Watcher {
 
     protected long incrPacketsReceived() {
         return packetsReceived.incrementAndGet();
-    }
-
-    protected void incrOutstandingRequests(RequestHeader h) {
     }
 
     protected long incrPacketsSent() {

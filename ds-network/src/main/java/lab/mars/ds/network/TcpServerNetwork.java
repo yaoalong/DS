@@ -19,7 +19,7 @@ public class TcpServerNetwork {
     private ChannelInitializer<SocketChannel> channelChannelInitializer;
 
     public void bind(String host, int port) throws InterruptedException {
-        channels = new HashSet<Channel>();
+        channels = new HashSet<>();
         ServerBootstrap b = new ServerBootstrap();
         b.group(NetworkEventLoopGroup.bossGroup,
                 NetworkEventLoopGroup.workerGroup)

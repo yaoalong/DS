@@ -2,6 +2,8 @@ package lab.mars.ds.network.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lab.mars.ds.connectmanage.LRUManage;
+import lab.mars.ds.constant.OperateConstant;
 import lab.mars.ds.register.model.RegisterM2mPacket;
 import lab.mars.ds.register.starter.Starter;
 
@@ -13,7 +15,6 @@ public class RegisterPacketServerChannelHandler extends
     private static Logger LOG = LoggerFactory
             .getLogger(RegisterPacketServerChannelHandler.class);
     private Starter register;
-
     public RegisterPacketServerChannelHandler(Starter register) {
         this.register = register;
     }
@@ -21,8 +22,7 @@ public class RegisterPacketServerChannelHandler extends
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         RegisterM2mPacket m2mPacket = (RegisterM2mPacket) msg;
-        System.out.println("接收到了消息");
-        if (m2mPacket.getType() == 0) {
+        if (m2mPacket.getType() == OperateConstant.DETECT.getCode()) {
             m2mPacket.setBody(1);
             ctx.writeAndFlush(m2mPacket);
         } else {
@@ -32,12 +32,9 @@ public class RegisterPacketServerChannelHandler extends
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-
         ctx.fireChannelRegistered();
 
     }
-
-    ;
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {

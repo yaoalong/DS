@@ -26,10 +26,9 @@ public class LRUManage implements ConnectManager {
         private static final long serialVersionUID = 3033453005289310613L;
 
         @Override
-        protected boolean removeEldestEntry(
+        protected   boolean removeEldestEntry(
                 Map.Entry<Channel, Boolean> eldest) {
             if (size() > size) {
-                System.out.println("关闭");
                 eldest.getKey().close();
                 return true;
             }
@@ -42,12 +41,12 @@ public class LRUManage implements ConnectManager {
     }
 
     @Override
-    public void refresh(Channel channel) {
+    public   void refresh(Channel channel) {
         connectMessages.get(channel);
     }
 
     @Override
-    public void add(Channel channel) {
+    public   void add(Channel channel) {
         connectMessages.put(channel,true);
     }
 }

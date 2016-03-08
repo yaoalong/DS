@@ -34,7 +34,11 @@
             <artifactId>register-interface</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>lab.mars</groupId>
+            <artifactId>connectionmanage-lru</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
 
 
         <dependency>
