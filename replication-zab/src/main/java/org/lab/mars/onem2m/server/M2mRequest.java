@@ -64,20 +64,10 @@ public class M2mRequest {
             return false;
         case OpCode.create:
         case OpCode.delete:
-        case OpCode.createSession:
-        case OpCode.exists:
+
         case OpCode.getData:
-        case OpCode.check:
-        case OpCode.multi:
         case OpCode.setData:
         case OpCode.sync:
-        case OpCode.getACL:
-        case OpCode.setACL:
-        case OpCode.getChildren:
-        case OpCode.getChildren2:
-        case OpCode.ping:
-        case OpCode.closeSession:
-        case OpCode.setWatches:
             return true;
         default:
             return false;
@@ -86,21 +76,12 @@ public class M2mRequest {
 
     static boolean isQuorum(int type) {
         switch (type) {
-        case OpCode.exists:
-        case OpCode.getACL:
-        case OpCode.getChildren:
-        case OpCode.getChildren2:
         case OpCode.getData:
             return false;
         case OpCode.error:
-        case OpCode.closeSession:
         case OpCode.create:
-        case OpCode.createSession:
         case OpCode.delete:
-        case OpCode.setACL:
         case OpCode.setData:
-        case OpCode.check:
-        case OpCode.multi:
             return true;
         default:
             return false;
@@ -113,36 +94,14 @@ public class M2mRequest {
             return "notification";
         case OpCode.create:
             return "create";
-        case OpCode.setWatches:
-            return "setWatches";
         case OpCode.delete:
             return "delete";
-        case OpCode.exists:
-            return "exists";
         case OpCode.getData:
             return "getData";
-        case OpCode.check:
-            return "check";
-        case OpCode.multi:
-            return "multi";
         case OpCode.setData:
             return "setData";
         case OpCode.sync:
             return "sync:";
-        case OpCode.getACL:
-            return "getACL";
-        case OpCode.setACL:
-            return "setACL";
-        case OpCode.getChildren:
-            return "getChildren";
-        case OpCode.getChildren2:
-            return "getChildren2";
-        case OpCode.ping:
-            return "ping";
-        case OpCode.createSession:
-            return "createSession";
-        case OpCode.closeSession:
-            return "closeSession";
         case OpCode.error:
             return "error";
         default:

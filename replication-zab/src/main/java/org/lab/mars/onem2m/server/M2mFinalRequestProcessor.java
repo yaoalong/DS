@@ -87,8 +87,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
             }
         }
 
-        if (request.m2mTxnHeader != null
-                && request.m2mTxnHeader.getType() == OpCode.closeSession) {
+        if (request.m2mTxnHeader != null) {
             ServerCnxnFactory scxn = zks.getServerCnxnFactory();
             if (scxn != null && request.channel == null) {
                 return;
@@ -106,7 +105,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
         try {
 
             KeeperException ke = request.getException();
-            if (ke != null && request.type != OpCode.multi) {
+            if (ke != null) {
                 throw ke;
             }
 

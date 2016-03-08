@@ -17,21 +17,20 @@
 
 package org.lab.mars.onem2m;
 
-import org.lab.mars.onem2m.jute.InputArchive;
-import org.lab.mars.onem2m.jute.OutputArchive;
-import org.lab.mars.onem2m.jute.Record;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.lab.mars.onem2m.jute.InputArchive;
+import org.lab.mars.onem2m.jute.OutputArchive;
+import org.lab.mars.onem2m.jute.Record;
+
 /**
- * Encodes a composite transaction.  In the wire format, each transaction
- * consists of a single MultiHeader followed by the appropriate request.
- * Each of these MultiHeaders has a type which indicates
- * the type of the following transaction or a negative number if no more transactions
- * are included.
+ * Encodes a composite transaction. In the wire format, each transaction
+ * consists of a single MultiHeader followed by the appropriate request. Each of
+ * these MultiHeaders has a type which indicates the type of the following
+ * transaction or a negative number if no more transactions are included.
  */
 public class MultiTransactionRecord implements Record, Iterable<Op> {
     private List<Op> ops = new ArrayList<Op>();
@@ -64,35 +63,35 @@ public class MultiTransactionRecord implements Record, Iterable<Op> {
         int index = 0;
         for (Op op : ops) {
             switch (op.getType()) {
-                case ZooDefs.OpCode.create:
-                    op.toRequestRecord().serialize(archive, tag);
-                    break;
-                case ZooDefs.OpCode.delete:
-                    op.toRequestRecord().serialize(archive, tag);
-                    break;
-                case ZooDefs.OpCode.setData:
-                    op.toRequestRecord().serialize(archive, tag);
-                    break;
-                case ZooDefs.OpCode.check:
-                    op.toRequestRecord().serialize(archive, tag);
-                    break;
-                default:
-                    throw new IOException("Invalid type of op");
+            case ZooDefs.OpCode.create:
+                op.toRequestRecord().serialize(archive, tag);
+                break;
+            case ZooDefs.OpCode.delete:
+                op.toRequestRecord().serialize(archive, tag);
+                break;
+            case ZooDefs.OpCode.setData:
+                op.toRequestRecord().serialize(archive, tag);
+                break;
+            default:
+                throw new IOException("Invalid type of op");
             }
         }
         archive.endRecord(this, tag);
     }
 
     @Override
-    public void deserialize(InputArchive archive, String tag) throws IOException {
+    public void deserialize(InputArchive archive, String tag)
+            throws IOException {
         archive.startRecord(tag);
         archive.endRecord(tag);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MultiTransactionRecord)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof MultiTransactionRecord))
+            return false;
 
         MultiTransactionRecord that = (MultiTransactionRecord) o;
 
