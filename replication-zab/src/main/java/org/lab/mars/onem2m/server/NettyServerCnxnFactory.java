@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 
 import lab.mars.ds.loadbalance.impl.NetworkPool;
-import lab.mars.ds.network.ZABTcpServer;
+import lab.mars.ds.network.TcpServer;
 
 import org.lab.mars.onem2m.server.quorum.M2mHandler;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeerMain;
@@ -34,7 +34,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
     private static final Logger LOG = LoggerFactory
             .getLogger(NettyServerCnxnFactory.class);
     private Integer clientPort;
-    private ZABTcpServer tcpServer;
+    private TcpServer tcpServer;
     private Map<String, Long> allServers;
     /*
      * 获取本机的ip地址
@@ -66,7 +66,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
     public void configure(Integer clientPort, int maxClientCnxns,
             M2mHandler m2mHandler) throws IOException {
         this.clientPort = clientPort;
-        tcpServer = new ZABTcpServer(this, m2mHandler);
+        tcpServer = new TcpServer(this, m2mHandler);
 
     }
 

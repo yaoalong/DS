@@ -336,8 +336,8 @@ public class DSDatabaseImpl implements DSDatabase {
         select.where(eq("flag", 0)).and(gt("value", rangeDO.getStart()))
                 .and(lt("value", rangeDO.getEnd()));
         select.allowFiltering();
-        ResultSet resultSet2 = session.execute(select);
-        result = getZxid(resultSet2);
+        ResultSet resultSet = session.execute(select);
+        result = getZxid(resultSet);
         return result;
     }
 

@@ -6,7 +6,7 @@ import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.monitor.RegisterIntoZooKeeper;
 import lab.mars.ds.monitor.ZooKeeper_Monitor;
-import lab.mars.ds.network.TcpClientNetwork;
+import lab.mars.ds.network.RegisterTcpClient;
 import lab.mars.ds.network.TcpServerNetwork;
 import lab.mars.ds.network.intialize.RegisterPacketClientChannelInitializer;
 import lab.mars.ds.network.intialize.RegisterPacketServerChannelInitializer;
@@ -152,7 +152,7 @@ public class Starter {
         for (String server : networkPool.getNextServers(myServer,
                 startFactor - 1)) {
             try {
-                TcpClientNetwork tcpClient = new TcpClientNetwork();
+                RegisterTcpClient tcpClient = new RegisterTcpClient();
                 tcpClient
                         .setSocketChannelChannelInitializer(new RegisterPacketClientChannelInitializer());
                 String[] serverAndPort = spilitString(server);

@@ -12,17 +12,14 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Author:yaoalong.
- * Date:2016/3/3.
- * Email:yaoalong@foxmail.com
+ * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
  */
-public class TcpClientNetwork {
+public abstract class TcpClientNetwork {
 
     private Channel channel;
-    private ReentrantLock reentrantLock = new ReentrantLock();
-    private Condition condition = reentrantLock.newCondition();
+    protected ReentrantLock reentrantLock = new ReentrantLock();
+    protected Condition condition = reentrantLock.newCondition();
     private ChannelInitializer<SocketChannel> socketChannelChannelInitializer;
-
 
     public void connectionOne(String host, int port) {
         Bootstrap bootstrap = new Bootstrap();
@@ -39,19 +36,7 @@ public class TcpClientNetwork {
 
     }
 
-    public void write(Object msg) {
-        while (channel == null) {
-            try {
-                reentrantLock.lock();
-                condition.await();
-            } catch (InterruptedException e) {
-            } finally {
-                reentrantLock.unlock();
-            }
-        }
-        channel.writeAndFlush(msg);
-
-    }
+    public abstract void write(Object msg);
 
     public void close() {
         if (channel != null) {
@@ -67,7 +52,8 @@ public class TcpClientNetwork {
         this.channel = channel;
     }
 
-    public void setSocketChannelChannelInitializer(ChannelInitializer<SocketChannel> socketChannelChannelInitializer) {
+    public void setSocketChannelChannelInitializer(
+            ChannelInitializer<SocketChannel> socketChannelChannelInitializer) {
         this.socketChannelChannelInitializer = socketChannelChannelInitializer;
     }
 }
