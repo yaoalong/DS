@@ -21,9 +21,12 @@ package org.lab.mars.onem2m.server.quorum.flexible;
 import java.util.HashSet;
 
 /**
- * This class implements a validator for majority quorums. The implementation is
- * straightforward.
- *
+ * 
+ * @author yaoalong
+ * @Date 2016年3月8日
+ * @Email yaoalong@foxmail.com
+ * 
+ *        大多数服从决策器
  */
 public class M2mQuorumMaj implements M2mQuorumVerifier {
     int half;
@@ -37,8 +40,6 @@ public class M2mQuorumMaj implements M2mQuorumVerifier {
     public M2mQuorumMaj(int n) {
         this.half = n / 2;
     }
-
-
 
     /**
      * Verifies if a set is a majority.

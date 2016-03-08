@@ -18,10 +18,20 @@
 
 package org.lab.mars.onem2m.server;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
 import lab.mars.ds.loadbalance.RangeDO;
-import lab.mars.ds.loadbalance.impl.NetworkPool;
-import org.lab.mars.ds.server.DataTree.ProcessTxnResult;
+
 import org.lab.mars.ds.server.M2mDataNode;
+import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
@@ -35,16 +45,6 @@ import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
-
 /**
  * This class maintains the in memory database of zookeeper server states that
  * includes the sessions, datatree and the committed logs. It is booted up after
@@ -55,6 +55,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
  */
 public class DSDatabase implements M2mRecord {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2369189189754653975L;
     public static final int commitLogCount = 500; // 临时会存储500个
     private static final Logger LOG = LoggerFactory.getLogger(DSDatabase.class);
     private static final ConcurrentHashMap<String, M2mDataNode> nodes = new ConcurrentHashMap<>();
@@ -64,18 +68,14 @@ public class DSDatabase implements M2mRecord {
     protected ReentrantReadWriteLock logLock = new ReentrantReadWriteLock();
     private lab.mars.ds.persistence.DSDatabase m2mDataBase;
     volatile private boolean initialized = false;
-    private NetworkPool networkPool;
     private volatile long lastProcessedZxid = 0;
-
 
     private List<RangeDO> rangeDOs;
 
     /**
      * 初始化的同时进行数据加载
      */
-    public DSDatabase(NetworkPool networkPool, lab.mars.ds.persistence.DSDatabase m2mDataBase,
-                      String mySelfString) {
-        this.networkPool = networkPool;
+    public DSDatabase(lab.mars.ds.persistence.DSDatabase m2mDataBase) {
         this.m2mDataBase = m2mDataBase;
     }
 
@@ -104,7 +104,6 @@ public class DSDatabase implements M2mRecord {
         }
         initialized = false;
     }
-
 
     /**
      * Get the lock that controls the committedLog. If you want to get the
@@ -137,7 +136,6 @@ public class DSDatabase implements M2mRecord {
      * @return the last processed zxid of a datatree
      */
 
-
     /**
      * load the database from the disk onto memory and also add the transactions
      * to the committedlog in memory.
@@ -165,7 +163,8 @@ public class DSDatabase implements M2mRecord {
      * maintains a list of last <i>committedLog</i> or so committed requests.
      * This is used for fast follower synchronization.
      *
-     * @param request committed request
+     * @param request
+     *            committed request
      */
     public void addCommittedProposal(M2mRequest request) {
         WriteLock wl = logLock.writeLock();
@@ -192,8 +191,8 @@ public class DSDatabase implements M2mRecord {
             } catch (IOException e) {
                 LOG.error("This really should be impossible", e);
             }
-            M2mQuorumPacket pp = new M2mQuorumPacket(M2mLeader.PROPOSAL, request.zxid,
-                    baos.toByteArray());
+            M2mQuorumPacket pp = new M2mQuorumPacket(M2mLeader.PROPOSAL,
+                    request.zxid, baos.toByteArray());
             Proposal p = new Proposal();
             p.packet = pp;
             p.m2mRequest = request;
@@ -216,10 +215,12 @@ public class DSDatabase implements M2mRecord {
     /**
      * the process txn on the data
      *
-     * @param hdr the txnheader for the txn
-     * @param txn the transaction that needs to be processed
+     * @param hdr
+     *            the txnheader for the txn
+     * @param txn
+     *            the transaction that needs to be processed
      * @return the result of processing the transaction on this
-     * datatree/zkdatabase
+     *         datatree/zkdatabase
      */
     /*
      * m2m内存数据库处理事务请求
@@ -244,7 +245,6 @@ public class DSDatabase implements M2mRecord {
         return m2mDataBase.retrieve(key);
     }
 
-
     // /**
     // * Truncate the ZKDatabase to the specified zxid
     // * @param zxid the zxid to truncate zk database to
@@ -266,7 +266,8 @@ public class DSDatabase implements M2mRecord {
     /**
      * deserialize a snapshot from an input archive
      *
-     * @param ia the input archive you want to deserialize from
+     * @param ia
+     *            the input archive you want to deserialize from
      * @throws IOException
      */
     public void deserializeSnapshot(M2mInputArchive ia) throws IOException {
@@ -279,8 +280,9 @@ public class DSDatabase implements M2mRecord {
     /**
      * serialize the snapshot
      *
-     * @param oa the output archive to which the snapshot needs to be
-     *           serialized
+     * @param oa
+     *            the output archive to which the snapshot needs to be
+     *            serialized
      * @throws IOException
      * @throws InterruptedException
      */
@@ -293,11 +295,11 @@ public class DSDatabase implements M2mRecord {
      * 数据库的插入
      */
     public void commit() {
-//        for (Entry<String, M2mDataNode> m2mDataNode : getM2mData().getNodes()
-//                .entrySet()) {
-//            m2mDataBase.create(m2mDataNode.getValue());
-//
-//        }
+        // for (Entry<String, M2mDataNode> m2mDataNode : getM2mData().getNodes()
+        // .entrySet()) {
+        // m2mDataBase.create(m2mDataNode.getValue());
+        //
+        // }
 
     }
 
@@ -352,11 +354,9 @@ public class DSDatabase implements M2mRecord {
         return logLock;
     }
 
-
     public void setlastProcessedZxid(long zxid) {
 
     }
-
 
     public void setRangeDOs(List<RangeDO> rangeDOs) {
         this.rangeDOs = rangeDOs;
@@ -374,7 +374,8 @@ public class DSDatabase implements M2mRecord {
     }
 
     @Override
-    public void deserialize(M2mInputArchive archive, String tag) throws IOException {
+    public void deserialize(M2mInputArchive archive, String tag)
+            throws IOException {
         int count = archive.readInt("count");
         while (count > 0) {
             M2mDataNode m2mDataNode = new M2mDataNode();

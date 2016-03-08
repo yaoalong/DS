@@ -120,13 +120,10 @@ public class M2mQuorumPeerMain extends Thread {
                 quorumPeer.setElectionType(config.getElectionAlg());
                 quorumPeer.setCnxnFactory(cnxnFactory);
 
-                quorumPeer.setZKDatabase(new DSDatabase(
-                        config.getNetworkPool(), new DSDatabaseImpl(
-                                config.m2mDataBase.isClean(),
-                                config.m2mDataBase.getKeyspace(),
-                                config.m2mDataBase.getTable(),
-                                config.m2mDataBase.getNode()), quorumPeer
-                                .getHandleIp()));
+                quorumPeer.setZKDatabase(new DSDatabase(new DSDatabaseImpl(
+                        config.m2mDataBase.isClean(), config.m2mDataBase
+                                .getKeyspace(), config.m2mDataBase.getTable(),
+                        config.m2mDataBase.getNode())));
                 quorumPeer.setMyid(config.getServerId());
                 quorumPeer.setTickTime(config.getTickTime());
                 quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());

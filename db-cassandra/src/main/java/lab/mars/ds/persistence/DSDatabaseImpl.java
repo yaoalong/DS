@@ -1,13 +1,25 @@
 package lab.mars.ds.persistence;
 
-import com.datastax.driver.core.*;
-import com.datastax.driver.core.querybuilder.Insert;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.reflection.ResourceReflection;
-import org.lab.mars.ds.server.DataTree;
+
 import org.lab.mars.ds.server.M2mDataNode;
+import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.ZooDefs;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
@@ -18,16 +30,17 @@ import org.lab.mars.onem2m.txn.M2mDeleteTxn;
 import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ColumnDefinitions;
+import com.datastax.driver.core.Host;
+import com.datastax.driver.core.Metadata;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.Insert;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 
 /**
  * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
@@ -42,12 +55,14 @@ public class DSDatabaseImpl implements DSDatabase {
     private Session session;
     private boolean clean = false;
 
+    private TreeMap<Long, RangeDO> endRangeDOMap = new TreeMap<Long, RangeDO>();
+
     public DSDatabaseImpl() {
         this(false, "mars", "onem2m", "127.0.0.1");
     }
 
     public DSDatabaseImpl(boolean clean, String keyspace, String table,
-                          String node) {
+            String node) {
         this.clean = clean;
         this.keyspace = keyspace;
         this.table = table;
@@ -75,7 +90,7 @@ public class DSDatabaseImpl implements DSDatabase {
         }
     }
 
-    private static List<M2mDataNode> getM2mDataNodes(ResultSet resultSet) {
+    private List<M2mDataNode> getM2mDataNodes(ResultSet resultSet) {
         List<M2mDataNode> m2mDataNodes = new ArrayList<>();
         Map<String, Object> result = new HashMap<String, Object>();
         for (Row row : resultSet.all()) {
@@ -86,8 +101,11 @@ public class DSDatabaseImpl implements DSDatabase {
                 Object object = row.getObject(name);
                 result.put(name, object);
             });
-            m2mDataNodes.add(ResourceReflection.deserialize(M2mDataNode.class,
-                    result));
+            if (judgeIsHandle(Long.valueOf((String) result.get("zxid")))) {
+                m2mDataNodes.add(ResourceReflection.deserialize(
+                        M2mDataNode.class, result));
+            }
+
             result.clear();
         }
         return m2mDataNodes;
@@ -123,20 +141,8 @@ public class DSDatabaseImpl implements DSDatabase {
             if (resultSet == null) {
                 return null;
             }
-            Map<String, Object> result = new HashMap<>();
-            for (Row row : resultSet.all()) {
-                ColumnDefinitions columnDefinitions = resultSet
-                        .getColumnDefinitions();
-                columnDefinitions.forEach(d -> {
-                    String name = d.getName();
-                    Object object = row.getObject(name);
-                    result.put(name, object);
-                });
-            }
-
-            M2mDataNode m2mDataNode = ResourceReflection.deserialize(
-                    M2mDataNode.class, result);
-            return m2mDataNode;
+            List<M2mDataNode> m2mDataNodes = getM2mDataNodes(resultSet);
+            return m2mDataNodes.get(0);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -191,7 +197,7 @@ public class DSDatabaseImpl implements DSDatabase {
             ex.printStackTrace();
             return 0L;
         }
-        return Long.valueOf(1);
+        return 1L;
     }
 
     private QueryBuilder query() {
@@ -213,47 +219,46 @@ public class DSDatabaseImpl implements DSDatabase {
      * 最终将事务请求应用到cassandra数据库上
      */
     @Override
-    public DataTree.ProcessTxnResult processTxn(M2mTxnHeader header,
-                                                M2mRecord m2mRecord) {
-        DataTree.ProcessTxnResult processTxnResult = new DataTree.ProcessTxnResult();
+    public ProcessTxnResult processTxn(M2mTxnHeader header, M2mRecord m2mRecord) {
+        ProcessTxnResult processTxnResult = new ProcessTxnResult();
         try {
             processTxnResult.cxid = header.getCxid();
             processTxnResult.zxid = header.getZxid();
             processTxnResult.err = 0;
             switch (header.getType()) {
-                case ZooDefs.OpCode.create:
-                    M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
-                    processTxnResult.path = createTxn.getPath();
-                    ByteArrayInputStream inbaos = new ByteArrayInputStream(
-                            createTxn.getData());
-                    DataInputStream dis = new DataInputStream(inbaos);
-                    M2mBinaryInputArchive inboa = M2mBinaryInputArchive
-                            .getArchive(dis);
-                    M2mDataNode m2mDataNode = new M2mDataNode();
-                    try {
-                        m2mDataNode.deserialize(inboa, "m2mData");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                    m2mDataNode.setZxid(header.getZxid());
-                    create(m2mDataNode);
+            case ZooDefs.OpCode.create:
+                M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
+                processTxnResult.path = createTxn.getPath();
+                ByteArrayInputStream inbaos = new ByteArrayInputStream(
+                        createTxn.getData());
+                DataInputStream dis = new DataInputStream(inbaos);
+                M2mBinaryInputArchive inboa = M2mBinaryInputArchive
+                        .getArchive(dis);
+                M2mDataNode m2mDataNode = new M2mDataNode();
+                try {
+                    m2mDataNode.deserialize(inboa, "m2mData");
+                } catch (IOException e) {
+                    e.printStackTrace();
                     break;
-                case ZooDefs.OpCode.delete:
-                    M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;
-                    processTxnResult.path = deleteTxn.getPath();
-                    delete(deleteTxn.getPath());
-                    break;
-                case ZooDefs.OpCode.setData:
-                    M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
-                    processTxnResult.path = m2mSetDataTxn.getPath();
+                }
+                m2mDataNode.setZxid(header.getZxid());
+                create(m2mDataNode);
+                break;
+            case ZooDefs.OpCode.delete:
+                M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;
+                processTxnResult.path = deleteTxn.getPath();
+                delete(deleteTxn.getPath());
+                break;
+            case ZooDefs.OpCode.setData:
+                M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
+                processTxnResult.path = m2mSetDataTxn.getPath();
 
-                    M2mDataNode object = (M2mDataNode) ResourceReflection
-                            .deserializeKryo(m2mSetDataTxn.getData());
+                M2mDataNode object = (M2mDataNode) ResourceReflection
+                        .deserializeKryo(m2mSetDataTxn.getData());
 
-                    update(m2mSetDataTxn.getPath(),
-                            ResourceReflection.serialize(object));
-                    break;
+                update(m2mSetDataTxn.getPath(),
+                        ResourceReflection.serialize(object));
+                break;
             }
         } catch (M2mKeeperException e) {
             processTxnResult.err = e.getCode().intValue();
@@ -265,18 +270,10 @@ public class DSDatabaseImpl implements DSDatabase {
     @Override
     public boolean truncate(Long zxid) {
         try {
-            Select.Selection selection = query().select();
-            Select select = selection.from(keyspace, table);
-            select.where(gte("zxid", zxid)).and(eq("label", 0));
-            select.allowFiltering();
-            ResultSet resultSet = session.execute(select);
-            if (resultSet == null) {
-                return true;
-            }
-            for (Row row : resultSet.all()) {
-                String idValue = (String) row.getObject("id");
-                delete(idValue);
 
+            List<M2mDataNode> m2mDataNodes = retrieve(zxid);
+            for (M2mDataNode m2mDataNode : m2mDataNodes) {
+                delete(m2mDataNode.getId());
             }
 
         } catch (Exception ex) {
@@ -364,10 +361,22 @@ public class DSDatabaseImpl implements DSDatabase {
         return result;
     }
 
+    private boolean judgeIsHandle(long zxid) {
+        SortedMap<Long, RangeDO> tmap = this.endRangeDOMap.tailMap(zxid);
+
+        RangeDO rangeDO = (tmap.isEmpty()) ? this.endRangeDOMap.firstEntry()
+                .getValue() : null;
+        if (rangeDO != null && rangeDO.getStart() < zxid) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public Long getMaxZxid(List<RangeDO> rangeDOs) {
         long result = 0;
         for (RangeDO rangeDO : rangeDOs) {
+            endRangeDOMap.put(rangeDO.getEnd(), rangeDO);
             long temp = getMaxByCertainRange(rangeDO);
             if (temp > result) {
                 result = temp;

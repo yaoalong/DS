@@ -1,6 +1,5 @@
 package org.lab.mars.onem2m.server.util;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;

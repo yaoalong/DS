@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import org.lab.mars.ds.server.DataTree.ProcessTxnResult;
+import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.data.StatPersisted;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
@@ -110,7 +110,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * @throws IOException
      */
     public ZooKeeperServer(int tickTime) throws IOException {
-        this(tickTime, -1, -1, new DSDatabase(null, null, null));
+        this(tickTime, -1, -1, new DSDatabase(null));
     }
 
     /**
@@ -128,7 +128,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * @throws IOException
      */
     public ZooKeeperServer() throws IOException {
-        this(DEFAULT_TICK_TIME, -1, -1, new DSDatabase(null, null, null));
+        this(DEFAULT_TICK_TIME, -1, -1, new DSDatabase(null));
     }
 
     public static int getSnapCount() {
@@ -266,7 +266,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public void startdata() throws IOException, InterruptedException {
         // check to see if zkDb is not null
         if (zkDb == null) {
-            zkDb = new DSDatabase(null, null, null);
+            zkDb = new DSDatabase(null);
         }
         if (!zkDb.isInitialized()) {
             loadData();

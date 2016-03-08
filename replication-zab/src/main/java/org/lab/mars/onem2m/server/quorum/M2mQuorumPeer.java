@@ -183,8 +183,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
         this.tickTime = tickTime;
         this.initLimit = initLimit;
         this.syncLimit = syncLimit;
-        this.zkDb = new DSDatabase(null, m2mDataBase, myIp + ":"
-                + (cnxnFactory.getLocalPort()));
+        this.zkDb = new DSDatabase(m2mDataBase);
         this.m2mDataBase = new DSDatabaseImpl();
         if (quorumConfig == null)
             this.quorumConfig = new M2mQuorumMaj(countParticipants(quorumPeers));
