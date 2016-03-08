@@ -32,8 +32,8 @@ import java.util.Map;
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.persistence.DSDatabaseImpl;
 
-import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.lab.mars.onem2m.server.DSDatabase;
+import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumMaj;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumVerifier;
@@ -41,45 +41,15 @@ import org.lab.mars.onem2m.server.util.ZxidUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * This class manages the quorum protocol. There are three states this server
- * can be in:
- * <ol>
- * <li>Leader election - each server will elect a leader (proposing itself as a
- * leader initially).</li>
- * <li>Follower - the server will synchronize with the leader and replicate any
- * transactions.</li>
- * <li>Leader - the server will process requests and forward them to followers.
- * A majority of followers must log the request before it can be accepted.
- * </ol>
- * <p>
- * This class will setup a datagram socket that will always respond with its
- * view of the current leader. The response will take the form of:
- * <p>
- * 
- * <pre>
- * int xid;
- * 
- * long myid;
- * 
- * long leader_id;
- * 
- * long leader_zxid;
- * </pre>
- * <p>
- * The request for the current leader will consist solely of an xid: int xid;
- */
 public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
     /**
      * The syncEnabled can also be set via a system property.
      */
     public static final String SYNC_ENABLED = "zookeeper.observer.syncEnabled";
-    public static final String CURRENT_EPOCH_FILENAME = "currentEpoch";
     public static final String ACCEPTED_EPOCH_FILENAME = "acceptedEpoch";
     public static final String UPDATING_EPOCH_FILENAME = "updatingEpoch";
     private static final Logger LOG = LoggerFactory
             .getLogger(M2mQuorumPeer.class);
-    private final QuorumStats quorumStats;
     /*
      * Record leader election time
      */
@@ -137,11 +107,6 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
     ServerCnxnFactory cnxnFactory;
 
     M2mQuorumPeerMain quorumPeerMain;
-    /*
-     * ZKDatabase is a top level member of quorumpeer which will be used in all
-     * the zookeeperservers instantiated later. Also, it is created once on
-     * bootup and only thrown away in case of a truncate message from the leader
-     */
     private DSDatabase zkDb;
     private boolean isStart = false;
     /**
@@ -181,13 +146,10 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
 
     private String dataLogDir;
 
-    private String dataDir;
-
     private List<RangeDO> rangeDOs;
 
     public M2mQuorumPeer() {
         super("QuorumPeer");
-        quorumStats = new QuorumStats(this);
     }
 
     public M2mQuorumPeer(Boolean isStart) {
@@ -263,11 +225,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
      * @return The number of followers in the map
      */
     protected static int countParticipants(Map<Long, QuorumServer> peers) {
-        int count = 0;
-        for (QuorumServer q : peers.values()) {
-            count++;
-        }
-        return count;
+        return peers.size();
     }
 
     public int getQuorumSize() {
@@ -316,10 +274,6 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
         return myQuorumAddr;
     }
 
-    QuorumStats quorumStats() {
-        return quorumStats;
-    }
-
     @Override
     public synchronized void start() {
         startRegisterAndMonitor();
@@ -347,7 +301,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
      * 将Zxid写入文件中
      */
     private void loadDataBase() {
-        File updating = new File(dataLogDir, UPDATING_EPOCH_FILENAME);
+        ;
         try {
             zkDb.setRangeDOs(rangeDOs);
 
@@ -404,12 +358,12 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
 
     protected M2mFollower makeFollower() throws IOException {
         return new M2mFollower(this, new M2mFollowerZooKeeperServer(this,
-                new ZooKeeperServer.BasicDataTreeBuilder(), this.zkDb));
+                this.zkDb));
     }
 
     protected M2mLeader makeLeader() throws IOException {
-        return new M2mLeader(this, new M2mLeaderZooKeeperServer(this,
-                new ZooKeeperServer.BasicDataTreeBuilder(), this.zkDb));
+        return new M2mLeader(this,
+                new M2mLeaderZooKeeperServer(this, this.zkDb));
     }
 
     protected M2mElection createElectionAlgorithm(int electionAlgorithm) {
@@ -892,10 +846,6 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
 
     public void setQuorumPeerMain(M2mQuorumPeerMain quorumPeerMain) {
         this.quorumPeerMain = quorumPeerMain;
-    }
-
-    public void setDataDir(String dataDir) {
-        this.dataDir = dataDir;
     }
 
     public void setDataLogDir(String dataLogDir) {

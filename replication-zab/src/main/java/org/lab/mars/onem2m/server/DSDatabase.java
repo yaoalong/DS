@@ -20,9 +20,8 @@ package org.lab.mars.onem2m.server;
 
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
-
-import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.ds.server.DataTree.ProcessTxnResult;
+import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
@@ -72,7 +71,6 @@ public class DSDatabase implements M2mRecord {
     private List<RangeDO> rangeDOs;
 
     /**
-     *
      * 初始化的同时进行数据加载
      */
     public DSDatabase(NetworkPool networkPool, lab.mars.ds.persistence.DSDatabase m2mDataBase,
@@ -167,8 +165,7 @@ public class DSDatabase implements M2mRecord {
      * maintains a list of last <i>committedLog</i> or so committed requests.
      * This is used for fast follower synchronization.
      *
-     * @param request
-     *            committed request
+     * @param request committed request
      */
     public void addCommittedProposal(M2mRequest request) {
         WriteLock wl = logLock.writeLock();
@@ -209,6 +206,7 @@ public class DSDatabase implements M2mRecord {
 
     /**
      * return nodes count
+     *
      * @return
      */
     public int getNodeCount() {
@@ -218,12 +216,10 @@ public class DSDatabase implements M2mRecord {
     /**
      * the process txn on the data
      *
-     * @param hdr
-     *            the txnheader for the txn
-     * @param txn
-     *            the transaction that needs to be processed
+     * @param hdr the txnheader for the txn
+     * @param txn the transaction that needs to be processed
      * @return the result of processing the transaction on this
-     *         datatree/zkdatabase
+     * datatree/zkdatabase
      */
     /*
      * m2m内存数据库处理事务请求
@@ -270,13 +266,12 @@ public class DSDatabase implements M2mRecord {
     /**
      * deserialize a snapshot from an input archive
      *
-     * @param ia
-     *            the input archive you want to deserialize from
+     * @param ia the input archive you want to deserialize from
      * @throws IOException
      */
     public void deserializeSnapshot(M2mInputArchive ia) throws IOException {
         clear();
-            SerializeUtils.deserializeSnapshot(this, ia);
+        SerializeUtils.deserializeSnapshot(this, ia);
 
         initialized = true;
     }
@@ -284,9 +279,8 @@ public class DSDatabase implements M2mRecord {
     /**
      * serialize the snapshot
      *
-     * @param oa
-     *            the output archive to which the snapshot needs to be
-     *            serialized
+     * @param oa the output archive to which the snapshot needs to be
+     *           serialized
      * @throws IOException
      * @throws InterruptedException
      */

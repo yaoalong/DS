@@ -60,9 +60,9 @@ public class M2mFollowerZooKeeperServer extends M2mLearnerZooKeeperServer {
      * @throws IOException
      */
     M2mFollowerZooKeeperServer(M2mQuorumPeer self,
-                               DataTreeBuilder treeBuilder, DSDatabase zkDb) throws IOException {
+                             DSDatabase zkDb) throws IOException {
         super( self.tickTime, self.minSessionTimeout,
-                self.maxSessionTimeout, treeBuilder, zkDb, self);
+                self.maxSessionTimeout, zkDb, self);
         this.pendingSyncs = new ConcurrentLinkedQueue<M2mRequest>();
     }
 

@@ -158,9 +158,6 @@ public class M2mLeader {
         synchronized (learners) {
             learners.remove(peer);
         }
-        synchronized (observingLearners) {
-            observingLearners.remove(peer);
-        }
     }
 
     boolean isLearnerSynced(M2mLearnerHandler peer) {
@@ -178,7 +175,8 @@ public class M2mLeader {
      * @param zk
      * @throws IOException
      */
-    M2mLeader(M2mQuorumPeer self, M2mLeaderZooKeeperServer zk) throws IOException {
+    M2mLeader(M2mQuorumPeer self, M2mLeaderZooKeeperServer zk)
+            throws IOException {
         this.self = self;
         try {
 
@@ -311,7 +309,8 @@ public class M2mLeader {
                         // in LearnerHandler switch to the syncLimit
                         s.setSoTimeout(self.tickTime * self.initLimit);
                         s.setTcpNoDelay(nodelay);
-                        M2mLearnerHandler fh = new M2mLearnerHandler(s, M2mLeader.this);
+                        M2mLearnerHandler fh = new M2mLearnerHandler(s,
+                                M2mLeader.this);
                         fh.start();
                     } catch (SocketException e) {
                         if (stop) {
@@ -408,21 +407,8 @@ public class M2mLeader {
                 return;
             }
 
-            startZkServer();
+            startZkServer();// 等待足够多的server确认新的Leader以后启动ZookeeperServer服务
 
-            /**
-             * WARNING: do not use this for anything other than QA testing on a
-             * real cluster. Specifically to enable verification that quorum can
-             * handle the lower 32bit roll-over issue identified in
-             * ZOOKEEPER-1277. Without this option it would take a very long
-             * time (on order of a month say) to see the 4 billion writes
-             * necessary to cause the roll-over to occur.
-             * 
-             * This field allows you to override the zxid of the server.
-             * Typically you'll want to set it to something like 0xfffffff0 and
-             * then start the quorum, run some operations and see the
-             * re-election.
-             */
             String initialZxid = System
                     .getProperty("zookeeper.testingonly.initialZxid");
             if (initialZxid != null) {
@@ -436,15 +422,6 @@ public class M2mLeader {
                     "no")) {
                 self.cnxnFactory.addZooKeeperServer(self.getHandleIp(), zk);
             }
-            // Everything is a go, simply start counting the ticks
-            // WARNING: I couldn't find any wait statement on a synchronized
-            // block that would be notified by this notifyAll() call, so
-            // I commented it out
-            // synchronized (this) {
-            // notifyAll();
-            // }
-            // We ping twice a tick, so we only update the tick every other
-            // iteration
             boolean tickSkip = true;
 
             while (true) {
@@ -767,8 +744,8 @@ public class M2mLeader {
         } catch (IOException e) {
             LOG.warn("This really should be impossible", e);
         }
-        M2mQuorumPacket pp = new M2mQuorumPacket(M2mLeader.PROPOSAL, request.zxid,
-                baos.toByteArray());
+        M2mQuorumPacket pp = new M2mQuorumPacket(M2mLeader.PROPOSAL,
+                request.zxid, baos.toByteArray());
 
         Proposal p = new Proposal();
         p.packet = pp;
@@ -873,7 +850,7 @@ public class M2mLeader {
     private HashSet<Long> connectingFollowers = new HashSet<Long>();
 
     /**
-     * 等待Follower对新的sid以及epoch承认
+     * 等待Follower对新的sid以及epoch确认
      * 
      * @param sid
      * @param lastAcceptedEpoch

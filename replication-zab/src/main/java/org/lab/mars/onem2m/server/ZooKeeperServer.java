@@ -20,7 +20,16 @@ package org.lab.mars.onem2m.server;
 
 import io.netty.channel.ChannelHandlerContext;
 
-import org.lab.mars.ds.server.DataTree;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+
 import org.lab.mars.ds.server.DataTree.ProcessTxnResult;
 import org.lab.mars.onem2m.data.StatPersisted;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
@@ -33,16 +42,6 @@ import org.lab.mars.onem2m.server.SessionTracker.SessionExpirer;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
 
 /**
  * This class implements a simple standalone ZooKeeperServer. It sets up the
@@ -91,14 +90,9 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      *
      * @throws IOException
      */
-    public ZooKeeperServer() {
-        serverStats = new ServerStats(this);
-    }
 
-
-    public ZooKeeperServer(int tickTime,
-                           int minSessionTimeout, int maxSessionTimeout,
-                           DataTreeBuilder treeBuilder, DSDatabase zkDb) {
+    public ZooKeeperServer(int tickTime, int minSessionTimeout,
+            int maxSessionTimeout, DSDatabase zkDb) {
         serverStats = new ServerStats(this);
         this.zkDb = zkDb;
         this.tickTime = tickTime;
@@ -111,16 +105,12 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     /**
-     * creates a zookeeperserver instance.
      *
-     * @param tickTime    the ticktime for the server
-     * @param treeBuilder the datatree builder
+     * @param tickTime
      * @throws IOException
      */
-    public ZooKeeperServer(int tickTime,
-                           DataTreeBuilder treeBuilder) throws IOException {
-        this(tickTime, -1, -1, treeBuilder, new DSDatabase(null,
-                null, null));
+    public ZooKeeperServer(int tickTime) throws IOException {
+        this(tickTime, -1, -1, new DSDatabase(null, null, null));
     }
 
     /**
@@ -129,8 +119,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      */
     public ZooKeeperServer(File snapDir, File logDir, int tickTime)
             throws IOException {
-        this(tickTime,
-                new BasicDataTreeBuilder());
+        this(tickTime);
     }
 
     /**
@@ -138,9 +127,8 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      *
      * @throws IOException
      */
-    public ZooKeeperServer(DataTreeBuilder treeBuilder) throws IOException {
-        this(DEFAULT_TICK_TIME, -1, -1, treeBuilder,
-                new DSDatabase(null, null, null));
+    public ZooKeeperServer() throws IOException {
+        this(DEFAULT_TICK_TIME, -1, -1, new DSDatabase(null, null, null));
     }
 
     public static int getSnapCount() {
@@ -245,15 +233,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     protected void killSession(long sessionId, long zxid) {
-        // zkDb.killSession(sessionId, zxid);
-        // if (LOG.isTraceEnabled()) {
-        // ZooTrace.logTraceMessage(LOG, ZooTrace.SESSION_TRACE_MASK,
-        // "ZooKeeperServer --- killSession: 0x"
-        // + Long.toHexString(sessionId));
-        // }
-        // if (sessionTracker != null) {
-        // sessionTracker.removeSession(sessionId);
-        // }
     }
 
     // private void close(long sessionId) {
@@ -281,30 +260,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         }
     }
 
-    // public void expire(Session session) {
-    // long sessionId = session.getSessionId();
-    // LOG.info("Expiring session 0x" + Long.toHexString(sessionId)
-    // + ", timeout of " + session.getTimeout() + "ms exceeded");
-    // close(sessionId);
-    // }
-
     protected void registerJMX() {
-        // register with JMX
-        // try {
-        // jmxServerBean = new ZooKeeperServerBean(this);
-        // MBeanRegistry.getInstance().register(jmxServerBean, null);
-        //
-        // try {
-        // jmxDataTreeBean = new DataTreeBean(zkDb.getM2mData());
-        // MBeanRegistry.getInstance().register(jmxDataTreeBean, jmxServerBean);
-        // } catch (Exception e) {
-        // LOG.warn("Failed to register with JMX", e);
-        // jmxDataTreeBean = null;
-        // }
-        // } catch (Exception e) {
-        // LOG.warn("Failed to register with JMX", e);
-        // jmxServerBean = null;
-        // }
     }
 
     public void startdata() throws IOException, InterruptedException {
@@ -356,11 +312,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public void shutdown() {
         LOG.info("shutting down");
 
-        // new RuntimeException("Calling shutdown").printStackTrace();
         this.running = false;
-        // Since sessionTracker and syncThreads poll we just have to
-        // set running to false and they will detect it during the poll
-        // interval.
         if (sessionTracker != null) {
             sessionTracker.shutdown();
         }
@@ -371,7 +323,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             zkDb.clear();
         }
 
-        // unregisterJMX();
     }
 
     protected void unregisterJMX() {
@@ -397,13 +348,8 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         return p;
     }
 
-
-    // public void setOwner(long id, Object owner) throws
-    // SessionExpiredException {
-    // sessionTracker.setOwner(id, owner);
-    // }
     protected void revalidateSession(ServerCnxn cnxn, long sessionId,
-                                     int sessionTimeout) throws IOException {
+            int sessionTimeout) throws IOException {
         boolean rc = sessionTracker.touchSession(sessionId, sessionTimeout);
         if (LOG.isTraceEnabled()) {
             ZooTrace.logTraceMessage(LOG, ZooTrace.SESSION_TRACE_MASK,
@@ -422,10 +368,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         return 0;
     }
 
-
-    /*
-     * 添加
-     */
     public void submitRequest(M2mRequest si) {
         if (firstProcessor == null) {
             synchronized (this) {
@@ -453,16 +395,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         }
     }
 
-    //
-    // public void reopenSession(ServerCnxn cnxn, long sessionId, byte[] passwd,
-    // int sessionTimeout) throws IOException {
-    // if (!checkPasswd(sessionId, passwd)) {
-    // finishSessionInit(cnxn, false);
-    // } else {
-    // revalidateSession(cnxn, sessionId, sessionTimeout);
-    // }
-    // }
-
     public int getGlobalOutstandingLimit() {
         String sc = System.getProperty("zookeeper.globalOutstandingLimit");
         int limit;
@@ -473,10 +405,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         }
         return limit;
     }
-
-    // public void closeSession(ServerCnxn cnxn, RequestHeader requestHeader) {
-    // closeSession(cnxn.getSessionId());
-    // }
 
     public ServerCnxnFactory getServerCnxnFactory() {
         return serverCnxnFactory;
@@ -504,7 +432,8 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     /**
      * trunccate the log to get in sync with others if in a quorum
      *
-     * @param zxid the zxid that it needs to get in sync with others
+     * @param zxid
+     *            the zxid that it needs to get in sync with others
      * @throws IOException
      */
     /*
@@ -546,7 +475,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 : -1;
     }
 
-
     public String getState() {
         return "standalone";
     }
@@ -558,7 +486,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public int getNumAliveConnections() {
         return serverCnxnFactory.getNumAliveConnections();
     }
-
 
     /*
      * 将请求发送给processor
@@ -596,19 +523,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     }
 
-    /**
-     * The server delegates loading of the tree to an instance of the interface
-     */
-    public interface DataTreeBuilder {
-        public DataTree build();
-    }
-
-    static public class BasicDataTreeBuilder implements DataTreeBuilder {
-        public DataTree build() {
-            return new DataTree();
-        }
-    }
-
     public static class MissingSessionException extends IOException {
         private static final long serialVersionUID = 7467414635467261007L;
 
@@ -627,8 +541,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         StatPersisted stat; /* Make sure to create a new object when changing */
         int childCount;
 
-        ChangeRecord(long zxid, String path, StatPersisted stat,
-                     int childCount) {
+        ChangeRecord(long zxid, String path, StatPersisted stat, int childCount) {
             this.zxid = zxid;
             this.path = path;
             this.stat = stat;

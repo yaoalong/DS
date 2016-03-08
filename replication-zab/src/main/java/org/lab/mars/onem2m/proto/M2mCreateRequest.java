@@ -1,10 +1,10 @@
 package org.lab.mars.onem2m.proto;
 
+import java.io.IOException;
+
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
-
-import java.io.IOException;
 
 public class M2mCreateRequest implements M2mRecord {
 
@@ -16,11 +16,6 @@ public class M2mCreateRequest implements M2mRecord {
     private String key;
 
     private byte[] data;
-
-    public M2mCreateRequest() {
-
-    }
-
 
     public String getKey() {
         return key;

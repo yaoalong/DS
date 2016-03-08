@@ -30,9 +30,9 @@ public abstract class QuorumZooKeeperServer extends ZooKeeperServer {
 
     protected QuorumZooKeeperServer(int tickTime,
                                     int minSessionTimeout, int maxSessionTimeout,
-                                    DataTreeBuilder treeBuilder, DSDatabase zkDb, M2mQuorumPeer self) {
+                                    DSDatabase zkDb, M2mQuorumPeer self) {
         super(tickTime, minSessionTimeout, maxSessionTimeout,
-                treeBuilder, zkDb);
+                 zkDb);
         this.self = self;
     }
 

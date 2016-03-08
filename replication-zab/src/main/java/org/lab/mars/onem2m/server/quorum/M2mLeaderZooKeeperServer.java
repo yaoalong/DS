@@ -18,13 +18,13 @@
 
 package org.lab.mars.onem2m.server.quorum;
 
+import java.io.IOException;
+
+import org.lab.mars.onem2m.server.DSDatabase;
 import org.lab.mars.onem2m.server.M2mFinalRequestProcessor;
 import org.lab.mars.onem2m.server.PrepRequestProcessor;
 import org.lab.mars.onem2m.server.RequestProcessor;
 import org.lab.mars.onem2m.server.ServerCnxn;
-import org.lab.mars.onem2m.server.DSDatabase;
-
-import java.io.IOException;
 
 /**
  * Just like the standard ZooKeeperServer. We just replace the request
@@ -35,11 +35,10 @@ import java.io.IOException;
 public class M2mLeaderZooKeeperServer extends QuorumZooKeeperServer {
     M2mCommitProcessor commitProcessor;
 
-
-    M2mLeaderZooKeeperServer(M2mQuorumPeer self,
-                             DataTreeBuilder treeBuilder, DSDatabase zkDb) throws IOException {
-        super(self.tickTime, self.minSessionTimeout,
-                self.maxSessionTimeout, treeBuilder, zkDb, self);
+    M2mLeaderZooKeeperServer(M2mQuorumPeer self, DSDatabase zkDb)
+            throws IOException {
+        super(self.tickTime, self.minSessionTimeout, self.maxSessionTimeout,
+                zkDb, self);
     }
 
     public M2mLeader getLeader() {
@@ -73,7 +72,6 @@ public class M2mLeaderZooKeeperServer extends QuorumZooKeeperServer {
 
     @Override
     protected void startSessionTracker() {
-        // ((SessionTrackerImpl) sessionTracker).start();
     }
 
     public boolean touch(long sess, int to) {
@@ -108,7 +106,7 @@ public class M2mLeaderZooKeeperServer extends QuorumZooKeeperServer {
 
     @Override
     protected void revalidateSession(ServerCnxn cnxn, long sessionId,
-                                     int sessionTimeout) throws IOException {
+            int sessionTimeout) throws IOException {
 
     }
 }

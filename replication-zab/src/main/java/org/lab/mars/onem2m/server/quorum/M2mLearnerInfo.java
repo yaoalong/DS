@@ -19,18 +19,24 @@
 
 package org.lab.mars.onem2m.server.quorum;
 
-import org.lab.mars.onem2m.jute.*;
+import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
+import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
+import org.lab.mars.onem2m.jute.M2mInputArchive;
+import org.lab.mars.onem2m.jute.M2mOutputArchive;
+import org.lab.mars.onem2m.jute.M2mRecord;
 
 public class M2mLearnerInfo implements M2mRecord {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8382915221680967079L;
     private long serverid;
     private int protocolVersion;
 
     public M2mLearnerInfo() {
     }
 
-    public M2mLearnerInfo(
-            long serverid,
-            int protocolVersion) {
+    public M2mLearnerInfo(long serverid, int protocolVersion) {
         this.serverid = serverid;
         this.protocolVersion = protocolVersion;
     }
@@ -39,20 +45,20 @@ public class M2mLearnerInfo implements M2mRecord {
         return serverid;
     }
 
-
     public int getProtocolVersion() {
         return protocolVersion;
     }
 
-
-    public void serialize(M2mOutputArchive a_, String tag) throws java.io.IOException {
+    public void serialize(M2mOutputArchive a_, String tag)
+            throws java.io.IOException {
         a_.startRecord(this, tag);
         a_.writeLong(serverid, "serverid");
         a_.writeInt(protocolVersion, "protocolVersion");
         a_.endRecord(this, tag);
     }
 
-    public void deserialize(M2mInputArchive a_, String tag) throws java.io.IOException {
+    public void deserialize(M2mInputArchive a_, String tag)
+            throws java.io.IOException {
         a_.startRecord(tag);
         serverid = a_.readLong("serverid");
         protocolVersion = a_.readInt("protocolVersion");
@@ -71,14 +77,19 @@ public class M2mLearnerInfo implements M2mRecord {
 
     public int compareTo(Object peer_) throws ClassCastException {
         if (!(peer_ instanceof M2mLearnerInfo)) {
-            throw new ClassCastException("Comparing different types of records.");
+            throw new ClassCastException(
+                    "Comparing different types of records.");
         }
         M2mLearnerInfo peer = (M2mLearnerInfo) peer_;
         int ret = 0;
-        ret = (serverid == peer.serverid) ? 0 : ((serverid < peer.serverid) ? -1 : 1);
-        if (ret != 0) return ret;
-        ret = (protocolVersion == peer.protocolVersion) ? 0 : ((protocolVersion < peer.protocolVersion) ? -1 : 1);
-        if (ret != 0) return ret;
+        ret = (serverid == peer.serverid) ? 0
+                : ((serverid < peer.serverid) ? -1 : 1);
+        if (ret != 0)
+            return ret;
+        ret = (protocolVersion == peer.protocolVersion) ? 0
+                : ((protocolVersion < peer.protocolVersion) ? -1 : 1);
+        if (ret != 0)
+            return ret;
         return ret;
     }
 
@@ -92,9 +103,11 @@ public class M2mLearnerInfo implements M2mRecord {
         M2mLearnerInfo peer = (M2mLearnerInfo) peer_;
         boolean ret = false;
         ret = (serverid == peer.serverid);
-        if (!ret) return ret;
+        if (!ret)
+            return ret;
         ret = (protocolVersion == peer.protocolVersion);
-        if (!ret) return ret;
+        if (!ret)
+            return ret;
         return ret;
     }
 }

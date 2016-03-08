@@ -11,8 +11,8 @@ import lab.mars.ds.register.ZooKeeperRegister;
 
 import org.lab.mars.onem2m.OneM2m;
 import org.lab.mars.onem2m.proto.M2mPacket;
-import org.lab.mars.onem2m.server.NettyServerCnxnFactory;
 import org.lab.mars.onem2m.server.DSDatabase;
+import org.lab.mars.onem2m.server.NettyServerCnxnFactory;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumMaj;
@@ -134,7 +134,6 @@ public class M2mQuorumPeerMain extends Thread {
                 quorumPeer.setInitLimit(config.getInitLimit());
                 quorumPeer.setSyncLimit(config.getSyncLimit());
                 quorumPeer.setSyncEnabled(config.getSyncEnabled());
-                quorumPeer.setDataDir(config.getDataDir());
                 quorumPeer.setDataLogDir(config.getDataLogDir());
                 quorumPeer.setQuorumPeerMain(this);
                 quorumPeer.setRangeDOs(networkPool.getRanges(quorumPeer

@@ -78,12 +78,6 @@ public class M2mQuorumCnxManager {
     static final int MAX_CONNECTION_ATTEMPTS = 2;
 
     /*
-     * Negative counter for observer server ids.
-     */
-
-    private long observerCounter = -1;
-
-    /*
      * Connection time out value in milliseconds
      */
 

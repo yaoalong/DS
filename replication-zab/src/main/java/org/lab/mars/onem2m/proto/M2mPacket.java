@@ -66,14 +66,12 @@ public class M2mPacket implements M2mRecord {
     @Override
     public void serialize(M2mOutputArchive archive, String tag)
             throws IOException {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void deserialize(M2mInputArchive archive, String tag)
             throws IOException {
-        // TODO Auto-generated method stub
 
     }
 

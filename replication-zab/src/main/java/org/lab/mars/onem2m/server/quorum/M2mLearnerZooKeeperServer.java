@@ -29,10 +29,10 @@ import java.util.HashMap;
 public abstract class M2mLearnerZooKeeperServer extends QuorumZooKeeperServer {
     public M2mLearnerZooKeeperServer(int tickTime,
                                      int minSessionTimeout, int maxSessionTimeout,
-                                     DataTreeBuilder treeBuilder, DSDatabase zkDb, M2mQuorumPeer self)
+                                     DSDatabase zkDb, M2mQuorumPeer self)
             throws IOException {
         super(tickTime, minSessionTimeout, maxSessionTimeout,
-                treeBuilder, zkDb, self);
+                 zkDb, self);
     }
 
     /**

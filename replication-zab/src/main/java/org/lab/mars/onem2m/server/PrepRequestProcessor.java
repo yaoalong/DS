@@ -20,14 +20,10 @@ package org.lab.mars.onem2m.server;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.KeeperException.Code;
-import org.lab.mars.onem2m.Op;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.proto.M2mCreateRequest;
@@ -129,10 +125,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
             zks.outstandingChangesForPath.put(c.path, c);
         }
     }
-
-
-
-
 
     /**
      * This method will be called inside the ProcessRequestThread, which is a
