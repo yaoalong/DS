@@ -1,11 +1,6 @@
 package org.lab.mars.onem2m.txn;
 
-import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
-import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-import org.lab.mars.onem2m.jute.M2mCsvOutputArchive;
-import org.lab.mars.onem2m.jute.M2mInputArchive;
-import org.lab.mars.onem2m.jute.M2mOutputArchive;
-import org.lab.mars.onem2m.jute.M2mRecord;
+import org.lab.mars.onem2m.jute.*;
 
 public class M2mErrorTxn implements M2mRecord{
 

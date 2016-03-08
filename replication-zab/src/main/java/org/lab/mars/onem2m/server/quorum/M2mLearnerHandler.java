@@ -22,7 +22,7 @@ import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.Record;
-import org.lab.mars.onem2m.server.ByteBufferInputStream;
+import org.lab.mars.onem2m.server.M2mByteBufferInputStream;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.ZooTrace;
 import org.lab.mars.onem2m.server.quorum.M2mLeader.Proposal;
@@ -182,7 +182,7 @@ public class M2mLearnerHandler extends Thread {
                     this.sid = bbsid.getLong();
                 } else {
                     M2mLearnerInfo li = new M2mLearnerInfo();
-                    ByteBufferInputStream.byteBuffer2Record(
+                    M2mByteBufferInputStream.byteBuffer2Record(
                             ByteBuffer.wrap(learnerInfoData), li);
                     this.sid = li.getServerid();
                     this.version = li.getProtocolVersion();

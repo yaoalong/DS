@@ -1,20 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.lab.mars.onem2m.server.quorum;
 
 import java.io.BufferedInputStream;
@@ -33,7 +16,6 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.lab.mars.onem2m.jute.BinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
@@ -81,7 +63,8 @@ public class M2mLearner {
     /** the protocol version of the leader */
     protected int leaderProtocolVersion = 0x01;
 
-    protected static final Logger LOG = LoggerFactory.getLogger(M2mLearner.class);
+    protected static final Logger LOG = LoggerFactory
+            .getLogger(M2mLearner.class);
 
     static final private boolean nodelay = System.getProperty(
             "follower.nodelay", "true").equals("true");
@@ -283,7 +266,7 @@ public class M2mLearner {
          */
         M2mLearnerInfo li = new M2mLearnerInfo(self.getId(), 0x10000);
         ByteArrayOutputStream bsid = new ByteArrayOutputStream();
-        BinaryOutputArchive boa = BinaryOutputArchive.getArchive(bsid);
+        M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(bsid);
         boa.writeRecord(li, "LearnerInfo");
         qp.setData(bsid.toByteArray());
 
@@ -313,8 +296,8 @@ public class M2mLearner {
                         + " is less than accepted epoch, "
                         + self.getAcceptedEpoch());
             }
-            M2mQuorumPacket ackNewEpoch = new M2mQuorumPacket(M2mLeader.ACKEPOCH,
-                    lastLoggedZxid, epochBytes);// 发送ack
+            M2mQuorumPacket ackNewEpoch = new M2mQuorumPacket(
+                    M2mLeader.ACKEPOCH, lastLoggedZxid, epochBytes);// 发送ack
             writePacket(ackNewEpoch, true);
             return ZxidUtils.makeZxid(newEpoch, 0);
         } else {
@@ -477,8 +460,8 @@ public class M2mLearner {
                     // + updating.toString());
                     // }
                     snapshotTaken = true;
-                    writePacket(new M2mQuorumPacket(M2mLeader.ACK, newLeaderZxid,
-                            null), true);
+                    writePacket(new M2mQuorumPacket(M2mLeader.ACK,
+                            newLeaderZxid, null), true);
                     break;
                 }
             }

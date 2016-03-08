@@ -33,7 +33,7 @@ import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.persistence.DSDatabaseImpl;
 
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
-import org.lab.mars.onem2m.server.ZKDatabase;
+import org.lab.mars.onem2m.server.DSDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumMaj;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumVerifier;
@@ -142,7 +142,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
      * the zookeeperservers instantiated later. Also, it is created once on
      * bootup and only thrown away in case of a truncate message from the leader
      */
-    private ZKDatabase zkDb;
+    private DSDatabase zkDb;
     private boolean isStart = false;
     /**
      * 它所负责接管数据的 server对应的ip
@@ -221,7 +221,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
         this.tickTime = tickTime;
         this.initLimit = initLimit;
         this.syncLimit = syncLimit;
-        this.zkDb = new ZKDatabase(null, m2mDataBase, myIp + ":"
+        this.zkDb = new DSDatabase(null, m2mDataBase, myIp + ":"
                 + (cnxnFactory.getLocalPort()));
         this.m2mDataBase = new DSDatabaseImpl();
         if (quorumConfig == null)
@@ -799,7 +799,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
      *
      * @param database
      */
-    public void setZKDatabase(ZKDatabase database) {
+    public void setZKDatabase(DSDatabase database) {
         this.zkDb = database;
     }
 

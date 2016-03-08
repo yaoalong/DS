@@ -12,7 +12,7 @@ import lab.mars.ds.register.ZooKeeperRegister;
 import org.lab.mars.onem2m.OneM2m;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.NettyServerCnxnFactory;
-import org.lab.mars.onem2m.server.ZKDatabase;
+import org.lab.mars.onem2m.server.DSDatabase;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumMaj;
@@ -120,7 +120,7 @@ public class M2mQuorumPeerMain extends Thread {
                 quorumPeer.setElectionType(config.getElectionAlg());
                 quorumPeer.setCnxnFactory(cnxnFactory);
 
-                quorumPeer.setZKDatabase(new ZKDatabase(
+                quorumPeer.setZKDatabase(new DSDatabase(
                         config.getNetworkPool(), new DSDatabaseImpl(
                                 config.m2mDataBase.isClean(),
                                 config.m2mDataBase.getKeyspace(),

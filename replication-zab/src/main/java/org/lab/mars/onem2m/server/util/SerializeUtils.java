@@ -20,7 +20,7 @@ package org.lab.mars.onem2m.server.util;
 
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
-import org.lab.mars.onem2m.server.ZKDatabase;
+import org.lab.mars.onem2m.server.DSDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +31,12 @@ public class SerializeUtils {
             .getLogger(SerializeUtils.class);
 
 
-    public static void deserializeSnapshot(ZKDatabase zkDatabase, M2mInputArchive ia)
+    public static void deserializeSnapshot(DSDatabase zkDatabase, M2mInputArchive ia)
             throws IOException {
         zkDatabase.deserialize(ia, "m2mData");
     }
 
-    public static void serializeSnapshot(Long peerLast, ZKDatabase zkDatabase,
+    public static void serializeSnapshot(Long peerLast, DSDatabase zkDatabase,
                                          M2mOutputArchive oa) throws IOException {
 
         zkDatabase.serialize(peerLast, oa, "m2mData");

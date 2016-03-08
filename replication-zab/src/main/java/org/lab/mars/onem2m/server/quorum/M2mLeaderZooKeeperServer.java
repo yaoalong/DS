@@ -18,12 +18,11 @@
 
 package org.lab.mars.onem2m.server.quorum;
 
-import org.lab.mars.ds.server.*;
 import org.lab.mars.onem2m.server.M2mFinalRequestProcessor;
 import org.lab.mars.onem2m.server.PrepRequestProcessor;
 import org.lab.mars.onem2m.server.RequestProcessor;
 import org.lab.mars.onem2m.server.ServerCnxn;
-import org.lab.mars.onem2m.server.ZKDatabase;
+import org.lab.mars.onem2m.server.DSDatabase;
 
 import java.io.IOException;
 
@@ -38,7 +37,7 @@ public class M2mLeaderZooKeeperServer extends QuorumZooKeeperServer {
 
 
     M2mLeaderZooKeeperServer(M2mQuorumPeer self,
-                             DataTreeBuilder treeBuilder, ZKDatabase zkDb) throws IOException {
+                             DataTreeBuilder treeBuilder, DSDatabase zkDb) throws IOException {
         super(self.tickTime, self.minSessionTimeout,
                 self.maxSessionTimeout, treeBuilder, zkDb, self);
     }

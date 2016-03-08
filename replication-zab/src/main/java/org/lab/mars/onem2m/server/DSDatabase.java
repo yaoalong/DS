@@ -20,7 +20,6 @@ package org.lab.mars.onem2m.server;
 
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
-import lab.mars.ds.persistence.DSDatabase;
 
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.ds.server.DataTree.ProcessTxnResult;
@@ -55,16 +54,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 /*
  * 连接数据库以及内存数据
  */
-public class ZKDatabase implements M2mRecord {
+public class DSDatabase implements M2mRecord {
 
     public static final int commitLogCount = 500; // 临时会存储500个
-    private static final Logger LOG = LoggerFactory.getLogger(ZKDatabase.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DSDatabase.class);
     private static final ConcurrentHashMap<String, M2mDataNode> nodes = new ConcurrentHashMap<>();
     // protected FileTxnSnapLog snapLog;
     protected long minCommittedLog, maxCommittedLog;
     protected LinkedList<Proposal> committedLog = new LinkedList<Proposal>();// 提交的事务
     protected ReentrantReadWriteLock logLock = new ReentrantReadWriteLock();
-    private DSDatabase m2mDataBase;
+    private lab.mars.ds.persistence.DSDatabase m2mDataBase;
     volatile private boolean initialized = false;
     private NetworkPool networkPool;
     private volatile long lastProcessedZxid = 0;
@@ -76,7 +75,7 @@ public class ZKDatabase implements M2mRecord {
      *
      * 初始化的同时进行数据加载
      */
-    public ZKDatabase(NetworkPool networkPool, DSDatabase m2mDataBase,
+    public DSDatabase(NetworkPool networkPool, lab.mars.ds.persistence.DSDatabase m2mDataBase,
                       String mySelfString) {
         this.networkPool = networkPool;
         this.m2mDataBase = m2mDataBase;

@@ -81,7 +81,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     protected RequestProcessor firstProcessor;
     protected volatile boolean running;
     int requestsInProcess;
-    private ZKDatabase zkDb;
+    private DSDatabase zkDb;
     private ServerCnxnFactory serverCnxnFactory;
 
     /**
@@ -98,7 +98,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     public ZooKeeperServer(int tickTime,
                            int minSessionTimeout, int maxSessionTimeout,
-                           DataTreeBuilder treeBuilder, ZKDatabase zkDb) {
+                           DataTreeBuilder treeBuilder, DSDatabase zkDb) {
         serverStats = new ServerStats(this);
         this.zkDb = zkDb;
         this.tickTime = tickTime;
@@ -119,7 +119,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      */
     public ZooKeeperServer(int tickTime,
                            DataTreeBuilder treeBuilder) throws IOException {
-        this(tickTime, -1, -1, treeBuilder, new ZKDatabase(null,
+        this(tickTime, -1, -1, treeBuilder, new DSDatabase(null,
                 null, null));
     }
 
@@ -140,7 +140,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      */
     public ZooKeeperServer(DataTreeBuilder treeBuilder) throws IOException {
         this(DEFAULT_TICK_TIME, -1, -1, treeBuilder,
-                new ZKDatabase(null, null, null));
+                new DSDatabase(null, null, null));
     }
 
     public static int getSnapCount() {
@@ -187,7 +187,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      *
      * @return the zookeeper database for this server
      */
-    public ZKDatabase getZKDatabase() {
+    public DSDatabase getZKDatabase() {
         return this.zkDb;
     }
 
@@ -196,7 +196,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      *
      * @param zkDb
      */
-    public void setZKDatabase(ZKDatabase zkDb) {
+    public void setZKDatabase(DSDatabase zkDb) {
         this.zkDb = zkDb;
     }
 
@@ -310,7 +310,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public void startdata() throws IOException, InterruptedException {
         // check to see if zkDb is not null
         if (zkDb == null) {
-            zkDb = new ZKDatabase(null, null, null);
+            zkDb = new DSDatabase(null, null, null);
         }
         if (!zkDb.isInitialized()) {
             loadData();

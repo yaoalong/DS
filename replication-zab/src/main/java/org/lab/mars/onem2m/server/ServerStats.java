@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,32 +21,22 @@ package org.lab.mars.onem2m.server;
 /**
  * Basic Server Statistics
  */
+
 /**
  * 服务器基本的数据统计
- * 
+ *
  * @author yaoalong
  * @Date 2016年1月26日
  * @Email yaoalong@foxmail.com
  */
 public class ServerStats {
+    private final Provider provider;
     private long packetsSent;
     private long packetsReceived;
     private long maxLatency;
     private long minLatency = Long.MAX_VALUE;
     private long totalLatency = 0;
     private long count = 0;
-
-    private final Provider provider;
-
-    public interface Provider {
-        public long getOutstandingRequests();
-
-        public long getLastProcessedZxid();
-
-        public String getState();
-
-        public int getNumAliveConnections();
-    }
 
     public ServerStats(Provider provider) {
         this.provider = provider;
@@ -88,7 +78,9 @@ public class ServerStats {
         return provider.getState();
     }
 
-    /** The number of client connections alive to this server */
+    /**
+     * The number of client connections alive to this server
+     */
     public int getNumAliveClientConnections() {
         return provider.getNumAliveConnections();
     }
@@ -131,17 +123,6 @@ public class ServerStats {
         minLatency = Long.MAX_VALUE;
     }
 
-    synchronized public void resetMaxLatency() {
-        maxLatency = getMinLatency();
-    }
-
-    synchronized public void incrementPacketsReceived() {
-        packetsReceived++;
-    }
-
-    synchronized public void incrementPacketsSent() {
-        packetsSent++;
-    }
 
     synchronized public void resetRequestCounters() {
         packetsReceived = 0;
@@ -151,6 +132,16 @@ public class ServerStats {
     synchronized public void reset() {
         resetLatency();
         resetRequestCounters();
+    }
+
+    public interface Provider {
+        long getOutstandingRequests();
+
+        long getLastProcessedZxid();
+
+        String getState();
+
+        int getNumAliveConnections();
     }
 
 }

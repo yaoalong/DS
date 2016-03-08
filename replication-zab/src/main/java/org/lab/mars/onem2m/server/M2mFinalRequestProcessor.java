@@ -20,9 +20,8 @@ package org.lab.mars.onem2m.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import lab.mars.ds.reflection.ResourceReflection;
-
-import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.ds.server.DataTree.ProcessTxnResult;
+import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.KeeperException.Code;
 import org.lab.mars.onem2m.KeeperException.SessionMovedException;
@@ -41,7 +40,7 @@ import java.nio.ByteBuffer;
  * request and services any queries. It is always at the end of a
  * RequestProcessor chain (hence the name), so it does not have a nextProcessor
  * member.
- *
+ * <p>
  * This RequestProcessor counts on ZooKeeperServer to populate the
  * outstandingRequests member of ZooKeeperServer.
  */
@@ -125,7 +124,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 }
                 case OpCode.getData: {
                     M2mGetDataRequest getDataRequest = new M2mGetDataRequest();
-                    ByteBufferInputStream.byteBuffer2Record(request.request,
+                    M2mByteBufferInputStream.byteBuffer2Record(request.request,
                             getDataRequest);
                     M2mDataNode m2mDataNode = (M2mDataNode) zks.getZKDatabase()
                             .getData(getDataRequest.getPath());

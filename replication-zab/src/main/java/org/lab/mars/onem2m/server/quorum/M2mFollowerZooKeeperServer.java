@@ -27,7 +27,7 @@ import org.lab.mars.onem2m.server.M2mFinalRequestProcessor;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.RequestProcessor;
 import org.lab.mars.onem2m.server.M2mSyncRequestProcessor;
-import org.lab.mars.onem2m.server.ZKDatabase;
+import org.lab.mars.onem2m.server.DSDatabase;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ public class M2mFollowerZooKeeperServer extends M2mLearnerZooKeeperServer {
      * @throws IOException
      */
     M2mFollowerZooKeeperServer(M2mQuorumPeer self,
-                               DataTreeBuilder treeBuilder, ZKDatabase zkDb) throws IOException {
+                               DataTreeBuilder treeBuilder, DSDatabase zkDb) throws IOException {
         super( self.tickTime, self.minSessionTimeout,
                 self.maxSessionTimeout, treeBuilder, zkDb, self);
         this.pendingSyncs = new ConcurrentLinkedQueue<M2mRequest>();

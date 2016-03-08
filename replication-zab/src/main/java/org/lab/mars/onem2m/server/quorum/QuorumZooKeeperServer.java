@@ -17,7 +17,7 @@
  */
 package org.lab.mars.onem2m.server.quorum;
 
-import org.lab.mars.onem2m.server.ZKDatabase;
+import org.lab.mars.onem2m.server.DSDatabase;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
 
 import java.io.PrintWriter;
@@ -30,7 +30,7 @@ public abstract class QuorumZooKeeperServer extends ZooKeeperServer {
 
     protected QuorumZooKeeperServer(int tickTime,
                                     int minSessionTimeout, int maxSessionTimeout,
-                                    DataTreeBuilder treeBuilder, ZKDatabase zkDb, M2mQuorumPeer self) {
+                                    DataTreeBuilder treeBuilder, DSDatabase zkDb, M2mQuorumPeer self) {
         super(tickTime, minSessionTimeout, maxSessionTimeout,
                 treeBuilder, zkDb);
         this.self = self;
