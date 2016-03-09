@@ -167,13 +167,11 @@ public class QuorumPeerConfig {
                 initLimit = Integer.parseInt(value);
             } else if (key.equals("syncLimit")) {
                 syncLimit = Integer.parseInt(value);
-            } else if (key.equals("electionAlg")) {
-                electionAlg = Integer.parseInt(value);
             } else if (key.equals("syncEnabled")) {
                 syncEnabled = Boolean.parseBoolean(value);
             } else if (key.equals("autopurge.snapRetainCount")) {
                 snapRetainCount = Integer.parseInt(value);
-            } else if (key.startsWith("server.")) {
+            } else if (key.startsWith("zabServer.")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
                 String parts[] = value.split(":");

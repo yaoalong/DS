@@ -85,7 +85,7 @@ public class Starter {
                 try {
 
                     System.out.println("开始");
-                    zooKeeper.getChildren("/server", null);
+                    zooKeeper.getChildren("/", null);
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -124,16 +124,13 @@ public class Starter {
         }
         isStarted = true;
         startNextServers();
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
+        new Thread(()->{
                 try {
                     quorumPeerMain.runFromConfig(quorumPeerMain.getConfig());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
+
         }).start();
 
     }

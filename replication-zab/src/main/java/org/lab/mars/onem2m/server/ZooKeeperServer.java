@@ -302,7 +302,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     protected void startSessionTracker() {
-        ((SessionTrackerImpl) sessionTracker).start();
     }
 
     public boolean isRunning() {
