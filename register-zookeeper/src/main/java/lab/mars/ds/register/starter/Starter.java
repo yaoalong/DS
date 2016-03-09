@@ -2,6 +2,7 @@ package lab.mars.ds.register.starter;
 
 import java.io.IOException;
 
+import lab.mars.ds.constant.OperateConstant;
 import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.monitor.RegisterIntoZooKeeper;
@@ -29,6 +30,8 @@ public class Starter {
     private String zooKeeperServer;
     private ZooKeeper zooKeeper;
 
+    private volatile boolean isStarted = false;
+
     public Starter(NetworkInterface networkInterface) {
         this.networkInterface = networkInterface;
     }
@@ -37,6 +40,11 @@ public class Starter {
 
         QuorumPeerConfig config = quorumPeerMain.getConfig();
         zooKeeperServer = config.getZooKeeperServer();
+        try {
+            zooKeeper = new ZooKeeper(zooKeeperServer, 10000, null);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
         networkPool = new NetworkPool();
         networkPool.setAllServers(config.getAllServers());
         startFactor = config.getZooKeeperStartFactor();
@@ -60,24 +68,10 @@ public class Starter {
         startServer();
 
         if (networkPool.getFirstPosition(myServer) < startFactor) {
-
-            try {
-                zooKeeper = new ZooKeeper(zooKeeperServer, 30000, null);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
             start();
             check();
 
         } else {
-
-            try {
-                zooKeeper = new ZooKeeper(zooKeeperServer, 30000, null);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
             check();
         }
 
@@ -89,58 +83,54 @@ public class Starter {
 
             while (true) {
                 try {
-                    zooKeeper = new ZooKeeper(zooKeeperServer, 10000, null);
+
                     System.out.println("开始");
                     zooKeeper.getChildren("/server", null);
-                    System.out.println("成功");
                     return;
                 } catch (Exception e) {
-
-                    System.out.println("错误信息" + e.getMessage());
+                    e.printStackTrace();
                     break;
                 }
 
             }
-            // for (String server : networkPool.getBeforeList(myServer)) {
-            // try {
-            // TcpClientNetwork tcpClient = new TcpClientNetwork();
-            // tcpClient
-            // .setSocketChannelChannelInitializer(new
-            // RegisterPacketClientChannelInitializer());
-            // String[] serverAndPort = spilitString(server);
-            //
-            // tcpClient.connectionOne(serverAndPort[0],
-            // Integer.valueOf(serverAndPort[1]));
-            // tcpClient.write(new RegisterM2mPacket(1, null));
-            // } catch (Exception ex) {
-            // }
-            // }
+            for (String server : networkPool.getBeforeList(myServer)) {
+                try {
+                    RegisterTcpClient tcpClient = new RegisterTcpClient();
+                    tcpClient
+                            .setSocketChannelChannelInitializer(new RegisterPacketClientChannelInitializer());
+                    String[] serverAndPort = spilitString(server);
+
+                    tcpClient.connectionOne(serverAndPort[0],
+                            Integer.valueOf(serverAndPort[1]));
+                    tcpClient.write(new RegisterM2mPacket(
+                            OperateConstant.DETECT.getCode(), null));
+                } catch (Exception ex) {
+                }
+            }
 
             Thread.sleep(1000);
             if (count == 0) {
                 start();
-            } else {
-                check();
             }
+            check();
         } catch (InterruptedException e1) {
-            e1.printStackTrace();
         }
 
     }
 
     public void start() {
-
+        if (isStarted == true) {
+            return;
+        }
+        isStarted = true;
         startNextServers();
-        // quorumPeerMain.runFromConfig(quorumPeerMain.getConfig());
         new Thread(new Runnable() {
 
             @Override
             public void run() {
-                // TODO Auto-generated method stub
                 try {
                     quorumPeerMain.runFromConfig(quorumPeerMain.getConfig());
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -159,7 +149,8 @@ public class Starter {
 
                 tcpClient.connectionOne(serverAndPort[0],
                         Integer.valueOf(serverAndPort[1]));
-                tcpClient.write(new RegisterM2mPacket(0, null));
+                tcpClient.write(new RegisterM2mPacket(OperateConstant.START
+                        .getCode(), null));
             } catch (Exception ex) {
             }
         }
@@ -174,7 +165,7 @@ public class Starter {
     }
 
     public void register(String value) {
-        System.out.println("开始注册");
+
         RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper();
         try {
             registerIntoZooKeeper.setServer(zooKeeperServer);
@@ -182,11 +173,10 @@ public class Starter {
 
             registerIntoZooKeeper.start();
         } catch (IOException e) {
-            e.printStackTrace();
+
         } catch (KeeperException e) {
-            e.printStackTrace();
+
         } catch (InterruptedException e) {
-            e.printStackTrace();
         }
         try {
             registerIntoZooKeeper.join();

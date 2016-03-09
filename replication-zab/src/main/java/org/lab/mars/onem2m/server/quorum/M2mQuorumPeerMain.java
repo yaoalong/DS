@@ -96,8 +96,8 @@ public class M2mQuorumPeerMain extends Thread {
             cnxnFactory.setTemporyAdd(config.isTemporyAdd());
 
             ZooKeeperRegister zooKeeperRegister = new ZooKeeperRegister();
-            // TODO zooKeeperRegister.starter(args, networkPool);
-            // TODO zooKeeperRegister.register(address + ":" + webPort);
+            zooKeeperRegister.starter(args, networkPool);
+            zooKeeperRegister.register(address + ":" + webPort);
             List<M2mQuorumPeer> quorumPeers = new ArrayList<M2mQuorumPeer>();
             long minValue = config.isTemporyAdd() ? 1
                     : config.replication_factor;

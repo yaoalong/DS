@@ -112,6 +112,9 @@ public class NetworkPool implements NetworkInterface {
 
     @Override
     public void setServers(List<String> servers) {
+        servers.forEach(server -> {
+            System.out.println("server:" + server);
+        });
         this.servers = servers;
     }
 

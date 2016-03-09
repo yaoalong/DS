@@ -52,7 +52,7 @@ public class TcpClient extends TcpClientNetwork {
         synchronized (msg) {
             while (!((M2mPacket) msg).isFinished()) {
                 try {
-                    ((M2mPacket) msg).wait();
+                    msg.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -61,6 +61,7 @@ public class TcpClient extends TcpClientNetwork {
         }
 
     }
+
 
     public Channel getChannel() {
         return channel;

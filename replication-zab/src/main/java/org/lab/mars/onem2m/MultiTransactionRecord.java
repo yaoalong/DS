@@ -65,7 +65,6 @@ public class MultiTransactionRecord implements M2mRecord, Iterable<Op> {
     public void serialize(M2mOutputArchive archive, String tag)
             throws IOException {
         archive.startRecord(this, tag);
-        int index = 0;
         for (Op op : ops) {
             switch (op.getType()) {
             case ZooDefs.OpCode.create:
