@@ -38,6 +38,7 @@ public class OneM2m {
 
         System.out.println("host:" + host);
         System.out.println("port:" + port);
+
         tcpClient.connectionOne(host, port);
     }
 
