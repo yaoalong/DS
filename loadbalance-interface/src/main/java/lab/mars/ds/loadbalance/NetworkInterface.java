@@ -14,7 +14,7 @@ public interface NetworkInterface {
 
     void setServers(List<String> servers);
 
-    void setFactor(Integer factor);
+    void setNumOfVirtualNode(Integer factor);
 
 
     /**

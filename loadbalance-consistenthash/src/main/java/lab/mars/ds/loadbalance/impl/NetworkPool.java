@@ -39,7 +39,7 @@ public class NetworkPool implements NetworkInterface {
     private final ConcurrentHashMap<String, Long> serverFirstToPosition = new ConcurrentHashMap<>();
     public volatile TreeMap<Long, String> consistentBuckets; // TODO 临时打开的
     public volatile TreeMap<Long, String> allConsistentBuckets;// TODO 临时打开的
-    private int factor = 1;
+    private int numOfVirtualNode = 1;
     private volatile boolean initialized = false;
     private volatile List<String> servers;
     private ConcurrentHashMap<Long, String> allpositionToServer = new ConcurrentHashMap<>();
@@ -93,7 +93,7 @@ public class NetworkPool implements NetworkInterface {
         MessageDigest md5 = MD5.get();
 
         for (int i = 0; i < servers.size(); i++) {
-            for (long j = 0; j < factor; j++) {
+            for (long j = 0; j < numOfVirtualNode; j++) {
                 byte[] d = md5.digest((servers.get(i) + "-" + j).getBytes());
                 for (int h = 0; h < 1; h++) {
                     Long k = ((long) (d[3 + h * 4] & 0xFF) << 24)
@@ -123,7 +123,7 @@ public class NetworkPool implements NetworkInterface {
         MessageDigest md5 = MD5.get();
 
         for (int i = 0; i < allServers.size(); i++) {
-            for (long j = 0; j < factor; j++) {
+            for (long j = 0; j < numOfVirtualNode; j++) {
                 byte[] d = md5.digest((allServers.get(i) + "-" + j).getBytes());
                 for (int h = 0; h < 1; h++) {
                     Long k = ((long) (d[3 + h * 4] & 0xFF) << 24)
@@ -158,8 +158,8 @@ public class NetworkPool implements NetworkInterface {
     }
 
     @Override
-    public void setFactor(Integer factor) {
-        this.factor = factor;
+    public void setNumOfVirtualNode(Integer numOfVirtualNode) {
+        this.numOfVirtualNode = numOfVirtualNode;
     }
 
     @Override
@@ -207,18 +207,18 @@ public class NetworkPool implements NetworkInterface {
         return result;
     }
 
-    // TODO 这里需要设置 factor
     @Override
     public Integer getReplication() {
-        return factor;
+        return numOfVirtualNode;
     }
 
+    // TODO 修改为数据备份因子
     @Override
     public List<String> getReplicationServers(String server) {
 
         long firstLong = serverFirstToHash.get(server);
         List<String> result = new ArrayList<>();
-        while (result.size() < factor - 1) {
+        while (result.size() < numOfVirtualNode - 1) {
             long temp = findAllPointFor(firstLong + 1);
             String positionServer = consistentBuckets.get(temp);
             if (!result.contains(positionServer)

@@ -22,13 +22,16 @@ public abstract class TcpClientNetwork {
     private ChannelInitializer<SocketChannel> socketChannelChannelInitializer;
 
     public void connectionOne(String host, int port) {
+
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(NetworkEventLoopGroup.workerGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .handler(socketChannelChannelInitializer);
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
+
             reentrantLock.lock();
+            System.out.println("链接成功");
             channel = future.channel();
             condition.signalAll();
             reentrantLock.unlock();

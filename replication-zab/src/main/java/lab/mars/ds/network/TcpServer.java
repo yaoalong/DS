@@ -1,7 +1,15 @@
 package lab.mars.ds.network;
 
-import lab.mars.ds.network.handler.PacketServerChannelHandler;
-import lab.mars.ds.network.initializer.TcpChannelInitializer;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import lab.mars.ds.network.intializer.PacketServerChannelInitializer;
 
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.lab.mars.onem2m.server.quorum.M2mHandler;
@@ -9,13 +17,35 @@ import org.lab.mars.onem2m.server.quorum.M2mHandler;
 /*
  * TCP服务器
  */
-public class TcpServer extends TcpServerNetwork {
+public class TcpServer {
+    private Set<Channel> channels;
+    private ServerCnxnFactory serverCnxnFactory;
+    private M2mHandler m2mHandler;
+
     public TcpServer(ServerCnxnFactory serverCnxnFactory, M2mHandler m2mHandler) {
-        super();
-        PacketServerChannelHandler packetServerChannelHandler = new PacketServerChannelHandler(
-                serverCnxnFactory, m2mHandler);
-        setChannelChannelInitializer(new TcpChannelInitializer(
-                packetServerChannelHandler));
+        this.serverCnxnFactory = serverCnxnFactory;
+        this.channels = new HashSet<>();
+        this.m2mHandler = m2mHandler;
+
+    }
+
+    public void bind(String host, int port) throws InterruptedException {
+        ServerBootstrap b = new ServerBootstrap();
+        b.group(NetworkEventLoopGroup.bossGroup,
+                NetworkEventLoopGroup.workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_BACKLOG, 1000)
+                .childHandler(
+                        new PacketServerChannelInitializer(serverCnxnFactory,
+                                m2mHandler));
+        b.bind(host, port).addListener((ChannelFuture channelFuture) -> {
+            channels.add(channelFuture.channel());
+        });
+    }
+
+    public void close() {
+        channels.forEach(channel -> channel.close());
 
     }
 

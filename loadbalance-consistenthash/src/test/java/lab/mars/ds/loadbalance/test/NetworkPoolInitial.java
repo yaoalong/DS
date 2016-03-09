@@ -35,7 +35,7 @@ public class NetworkPoolInitial {
             servers.add("192.168.10.131" + (2181 + i));
         }
         networkPool.setServers(servers);
-        networkPool.setFactor(100);
+        networkPool.setNumOfVirtualNode(100);
         networkPool.initialize();
         Assert.assertEquals(Integer.valueOf(300), networkPool.getServerSize());
     }

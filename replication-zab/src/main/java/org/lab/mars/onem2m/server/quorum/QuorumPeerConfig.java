@@ -103,6 +103,10 @@ public class QuorumPeerConfig {
     private boolean isTemporyAdd = false;
     private Integer webPort;
 
+    protected Integer numOfVirtualNode;
+
+    protected Integer zabClientPort;
+
     /**
      * Parse a ZooKeeper configuration file
      *
@@ -204,6 +208,10 @@ public class QuorumPeerConfig {
                 zooKeeperServer = value;
             } else if (key.equals("replication.factor")) {
                 replication_factor = Integer.valueOf(value);
+
+            } else if (key.equals("numOfVirtualNode")) {
+                System.out.println("设置");
+                numOfVirtualNode = Integer.valueOf(value);
             } else if (key.startsWith("client")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
@@ -213,6 +221,8 @@ public class QuorumPeerConfig {
                 long sid = Long.parseLong(key.substring(dot + 1));
                 webPort = Integer.valueOf(value);
                 sidAndWebPort.put(sid, webPort);
+            } else if (key.equals("zabClientPort")) {
+                zabClientPort = Integer.valueOf(value);
             } else {
                 System.setProperty("zookeeper." + key, value);
             }
@@ -329,6 +339,9 @@ public class QuorumPeerConfig {
             String address = m2mAddressToId.getAddress();
             allServerStrings.add(address + ":" + port);
             allServers.put(address + ":" + port, sid);
+        }
+        if (numOfVirtualNode != null) {
+            networkPool.setNumOfVirtualNode(numOfVirtualNode);
         }
         networkPool.setAllServers(allServerStrings);
 

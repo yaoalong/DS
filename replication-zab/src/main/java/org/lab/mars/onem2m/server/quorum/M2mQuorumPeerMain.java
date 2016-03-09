@@ -84,12 +84,11 @@ public class M2mQuorumPeerMain extends Thread {
         try {
             NetworkPool networkPool = new NetworkPool();
             networkPool.setAllServers(config.allServerStrings);
-            networkPool.setFactor(config.replication_factor);
+            networkPool.setNumOfVirtualNode(config.numOfVirtualNode);
             NettyServerCnxnFactory cnxnFactory = new NettyServerCnxnFactory(
                     this);
             cnxnFactory.setNetworkPool(networkPool);
-            cnxnFactory.configure(config.getClientPortAddress().getPort(), 5,
-                    m2mHandler);
+            cnxnFactory.configure(config.zabClientPort, 5, m2mHandler);
             cnxnFactory.setMyIp(config.getMyIp());
             cnxnFactory.setAllServers(config.allServers);
             cnxnFactory.setReplicationFactory(config.getReplication_factor());// 设置复制因子
@@ -146,7 +145,6 @@ public class M2mQuorumPeerMain extends Thread {
             }
 
         } catch (InterruptedException e) {
-            // warn, but generally this is ok
             LOG.warn("Quorum Peer interrupted", e);
         }
     }

@@ -3,9 +3,14 @@ package lab.mars.ds.network.handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
+
+import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
+
 import lab.mars.ds.connectmanage.LRUManage;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.network.TcpClient;
+
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.NettyServerCnxn;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
@@ -14,13 +19,10 @@ import org.lab.mars.onem2m.server.quorum.M2mHandlerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class PacketServerChannelHandler extends
         SimpleChannelInboundHandler<Object> {
     private static final AttributeKey<NettyServerCnxn> STATE = AttributeKey
-            .valueOf("MyHandler.nettyServerCnxn");
+            .valueOf("PacketServerChannelHandler.nettyServerCnxn");
     private static Logger LOG = LoggerFactory
             .getLogger(RegisterPacketServerChannelHandler.class);
     private final LinkedList<M2mPacket> pendingQueue = new LinkedList<M2mPacket>();
@@ -30,9 +32,10 @@ public class PacketServerChannelHandler extends
     private NetworkPool networkPool;
     private M2mHandler m2mHandler;
 
-    private LRUManage lruManage = new LRUManage(16);//TODO 这个应该用户来定义
+    private LRUManage lruManage = new LRUManage(16);// TODO 这个应该用户来定义
 
-    public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory, M2mHandler m2mHandler) {
+    public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory,
+            M2mHandler m2mHandler) {
         this.serverCnxnFactory = serverCnxnFactory;
         this.self = serverCnxnFactory.getMyIp();
         this.networkPool = serverCnxnFactory.getNetworkPool();
@@ -42,6 +45,7 @@ public class PacketServerChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
+        System.out.println("收到消息");
         lruManage.refresh(ctx.channel());
         M2mPacket m2mPacket = (M2mPacket) msg;
         if (preProcessPacket(m2mPacket, ctx)) {
@@ -54,10 +58,10 @@ public class PacketServerChannelHandler extends
                 boolean isDistributed = m2mHandlerResult.isFlag();
                 if (isDistributed == true) {
                     NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
-                    nettyServerCnxn.receiveMessage(ctx, m2mHandlerResult.getM2mPacket());
+                    nettyServerCnxn.receiveMessage(ctx,
+                            m2mHandlerResult.getM2mPacket());
                 }
             }
-
 
         } else {// 需要增加对错误的处理
 
@@ -72,10 +76,7 @@ public class PacketServerChannelHandler extends
         nettyServerCnxn.setNetworkPool(serverCnxnFactory.getNetworkPool());
         ctx.attr(STATE).set(nettyServerCnxn);
         ctx.fireChannelRegistered();
-
     }
-
-    ;
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
@@ -96,7 +97,7 @@ public class PacketServerChannelHandler extends
      * @return
      */
     public boolean preProcessPacket(M2mPacket m2mPacket,
-                                    ChannelHandlerContext ctx) {
+            ChannelHandlerContext ctx) {
         String key = m2mPacket.getM2mRequestHeader().getKey();
 
         String server = networkPool.getServer(key);

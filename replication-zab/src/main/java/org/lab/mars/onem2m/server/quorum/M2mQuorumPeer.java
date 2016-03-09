@@ -275,17 +275,6 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
 
     @Override
     public synchronized void start() {
-        startRegisterAndMonitor();
-        loadDataBase();
-
-        startLeaderElection();
-        super.start();
-    }
-
-    /**
-     * 注册 并监控ZooKeeper信息
-     */
-    public void startRegisterAndMonitor() {
         if (isStart == true) {
             try {
                 cnxnFactory.start();
@@ -293,7 +282,10 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
                 LOG.error("zookeeper monitor start errror:{}", e);
             }
         }
+        loadDataBase();
 
+        startLeaderElection();
+        super.start();
     }
 
     /**

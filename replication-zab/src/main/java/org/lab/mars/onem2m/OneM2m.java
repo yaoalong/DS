@@ -1,26 +1,32 @@
 package org.lab.mars.onem2m;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.LinkedList;
+
+import lab.mars.ds.network.TcpClient;
 import lab.mars.ds.reflection.ResourceReflection;
 
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-
-import lab.mars.ds.network.TcpClient;
-
-import org.lab.mars.onem2m.proto.*;
+import org.lab.mars.onem2m.proto.M2mCreateRequest;
+import org.lab.mars.onem2m.proto.M2mCreateResponse;
+import org.lab.mars.onem2m.proto.M2mDeleteRequest;
+import org.lab.mars.onem2m.proto.M2mGetDataRequest;
+import org.lab.mars.onem2m.proto.M2mGetDataResponse;
+import org.lab.mars.onem2m.proto.M2mPacket;
+import org.lab.mars.onem2m.proto.M2mReplyHeader;
+import org.lab.mars.onem2m.proto.M2mRequestHeader;
+import org.lab.mars.onem2m.proto.M2mSetDataRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.LinkedList;
 
 /**
  * @author yaoalong
  * @Date 2016年2月20日
  * @Email yaoalong@foxmail.com
- * <p>
- * 客户端入口
+ *        <p>
+ *        客户端入口
  */
 public class OneM2m {
     private static final Logger LOG = LoggerFactory.getLogger(OneM2m.class);
@@ -29,12 +35,11 @@ public class OneM2m {
 
     public OneM2m(String host, Integer port) {
         tcpClient = new TcpClient(new LinkedList<M2mPacket>());
-        System.out.println("host:"+host);
-        System.out.println("port:"+port);
+
+        System.out.println("host:" + host);
+        System.out.println("port:" + port);
         tcpClient.connectionOne(host, port);
     }
-
-
 
     public String create(final String path, byte[] data) throws IOException {
         M2mRequestHeader m2mRequestHeader = new M2mRequestHeader();
@@ -55,7 +60,7 @@ public class OneM2m {
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mCreateRequest, m2mCreateResponse);
         tcpClient.write(m2mPacket);
-        int i=m2mPacket.getM2mReplyHeader().getErr();
+        int i = m2mPacket.getM2mReplyHeader().getErr();
         System.out.println(i);
         return "";
     }
@@ -111,8 +116,9 @@ public class OneM2m {
     public void send(M2mPacket m2mPacket) {
         tcpClient.write(m2mPacket);
     }
+
     public static void main(String args[]) throws IOException {
-        OneM2m oneM2m = new OneM2m("192.168.10.131", 2182);
+        OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
         // oneM2m.create("555555", null);
         oneM2m.create("3333333333", null);
     }
