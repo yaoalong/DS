@@ -33,14 +33,15 @@ public class PacketServerChannelHandler extends
     private NetworkPool networkPool;
     private M2mHandler m2mHandler;
 
-    private LRUManage lruManage = new LRUManage(16);// TODO 这个应该用户来定义
+    private LRUManage lruManage;// TODO 这个应该用户来定义
 
     public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory,
-            M2mHandler m2mHandler) {
+            M2mHandler m2mHandler, LRUManage lruManage) {
         this.serverCnxnFactory = serverCnxnFactory;
         this.self = serverCnxnFactory.getMyIp();
         this.networkPool = serverCnxnFactory.getNetworkPool();
         this.m2mHandler = m2mHandler;
+        this.lruManage = lruManage;
 
     }
 
@@ -71,6 +72,7 @@ public class PacketServerChannelHandler extends
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println(this);
         lruManage.add(ctx.channel());
         NettyServerCnxn nettyServerCnxn = new NettyServerCnxn(ctx.channel(),
                 serverCnxnFactory.getZkServers(), serverCnxnFactory);

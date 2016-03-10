@@ -27,6 +27,10 @@ import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 
 public class StatPersisted implements M2mRecord {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 7724710019397009828L;
     private long czxid;
     private long mzxid;
     private long ctime;

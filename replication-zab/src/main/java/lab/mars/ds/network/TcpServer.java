@@ -9,6 +9,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import java.util.HashSet;
 import java.util.Set;
 
+import lab.mars.ds.connectmanage.LRUManage;
 import lab.mars.ds.network.intializer.PacketServerChannelInitializer;
 
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
@@ -21,11 +22,14 @@ public class TcpServer {
     private Set<Channel> channels;
     private ServerCnxnFactory serverCnxnFactory;
     private M2mHandler m2mHandler;
+    private LRUManage lruManage;
 
-    public TcpServer(ServerCnxnFactory serverCnxnFactory, M2mHandler m2mHandler) {
+    public TcpServer(ServerCnxnFactory serverCnxnFactory,
+            M2mHandler m2mHandler, Integer numberOfConnections) {
         this.serverCnxnFactory = serverCnxnFactory;
         this.channels = new HashSet<>();
         this.m2mHandler = m2mHandler;
+        this.lruManage = new LRUManage(numberOfConnections);
 
     }
 
@@ -38,7 +42,7 @@ public class TcpServer {
                 .option(ChannelOption.SO_BACKLOG, 1000)
                 .childHandler(
                         new PacketServerChannelInitializer(serverCnxnFactory,
-                                m2mHandler));
+                                m2mHandler, lruManage));
         b.bind(host, port).addListener((ChannelFuture channelFuture) -> {
             channels.add(channelFuture.channel());
         });

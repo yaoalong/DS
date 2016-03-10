@@ -64,9 +64,10 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
     }
 
     public void configure(Integer clientPort, int maxClientCnxns,
-            M2mHandler m2mHandler) throws IOException {
+            M2mHandler m2mHandler, Integer numberOfConnections)
+            throws IOException {
         this.clientPort = clientPort;
-        tcpServer = new TcpServer(this, m2mHandler);
+        tcpServer = new TcpServer(this, m2mHandler, numberOfConnections);
 
     }
 

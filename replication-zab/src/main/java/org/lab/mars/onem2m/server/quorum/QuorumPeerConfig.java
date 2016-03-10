@@ -104,6 +104,8 @@ public class QuorumPeerConfig {
 
     protected Integer numOfVirtualNode;
 
+    protected int numberOfConnections = 16;
+
     protected Integer zabClientPort;
 
     /**
@@ -220,6 +222,8 @@ public class QuorumPeerConfig {
                 sidAndWebPort.put(sid, webPort);
             } else if (key.equals("zabClientPort")) {
                 zabClientPort = Integer.valueOf(value);
+            } else if (key.equals("numberOfConnections")) {
+                numberOfConnections = Integer.valueOf(value);
             } else {
                 System.setProperty("zookeeper." + key, value);
             }

@@ -6,9 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Author:yaoalong. 
- * Date:2016/3/3. 
- * Email:yaoalong@foxmail.com
+ * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
  */
 public class LRUManage implements ConnectManager {
 
@@ -38,12 +36,12 @@ public class LRUManage implements ConnectManager {
     }
 
     @Override
-    public void refresh(Channel channel) {
+    public synchronized void refresh(Channel channel) {
         connectMessages.get(channel);
     }
 
     @Override
-    public void add(Channel channel) {
+    public synchronized void add(Channel channel) {
         connectMessages.put(channel, true);
     }
 }

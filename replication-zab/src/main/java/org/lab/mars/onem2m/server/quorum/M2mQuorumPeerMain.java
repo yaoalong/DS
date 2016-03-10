@@ -91,7 +91,8 @@ public class M2mQuorumPeerMain extends Thread {
                     this);
             networkPool.setReplicationFactor(config.replication_factor);
             cnxnFactory.setNetworkPool(networkPool);
-            cnxnFactory.configure(config.zabClientPort, 5, m2mHandler);
+            cnxnFactory.configure(config.zabClientPort, 5, m2mHandler,
+                    config.numberOfConnections);
             cnxnFactory.setMyIp(config.getMyIp());
             cnxnFactory.setAllServers(config.allServers);
             cnxnFactory.setReplicationFactory(config.getReplication_factor());// 设置复制因子
@@ -137,9 +138,6 @@ public class M2mQuorumPeerMain extends Thread {
                 quorumPeer.setMyIp(config.getMyIp());
 
                 quorumPeer.start();
-                M2mQuorumPeerStatistics.quorums.put(m2mQuorumServer
-                        .getServers().get(Integer.valueOf((i) + "")),
-                        quorumPeer);
                 quorumPeers.add(quorumPeer);
 
             }
