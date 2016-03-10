@@ -89,6 +89,7 @@ public class PacketServerChannelHandler extends
         LOG.info("Channel disconnect caused close:{}", cause);
         cause.printStackTrace();
         ctx.close();
+
     }
 
     /**
