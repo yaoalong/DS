@@ -22,15 +22,16 @@
             <artifactId>resource-pojo</artifactId>
             <version>${project.version}</version>
         </dependency>
+         <dependency>
+        	<groupId>${project.groupId}</groupId>
+        	<artifactId>loadbalance-consistenthash</artifactId>
+        	<version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-core</artifactId>
-            <exclusions>
-
-
-
-            </exclusions>
         </dependency>
+       
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

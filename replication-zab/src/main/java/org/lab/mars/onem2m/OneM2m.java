@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.network.TcpClient;
 import lab.mars.ds.reflection.ResourceReflection;
 
@@ -119,8 +120,10 @@ public class OneM2m {
     }
 
     public static void main(String args[]) throws IOException {
-        OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
-        // oneM2m.create("555555", null);
-        oneM2m.create("455555555", null);
+        // OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
+        // // oneM2m.create("555555", null);
+        // oneM2m.create("45555555555", null);
+        System.out.println(NetworkPool.md5HashingAlg("45555555555"));
     }
+
 }

@@ -16,6 +16,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import lab.mars.ds.loadbalance.RangeDO;
+import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.reflection.ResourceReflection;
 
 import org.lab.mars.ds.server.M2mDataNode;
@@ -237,6 +238,8 @@ public class DSDatabaseImpl implements DSDatabase {
                 M2mDataNode m2mDataNode = new M2mDataNode();
                 try {
                     m2mDataNode.deserialize(inboa, "m2mData");
+                    m2mDataNode.setValue(NetworkPool.md5HashingAlg(m2mDataNode
+                            .getId()));
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;
