@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.net.InetSocketAddress;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -89,9 +90,11 @@ public class NettyServerCnxn extends ServerCnxn {
     public void receiveMessage(ChannelHandlerContext ctx, M2mPacket m2mPacket) {
         String server = networkPool.getServer(m2mPacket.getM2mRequestHeader()
                 .getKey());
-        System.out.println("要处理的server:" + server);
-
+        for (Entry<String, ZooKeeperServer> entry : zookeeperServers.entrySet()) {
+            System.out.println("逐渐:" + entry.getKey());
+        }
         while (zookeeperServers.get(server) == null) {
+            System.out.println("为空");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

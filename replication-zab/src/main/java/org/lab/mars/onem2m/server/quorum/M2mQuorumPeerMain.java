@@ -78,7 +78,7 @@ public class M2mQuorumPeerMain extends Thread {
     public void runFromConfig(QuorumPeerConfig config, String[] args)
             throws IOException {
 
-        webPort = config.clientPort;
+        webPort = config.zabClientPort;
         address = config.getMyIp();
         LOG.info("Starting quorum peer");
         try {

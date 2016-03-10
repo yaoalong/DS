@@ -88,7 +88,6 @@ public class QuorumPeerConfig {
     protected String table = "student";
     protected String zooKeeperServer;
     protected Integer replication_factor;
-    protected Integer clientPort;
     /**
      * 用这个来判断自己在环中的位置
      */
@@ -161,8 +160,6 @@ public class QuorumPeerConfig {
                 dataDir = value;
             } else if (key.equals("dataLogDir")) {
                 dataLogDir = value;
-            } else if (key.equals("clientPort")) {
-                clientPort = Integer.parseInt(value);
             } else if (key.equals("clientPortAddress")) {
                 clientPortAddress = value.trim();
             } else if (key.equals("tickTime")) {
@@ -239,14 +236,14 @@ public class QuorumPeerConfig {
                         + " is missing.");
             }
         }
-        if (clientPort == 0) {
+        if (zabClientPort == 0) {
             throw new IllegalArgumentException("clientPort is not set");
         }
         if (clientPortAddress != null) {
             this.clientPortAddress = new InetSocketAddress(
-                    InetAddress.getByName(clientPortAddress), clientPort);
+                    InetAddress.getByName(clientPortAddress), zabClientPort);
         } else {
-            this.clientPortAddress = new InetSocketAddress(clientPort);
+            this.clientPortAddress = new InetSocketAddress(zabClientPort);
         }
 
         if (tickTime == 0) {
@@ -346,7 +343,7 @@ public class QuorumPeerConfig {
         networkPool.setAllServers(allServerStrings);
 
         List<String> responseServers = networkPool.getReponseServers(myIp + ":"
-                + clientPort);
+                + zabClientPort);
         long i = 0;
         for (String responseServer : responseServers) {
 
