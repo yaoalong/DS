@@ -1,6 +1,10 @@
 package lab.mars.ds.monitor;
 
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
 import lab.mars.ds.loadbalance.NetworkInterface;
+
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -10,9 +14,6 @@ import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
 /*
  * 监控zookeeper,从而可以获取在线机器列表
  */
@@ -20,7 +21,7 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
 
     private static final Logger LOG = LoggerFactory
             .getLogger(ZooKeeper_Monitor.class);
-    private static final String ROOT_NODE = "/server";
+    private static final String ROOT_NODE = "/";
     private static CountDownLatch countDownLatch = new CountDownLatch(1);
     private ZooKeeper zooKeeper;
     /*
@@ -85,7 +86,6 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
     public void setServer(String server) {
         this.server = server;
     }
-
 
     public void setNetworkPool(NetworkInterface networkPool) {
         this.networkPool = networkPool;
