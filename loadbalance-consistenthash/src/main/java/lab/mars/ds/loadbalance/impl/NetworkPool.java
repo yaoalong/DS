@@ -44,8 +44,10 @@ public class NetworkPool implements NetworkInterface {
     private volatile List<String> servers;
     private ConcurrentHashMap<Long, String> allpositionToServer = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Long> allserverToPosition = new ConcurrentHashMap<>();
-
+    // 一个服务器负责提供数据复制服务器的列表
     private ConcurrentHashMap<String, List<String>> serverResponseServers = new ConcurrentHashMap<>();
+
+    private Integer replicationFactor = 2;
 
     /**
      * 计算一个key的hash值
@@ -212,13 +214,12 @@ public class NetworkPool implements NetworkInterface {
         return numOfVirtualNode;
     }
 
-    // TODO 修改为数据备份因子
     @Override
     public List<String> getReplicationServers(String server) {
 
         long firstLong = serverFirstToHash.get(server);
         List<String> result = new ArrayList<>();
-        while (result.size() < numOfVirtualNode - 1) {
+        while (result.size() < replicationFactor - 1) {
             long temp = findAllPointFor(firstLong + 1);
             String positionServer = consistentBuckets.get(temp);
             if (!result.contains(positionServer)
@@ -279,7 +280,7 @@ public class NetworkPool implements NetworkInterface {
         long firstLong = serverFirstToHash.get(server);
         List<String> result = new ArrayList<>();
         result.add(server);
-        while (result.size() < factor) {
+        while (result.size() < replicationFactor) {
             long temp = findAllPointFor(firstLong + 1);
             String positionServer = allConsistentBuckets.get(temp);
             if (!result.contains(positionServer)
@@ -328,7 +329,8 @@ public class NetworkPool implements NetworkInterface {
     private List<String> getResponseServers(String server) {
         List<String> responseServers = new ArrayList<String>();
         for (Entry<String, Long> index : serverFirstToHash.entrySet()) {
-            List<String> resultList = getReplicationServer(index.getKey(), 2);
+            List<String> resultList = getReplicationServer(index.getKey(),
+                    replicationFactor);
             if (resultList.contains(server)) {
                 responseServers.add(index.getKey());
             }
@@ -351,5 +353,11 @@ public class NetworkPool implements NetworkInterface {
             return (tmap.isEmpty()) ? this.allConsistentBuckets.firstKey()
                     : tmap.firstKey();
         }
+    }
+
+    @Override
+    public void setReplicationFactor(Integer replicationFactor) {
+        this.replicationFactor = replicationFactor;
+
     }
 }

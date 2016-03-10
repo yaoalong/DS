@@ -207,10 +207,10 @@ public class QuorumPeerConfig {
                 replication_factor = Integer.valueOf(value);
 
             } else if (key.equals("numOfVirtualNode")) {
-                System.out.println("设置");
                 numOfVirtualNode = Integer.valueOf(value);
-            } else if (key.startsWith("client")) {
+            } else if (key.startsWith("zabPort")) {
                 int dot = key.indexOf('.');
+                System.out.println(key + "key");
                 long sid = Long.parseLong(key.substring(dot + 1));
                 sidToClientPort.put(sid, Integer.valueOf(value));
             } else if (key.startsWith("webPort")) {
@@ -299,6 +299,8 @@ public class QuorumPeerConfig {
 
             m2mDataBase = new DSDatabaseImpl(cleaned, keySpace, table, node);
 
+            System.out.println("ok");
+
             File myIdFile = new File(dataDir, "myid");
             if (!myIdFile.exists()) {
                 throw new IllegalArgumentException(myIdFile.toString()
@@ -340,16 +342,15 @@ public class QuorumPeerConfig {
         if (numOfVirtualNode != null) {
             networkPool.setNumOfVirtualNode(numOfVirtualNode);
         }
+        networkPool.setNumOfVirtualNode(numOfVirtualNode);
+        networkPool.setReplicationFactor(replication_factor);
         networkPool.setAllServers(allServerStrings);
-
         List<String> responseServers = networkPool.getReponseServers(myIp + ":"
                 + zabClientPort);
         long i = 0;
         for (String responseServer : responseServers) {
-
-            System.out.println("response server:" + responseServer);
             List<String> replicationServer = networkPool.getReplicationServer(
-                    responseServer, 2);// TODO 需要修复
+                    responseServer, replication_factor);
             HashMap<Long, QuorumServer> map = new HashMap<>();
 
             for (String server : replicationServer) {

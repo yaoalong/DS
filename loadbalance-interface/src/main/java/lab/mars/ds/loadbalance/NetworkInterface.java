@@ -3,12 +3,9 @@ package lab.mars.ds.loadbalance;
 import java.util.List;
 
 /**
- * Author:yaoalong.
- * Date:2016/3/3.
- * Email:yaoalong@foxmail.com
+ * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
  */
 public interface NetworkInterface {
-
 
     void initialize();
 
@@ -16,9 +13,9 @@ public interface NetworkInterface {
 
     void setNumOfVirtualNode(Integer factor);
 
-
     /**
      * 针对于key获取当前应该处理该key的server
+     * 
      * @param key
      * @return
      */
@@ -28,6 +25,7 @@ public interface NetworkInterface {
 
     /**
      * 获取某个server的处理范围
+     * 
      * @param server
      * @return
      */
@@ -35,12 +33,14 @@ public interface NetworkInterface {
 
     /**
      * 获取复制因子
+     * 
      * @return
      */
     Integer getReplication();
 
     /**
      * 获取对应的servers
+     * 
      * @param key
      * @return
      */
@@ -48,6 +48,7 @@ public interface NetworkInterface {
 
     /**
      * 根据key的值获取第一个处理该server的hash值
+     * 
      * @param key
      * @return
      */
@@ -55,17 +56,20 @@ public interface NetworkInterface {
 
     /**
      * 获取key 的value得到对应的server
+     * 
      * @param value
      * @return
      */
     String getServer(Long value);
-    /**s
-     *根据一个server获取它之前的所有server
+
+    /**
+     * s 根据一个server获取它之前的所有server
      */
-    List<String> getBeforeList(String server );
+    List<String> getBeforeList(String server);
 
     /**
      * 获取server在环中的Hash位置
+     * 
      * @param server
      * @return
      */
@@ -73,14 +77,16 @@ public interface NetworkInterface {
 
     /**
      * 获取特定serverSize的下serverSize个server
+     * 
      * @param server
      * @param serverSize
      * @return
      */
-    List<String> getNextServers(String server,Integer serverSize);
+    List<String> getNextServers(String server, Integer serverSize);
 
     /**
      * 获取第n个server
+     * 
      * @param position
      * @return
      */
@@ -88,14 +94,16 @@ public interface NetworkInterface {
 
     /**
      * 根据server以及factor获取负责的servers
+     * 
      * @param server
      * @param factor
      * @return
      */
-    List<String> getReplicationServer(String server,Integer factor);
+    List<String> getReplicationServer(String server, Integer factor);
 
     /**
      * 获取一个特定的server应该为哪些server提供复制功能
+     * 
      * @param server
      * @return
      */
@@ -103,11 +111,19 @@ public interface NetworkInterface {
 
     /**
      * 查看一个节点为另一个节点复制所提供的端口
+     * 
      * @param server
      * @param reponseServer
      * @return
      */
-    long getServerResponseForAnthorSerer(String server,String reponseServer);
+    long getServerResponseForAnthorSerer(String server, String reponseServer);
 
+    /**
+     * 设置数据复制因子
+     * 
+     * @param replicationFactor
+     */
+
+    void setReplicationFactor(Integer replicationFactor);
 
 }

@@ -83,10 +83,13 @@ public class M2mQuorumPeerMain extends Thread {
         LOG.info("Starting quorum peer");
         try {
             NetworkPool networkPool = new NetworkPool();
-            networkPool.setAllServers(config.allServerStrings);
+            networkPool.setReplicationFactor(config.replication_factor);
             networkPool.setNumOfVirtualNode(config.numOfVirtualNode);
+            networkPool.setAllServers(config.allServerStrings);
+
             NettyServerCnxnFactory cnxnFactory = new NettyServerCnxnFactory(
                     this);
+            networkPool.setReplicationFactor(config.replication_factor);
             cnxnFactory.setNetworkPool(networkPool);
             cnxnFactory.configure(config.zabClientPort, 5, m2mHandler);
             cnxnFactory.setMyIp(config.getMyIp());
