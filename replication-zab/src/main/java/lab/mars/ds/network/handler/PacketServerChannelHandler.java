@@ -5,6 +5,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lab.mars.ds.connectmanage.LRUManage;
@@ -100,44 +101,41 @@ public class PacketServerChannelHandler extends
             ChannelHandlerContext ctx) {
         String key = m2mPacket.getM2mRequestHeader().getKey();
 
-        String server = networkPool.getServer(key);
-        if (server.equals(self)) {
+        String trueServer = networkPool.getTrueServer(key);
+        if (trueServer.equals(self)) {
             return true;
         }
-        for (int i = 0; i < 3; i++) {
-            if (ipAndTcpClient.containsKey(server)) {
-                ipAndTcpClient.get(server).write(m2mPacket);
-                return false;
-            } else {
-                try {
-                    TcpClient tcpClient = new TcpClient(pendingQueue);
-                    String[] splitStrings = spilitString(server);
-                    tcpClient.connectionOne(splitStrings[0],
-                            Integer.valueOf(splitStrings[1]));
-
-                    tcpClient.write(m2mPacket);
-                    ctx.writeAndFlush(m2mPacket);
-
-                    ipAndTcpClient.put(server, tcpClient);
+        String server = networkPool.getServer(key);
+        List<String> responseServers = networkPool
+                .getReplicationServer(trueServer);
+        for (String responseServer : responseServers) {
+            if (responseServer.equals(self)) {
+                return true;
+            }
+            if (networkPool.getServers().contains(responseServer)) {
+                if (ipAndTcpClient.containsKey(responseServer)) {
+                    ipAndTcpClient.get(responseServer).write(m2mPacket);
                     return false;
-                } catch (Exception e) {
+                } else {
+                    try {
+                        TcpClient tcpClient = new TcpClient(pendingQueue);
+                        String[] splitStrings = spilitString(responseServer);
+                        tcpClient.connectionOne(splitStrings[0],
+                                Integer.valueOf(splitStrings[1]));
 
-                    LOG.error("process packet error:{}", e);
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    LOG.error("InterruptedException error:{}", e);
-                }
-                server = networkPool.getServer(key);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                        tcpClient.write(m2mPacket);
+                        ctx.writeAndFlush(m2mPacket);
+
+                        ipAndTcpClient.put(server, tcpClient);
+                        return false;
+                    } catch (Exception e) {
+                        LOG.error("process packet error:{}", e);
+                    }
                 }
 
             }
         }
+
         return false;
     }
 

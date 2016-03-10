@@ -349,8 +349,8 @@ public class QuorumPeerConfig {
                 + zabClientPort);
         long i = 0;
         for (String responseServer : responseServers) {
-            List<String> replicationServer = networkPool.getReplicationServer(
-                    responseServer, replication_factor);
+            List<String> replicationServer = networkPool
+                    .getReplicationServer(responseServer);
             HashMap<Long, QuorumServer> map = new HashMap<>();
 
             for (String server : replicationServer) {

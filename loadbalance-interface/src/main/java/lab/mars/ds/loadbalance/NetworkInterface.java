@@ -99,7 +99,7 @@ public interface NetworkInterface {
      * @param factor
      * @return
      */
-    List<String> getReplicationServer(String server, Integer factor);
+    List<String> getReplicationServer(String server);
 
     /**
      * 获取一个特定的server应该为哪些server提供复制功能
@@ -125,5 +125,17 @@ public interface NetworkInterface {
      */
 
     void setReplicationFactor(Integer replicationFactor);
+
+    /**
+     * 获取真正处理的节点
+     */
+    String getTrueServer(String key);
+
+    /**
+     * 获取目前的存活列表
+     * 
+     * @return
+     */
+    List<String> getServers();
 
 }

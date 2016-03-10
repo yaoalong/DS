@@ -101,7 +101,7 @@ public class DSDatabaseImpl implements DSDatabase {
                 Object object = row.getObject(name);
                 result.put(name, object);
             });
-            if (judgeIsHandle(Long.valueOf((String) result.get("zxid")))) {
+            if (judgeIsHandle((Long) result.get("zxid"))) {
                 m2mDataNodes.add(ResourceReflection.deserialize(
                         M2mDataNode.class, result));
             }

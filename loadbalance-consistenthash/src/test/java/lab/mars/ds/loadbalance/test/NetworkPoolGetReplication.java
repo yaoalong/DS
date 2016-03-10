@@ -27,16 +27,16 @@ public class NetworkPoolGetReplication {
             System.out.println(entry.getKey() + "::::" + entry.getValue());
 
         }
-        for (String server : networkPool.getReplicationServer(
-                "192.168.10.131:2181", 2)) {
+        for (String server : networkPool
+                .getReplicationServer("192.168.10.131:2181")) {
             System.out.println("192.168.10.131:2181:" + server);
         }
-        for (String server : networkPool.getReplicationServer(
-                "192.168.10.131:2182", 2)) {
+        for (String server : networkPool
+                .getReplicationServer("192.168.10.131:2182")) {
             System.out.println("192.168.10.131:2182:" + server);
         }
-        for (String server : networkPool.getReplicationServer(
-                "192.168.10.131:2183", 2)) {
+        for (String server : networkPool
+                .getReplicationServer("192.168.10.131:2183")) {
             System.out.println("192.168.10.131:2183:" + server);
         }
 

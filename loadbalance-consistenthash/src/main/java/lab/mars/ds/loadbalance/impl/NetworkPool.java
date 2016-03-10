@@ -177,6 +177,12 @@ public class NetworkPool implements NetworkInterface {
     }
 
     @Override
+    public String getTrueServer(String key) {
+        return allConsistentBuckets.get(getAllBucket(key));
+
+    }
+
+    @Override
     public Integer getServerSize() {
         return consistentBuckets.size();
     }
@@ -276,7 +282,7 @@ public class NetworkPool implements NetworkInterface {
     }
 
     @Override
-    public List<String> getReplicationServer(String server, Integer factor) {
+    public List<String> getReplicationServer(String server) {
         long firstLong = serverFirstToHash.get(server);
         List<String> result = new ArrayList<>();
         result.add(server);
@@ -296,6 +302,9 @@ public class NetworkPool implements NetworkInterface {
         return serverResponseServers.get(server);
     }
 
+    /**
+     * 判断一个服务器和另一个服务器的距离
+     */
     @Override
     public long getServerResponseForAnthorSerer(String server,
             String reponseServer) {
@@ -329,8 +338,7 @@ public class NetworkPool implements NetworkInterface {
     private List<String> getResponseServers(String server) {
         List<String> responseServers = new ArrayList<String>();
         for (Entry<String, Long> index : serverFirstToHash.entrySet()) {
-            List<String> resultList = getReplicationServer(index.getKey(),
-                    replicationFactor);
+            List<String> resultList = getReplicationServer(index.getKey());
             if (resultList.contains(server)) {
                 responseServers.add(index.getKey());
             }
@@ -359,5 +367,10 @@ public class NetworkPool implements NetworkInterface {
     public void setReplicationFactor(Integer replicationFactor) {
         this.replicationFactor = replicationFactor;
 
+    }
+
+    @Override
+    public List<String> getServers() {
+        return servers;
     }
 }
