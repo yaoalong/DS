@@ -11,8 +11,9 @@ import io.netty.channel.Channel;
 /**
  * 连接管理
  */
-public interface  ConnectManager {
+public interface ConnectManager {
 
     void refresh(Channel channel);
+
     void add(Channel channel);
 }

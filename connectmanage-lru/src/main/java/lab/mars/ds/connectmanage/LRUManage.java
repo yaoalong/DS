@@ -10,11 +10,11 @@ import java.util.Map;
  */
 public class LRUManage implements ConnectManager {
 
-    private static int size = 16;
+    private int size = 16;
     /**
      * 利用了LinkedHashMap实现了LRU 连接池
      */
-    public static final LinkedHashMap<Channel, Boolean> connectMessages = new LinkedHashMap<Channel, Boolean>(
+    public final LinkedHashMap<Channel, Boolean> connectMessages = new LinkedHashMap<Channel, Boolean>(
             size, 0.5f, true) {
         /**
          *
@@ -32,7 +32,7 @@ public class LRUManage implements ConnectManager {
     };
 
     public LRUManage(int size) {
-        LRUManage.size = size;
+        this.size = size;
     }
 
     @Override
