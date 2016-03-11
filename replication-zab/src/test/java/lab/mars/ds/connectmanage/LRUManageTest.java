@@ -8,7 +8,7 @@ import lab.mars.ds.network.TcpServer;
 public class LRUManageTest {
 
     public static void main(String args[]) {
-        TcpServer tcpServer = new TcpServer(null, null, null);
+        TcpServer tcpServer = new TcpServer(null, null,5);
         try {
             tcpServer.bind("192.168.10.131", 4444);
         } catch (NumberFormatException e) {

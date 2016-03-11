@@ -18,17 +18,18 @@
 
 package org.lab.mars.onem2m.server;
 
-import lab.mars.ds.loadbalance.impl.NetworkPool;
-import org.lab.mars.onem2m.server.quorum.M2mQuorumPeerMain;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import lab.mars.ds.loadbalance.impl.NetworkPool;
+
+import org.lab.mars.onem2m.server.quorum.M2mQuorumPeerMain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ServerCnxnFactory {
 
@@ -66,12 +67,12 @@ public abstract class ServerCnxnFactory {
     }
 
     static public ServerCnxnFactory createFactory(int clientPort,
-                                                  int maxClientCnxns) throws IOException {
+            int maxClientCnxns) throws IOException {
         return createFactory(new InetSocketAddress(clientPort), maxClientCnxns);
     }
 
     static public ServerCnxnFactory createFactory(InetSocketAddress addr,
-                                                  int maxClientCnxns) throws IOException {
+            int maxClientCnxns) throws IOException {
         ServerCnxnFactory factory = createFactory();
         factory.configure(addr, maxClientCnxns);
         return factory;
@@ -105,7 +106,6 @@ public abstract class ServerCnxnFactory {
     public abstract void startup(ZooKeeperServer zkServer) throws IOException,
             InterruptedException;
 
-
     public abstract void join() throws InterruptedException;
 
     public abstract void shutdown();
@@ -121,13 +121,12 @@ public abstract class ServerCnxnFactory {
      * @param zooKeeperServer
      */
     final public void addZooKeeperServer(String ip,
-                                         ZooKeeperServer zooKeeperServer) {
+            ZooKeeperServer zooKeeperServer) {
         this.zkServers.put(ip, zooKeeperServer);
         zooKeeperServer.setServerCnxnFactory(this);
         if (ip.equals(getMyIp())) {
             m2mQuorumPeerMain.isStarted = true;
         }
-
     }
 
     /**
@@ -146,7 +145,6 @@ public abstract class ServerCnxnFactory {
 
     public abstract InetSocketAddress getLocalAddress();
 
-
     public abstract NetworkPool getNetworkPool();
 
     public abstract Integer getReplicationFactor();
@@ -155,8 +153,6 @@ public abstract class ServerCnxnFactory {
         return zkServers;
     }
 
-
     public abstract Map<String, Long> getAllServer();
-
 
 }
