@@ -21,7 +21,7 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
 
     private static final Logger LOG = LoggerFactory
             .getLogger(ZooKeeper_Monitor.class);
-    private static final String ROOT_NODE = "/";
+    private static final String ROOT_NODE = "/server";
     private static CountDownLatch countDownLatch = new CountDownLatch(1);
     private ZooKeeper zooKeeper;
     /*
@@ -36,7 +36,7 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
             countDownLatch.await();
             getChildrens();
             while (true) {
-                zooKeeper.getChildren("/server", this);
+                zooKeeper.getChildren(ROOT_NODE, this);
                 Thread.sleep(1000);
             }
 
@@ -53,7 +53,7 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
                 && EventType.NodeChildrenChanged != event.getType()) {
             countDownLatch.countDown();
         } else if (EventType.NodeChildrenChanged == event.getType()
-                && event.getPath().startsWith("/server")) {
+                && event.getPath().startsWith(ROOT_NODE)) {
             try {
                 if (zooKeeper == null) {
                     return;

@@ -139,7 +139,7 @@ public class QuorumPeerConfig {
                 dataDir = value;
             } else if (key.equals("dataLogDir")) {
                 dataLogDir = value;
-            } else if (key.equals("clientPort")) {
+            } else if (key.equals("zooKeeperClientPort")) {
                 clientPort = Integer.parseInt(value);
             } else if (key.equals("clientPortAddress")) {
                 clientPortAddress = value.trim();
@@ -229,7 +229,7 @@ public class QuorumPeerConfig {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
                 serverWeight.put(sid, Long.parseLong(value));
-            } else if (key.startsWith("zooRegister")) {
+            } else if (key.startsWith("zooKeeperRegister")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
                 allServers.add(value);
@@ -351,7 +351,7 @@ public class QuorumPeerConfig {
                  */
 
                 LOG.info("Defaulting to majority quorums");
-                quorumVerifier = new QuorumMaj(3);// TODO 修改
+                quorumVerifier = new QuorumMaj(zooKeeperStartFactor);
             }
 
             // Now add observers to servers, once the quorums have been

@@ -13,7 +13,9 @@ import lab.mars.ds.network.intialize.RegisterPacketClientChannelInitializer;
 import lab.mars.ds.network.intialize.RegisterPacketServerChannelInitializer;
 import lab.mars.ds.register.model.RegisterM2mPacket;
 
+import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
@@ -83,11 +85,13 @@ public class Starter {
 
             while (true) {
                 try {
-
-                    System.out.println("开始");
-                    zooKeeper.getChildren("/", null);
+                    zooKeeper.create("/server", "1".getBytes(),
+                            Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                     return;
                 } catch (Exception e) {
+                    if (e instanceof KeeperException.NodeExistsException) {
+                        return;
+                    }
                     e.printStackTrace();
                     break;
                 }
@@ -124,12 +128,12 @@ public class Starter {
         }
         isStarted = true;
         startNextServers();
-        new Thread(()->{
-                try {
-                    quorumPeerMain.runFromConfig(quorumPeerMain.getConfig());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        new Thread(() -> {
+            try {
+                quorumPeerMain.runFromConfig(quorumPeerMain.getConfig());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         }).start();
 
