@@ -44,7 +44,6 @@ public class M2mSetDataRequest implements M2mRecord {
     @Override
     public void serialize(M2mOutputArchive archive, String tag)
             throws IOException {
-        // TODO Auto-generated method stub
         archive.startRecord(this, tag);
         archive.writeString(key, "key");
         archive.writeBuffer(data, "data");

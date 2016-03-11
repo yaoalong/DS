@@ -37,11 +37,11 @@ public class NetworkPool implements NetworkInterface {
     private final ConcurrentHashMap<String, Long> serverFirstToHash = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<String, Long> serverFirstToPosition = new ConcurrentHashMap<>();
-    public volatile TreeMap<Long, String> consistentBuckets; // TODO 临时打开的
-    public volatile TreeMap<Long, String> allConsistentBuckets;// TODO 临时打开的
+    private TreeMap<Long, String> consistentBuckets;
+    private TreeMap<Long, String> allConsistentBuckets;
     private int numOfVirtualNode = 1;
     private volatile boolean initialized = false;
-    private volatile List<String> servers;
+    private List<String> servers;
     private ConcurrentHashMap<Long, String> allpositionToServer = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Long> allserverToPosition = new ConcurrentHashMap<>();
     // 一个服务器负责提供数据复制服务器的列表
@@ -55,7 +55,7 @@ public class NetworkPool implements NetworkInterface {
      * @param key
      * @return
      */
-    public static long md5HashingAlg(String key) { // TODO 临时打开的，测试完成后需要关闭
+    public static long md5HashingAlg(String key) {
         MessageDigest md5 = MD5.get();
         md5.reset();
         md5.update(key.getBytes());
@@ -104,7 +104,6 @@ public class NetworkPool implements NetworkInterface {
                             | ((long) (d[0 + h * 4] & 0xFF));
 
                     newConsistentBuckets.put(k, servers.get(i));
-                    // result.put(servers.get(i), k);
                 }
             }
         }
@@ -113,14 +112,11 @@ public class NetworkPool implements NetworkInterface {
     }
 
     @Override
-    public void setServers(List<String> servers) {
-        servers.forEach(server -> {
-            System.out.println("server:" + server);
-        });
+    public synchronized void setServers(List<String> servers) {
         this.servers = servers;
     }
 
-    public void setAllServers(List<String> allServers) {
+    public synchronized void setAllServers(List<String> allServers) {
         TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
         MessageDigest md5 = MD5.get();
 
@@ -165,7 +161,7 @@ public class NetworkPool implements NetworkInterface {
     }
 
     @Override
-    public String getServer(String key) {
+    public synchronized String getServer(String key) {
         while (initialized == false) {
             try {
                 Thread.sleep(1000);
@@ -246,7 +242,7 @@ public class NetworkPool implements NetworkInterface {
     }
 
     @Override
-    public String getServer(Long value) {
+    public synchronized String getServer(Long value) {
         return consistentBuckets.get(findPointFor(value));
     }
 
@@ -373,4 +369,22 @@ public class NetworkPool implements NetworkInterface {
     public List<String> getServers() {
         return servers;
     }
+
+    public TreeMap<Long, String> getConsistentBuckets() {
+        return consistentBuckets;
+    }
+
+    public void setConsistentBuckets(TreeMap<Long, String> consistentBuckets) {
+        this.consistentBuckets = consistentBuckets;
+    }
+
+    public TreeMap<Long, String> getAllConsistentBuckets() {
+        return allConsistentBuckets;
+    }
+
+    public void setAllConsistentBuckets(
+            TreeMap<Long, String> allConsistentBuckets) {
+        this.allConsistentBuckets = allConsistentBuckets;
+    }
+
 }

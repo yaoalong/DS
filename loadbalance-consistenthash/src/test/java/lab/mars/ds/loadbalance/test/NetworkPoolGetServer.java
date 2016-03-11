@@ -24,8 +24,8 @@ public class NetworkPoolGetServer {
         networkPool.setServers(servers);
         networkPool.initialize();
 
-        for (Map.Entry<Long, String> entry : networkPool.consistentBuckets
-                .entrySet()) {
+        for (Map.Entry<Long, String> entry : networkPool
+                .getAllConsistentBuckets().entrySet()) {
             System.out.println(entry.getKey() + "::::" + entry.getValue());
 
         }
@@ -46,7 +46,7 @@ public class NetworkPoolGetServer {
         networkPool.setServers(servers);
         networkPool.initialize();
 
-        for (Map.Entry<Long, String> entry : networkPool.consistentBuckets
+        for (Map.Entry<Long, String> entry : networkPool.getConsistentBuckets()
                 .entrySet()) {
             System.out.println(entry.getKey() + "::::" + entry.getValue());
 

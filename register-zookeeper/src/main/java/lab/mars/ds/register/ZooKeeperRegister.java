@@ -18,7 +18,6 @@ public class ZooKeeperRegister implements ServiceRegister {
         try {
             starter.mainStart(args);
         } catch (ConfigException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

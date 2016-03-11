@@ -12,7 +12,6 @@ public class QuorumPeerTest {
         try {
             config.parse("zoo2.cfg");
         } catch (ConfigException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

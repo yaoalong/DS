@@ -33,7 +33,7 @@ public class PacketServerChannelHandler extends
     private NetworkPool networkPool;
     private M2mHandler m2mHandler;
 
-    private LRUManage lruManage;// TODO 这个应该用户来定义
+    private LRUManage lruManage;
 
     public PacketServerChannelHandler(ServerCnxnFactory serverCnxnFactory,
             M2mHandler m2mHandler, LRUManage lruManage) {

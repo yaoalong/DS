@@ -22,8 +22,8 @@ public class NetworkPoolGetReplication {
         networkPool.setNumOfVirtualNode(3);
         networkPool.setAllServers(servers);
 
-        for (Map.Entry<Long, String> entry : networkPool.allConsistentBuckets
-                .entrySet()) {
+        for (Map.Entry<Long, String> entry : networkPool
+                .getAllConsistentBuckets().entrySet()) {
             System.out.println(entry.getKey() + "::::" + entry.getValue());
 
         }

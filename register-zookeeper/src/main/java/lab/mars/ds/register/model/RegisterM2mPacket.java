@@ -13,10 +13,6 @@ public class RegisterM2mPacket implements Serializable {
 
     private Integer body;
 
-    public RegisterM2mPacket() {
-
-    }
-
     public RegisterM2mPacket(Integer type, Integer body) {
         this.type = type;
         this.body = body;
@@ -39,7 +35,6 @@ public class RegisterM2mPacket implements Serializable {
     }
 
     public boolean isFinished() {
-        // TODO Auto-generated method stub
         return false;
     }
 
