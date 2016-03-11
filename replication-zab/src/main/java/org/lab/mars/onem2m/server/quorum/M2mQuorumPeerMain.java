@@ -96,21 +96,19 @@ public class M2mQuorumPeerMain extends Thread {
             cnxnFactory.setMyIp(config.getMyIp());
             cnxnFactory.setAllServers(config.allServers);
             cnxnFactory.setReplicationFactory(config.getReplication_factor());// 设置复制因子
-            cnxnFactory.setTemporyAdd(config.isTemporyAdd());
 
             ZooKeeperRegister zooKeeperRegister = new ZooKeeperRegister();
             zooKeeperRegister.starter(args, networkPool);
             zooKeeperRegister.register(address + ":" + webPort);
             List<M2mQuorumPeer> quorumPeers = new ArrayList<M2mQuorumPeer>();
-            long minValue = config.isTemporyAdd() ? 1
-                    : config.replication_factor;
-            for (long i = 0; i < minValue; i++) {
+
+            for (long i = 0; i < config.positionToServers.size(); i++) {
                 M2mQuorumPeer quorumPeer;
                 M2mQuorumServer m2mQuorumServer = config.getM2mQuorumServers();
                 HashMap<Long, QuorumServer> servers = m2mQuorumServer
                         .getPositionToServers().get(i);
 
-                if (i == minValue - 1) {
+                if (i == 0) {
                     quorumPeer = new M2mQuorumPeer(true);
                 } else {
                     quorumPeer = new M2mQuorumPeer();
