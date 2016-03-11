@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import lab.mars.ds.loadbalance.NetworkInterface;
+import lab.mars.ds.register.starter.Starter;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -30,6 +31,12 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
     private String server;
     private NetworkInterface networkPool;
 
+    private Starter starter;
+
+    public ZooKeeper_Monitor(Starter starter) {
+        this.starter = starter;
+    }
+
     public void run() {
         try {
             zooKeeper = new ZooKeeper(server, 5000, this);
@@ -41,6 +48,7 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
             }
 
         } catch (Exception e) {
+            starter.check();
             e.printStackTrace();
             LOG.error("zookeepeer_monitor is error because of:{}",
                     e.getMessage());

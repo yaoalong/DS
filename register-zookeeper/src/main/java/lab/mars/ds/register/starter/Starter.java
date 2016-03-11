@@ -68,14 +68,7 @@ public class Starter {
     public void mainStart(String args[]) throws ConfigException {
         quorumPeerMain.parse(args);
         startServer();
-
-        if (networkPool.getFirstPosition(myServer) < startFactor) {
-            start();
-            check();
-
-        } else {
-            check();
-        }
+        check();
 
     }
 
@@ -167,7 +160,8 @@ public class Starter {
 
     public void register(String value) {
 
-        RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper();
+        RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper(
+                this);
         try {
             registerIntoZooKeeper.setServer(zooKeeperServer);
             registerIntoZooKeeper.register(value);
@@ -184,7 +178,7 @@ public class Starter {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        ZooKeeper_Monitor zooKeeper_monitor = new ZooKeeper_Monitor();
+        ZooKeeper_Monitor zooKeeper_monitor = new ZooKeeper_Monitor(this);
         zooKeeper_monitor.setServer(zooKeeperServer);
         zooKeeper_monitor.setNetworkPool(networkInterface);
         zooKeeper_monitor.start();
