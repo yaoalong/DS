@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import lab.mars.ds.loadbalance.NetworkInterface;
+import lab.mars.ds.register.constant.RegisterConstant;
 import lab.mars.ds.register.starter.Starter;
 
 import org.apache.zookeeper.KeeperException;
@@ -22,13 +23,12 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
 
     private static final Logger LOG = LoggerFactory
             .getLogger(ZooKeeper_Monitor.class);
-    private static final String ROOT_NODE = "/server";
     private static CountDownLatch countDownLatch = new CountDownLatch(1);
     private ZooKeeper zooKeeper;
     /*
      * zooKeeper服务器的地址
      */
-    private String server;
+    private String zooKeeperServer;
     private NetworkInterface networkPool;
 
     private Starter starter;
@@ -39,11 +39,11 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
 
     public void run() {
         try {
-            zooKeeper = new ZooKeeper(server, 5000, this);
+            zooKeeper = new ZooKeeper(zooKeeperServer, 5000, this);
             countDownLatch.await();
             getChildrens();
             while (true) {
-                zooKeeper.getChildren(ROOT_NODE, this);
+                zooKeeper.getChildren(RegisterConstant.ROOT_NODE, this);
                 Thread.sleep(1000);
             }
 
@@ -61,7 +61,7 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
                 && EventType.NodeChildrenChanged != event.getType()) {
             countDownLatch.countDown();
         } else if (EventType.NodeChildrenChanged == event.getType()
-                && event.getPath().startsWith(ROOT_NODE)) {
+                && event.getPath().startsWith(RegisterConstant.ROOT_NODE)) {
             try {
                 if (zooKeeper == null) {
                     return;
@@ -81,18 +81,18 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
             LOG.error("zookeeper is empty");
             return;
         }
-        List<String> serverStrings = zooKeeper.getChildren(ROOT_NODE, null);
+        List<String> serverStrings = zooKeeper.getChildren(RegisterConstant.ROOT_NODE, null);
         networkPool.setServers(serverStrings);
         networkPool.initialize();
 
     }
 
     public String getServer() {
-        return server;
+        return zooKeeperServer;
     }
 
-    public void setServer(String server) {
-        this.server = server;
+    public void setZooKeeperServer(String zooKeeperServer) {
+        this.zooKeeperServer = zooKeeperServer;
     }
 
     public void setNetworkPool(NetworkInterface networkPool) {

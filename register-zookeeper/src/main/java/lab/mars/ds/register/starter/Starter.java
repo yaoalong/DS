@@ -179,7 +179,7 @@ public class Starter {
             e.printStackTrace();
         }
         ZooKeeper_Monitor zooKeeper_monitor = new ZooKeeper_Monitor(this);
-        zooKeeper_monitor.setServer(zooKeeperServer);
+        zooKeeper_monitor.setZooKeeperServer(zooKeeperServer);
         zooKeeper_monitor.setNetworkPool(networkInterface);
         zooKeeper_monitor.start();
 
