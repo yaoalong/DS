@@ -41,6 +41,10 @@ public class Starter {
         this.networkInterface = networkInterface;
     }
 
+    /**
+     * 开始启动server 包括启动tcpserver,接收来自客户端的请求
+     * 
+     */
     public void startServer() {
 
         QuorumPeerConfig config = quorumPeerMain.getConfig();
@@ -63,7 +67,7 @@ public class Starter {
         try {
             tcpServer.bind(serverAndPort[0], Integer.valueOf(serverAndPort[1]));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            throw e;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 
-import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.network.TcpClient;
 import lab.mars.ds.reflection.ResourceReflection;
 
@@ -112,7 +111,7 @@ public class OneM2m {
         M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
                 .deserializeKryo(((M2mGetDataResponse) m2mPacket.getResponse())
                         .getData());
-        return m2mDataNode.getData() + "";
+        return new String(m2mDataNode.getData());
     }
 
     public void send(M2mPacket m2mPacket) {
@@ -121,9 +120,13 @@ public class OneM2m {
 
     public static void main(String args[]) throws IOException {
         OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
-        oneM2m.create("555555", "yaoalong".getBytes());
+        String key = "fff43dddff";
+        oneM2m.create(key, "111".getBytes());
+        System.out.println("FFF");
+        oneM2m.setData(key, "5555".getBytes());
+        System.out.println("k");
+        System.out.println(oneM2m.getData(key));
 
-        System.out.println(NetworkPool.md5HashingAlg("45555555555"));
     }
 
 }

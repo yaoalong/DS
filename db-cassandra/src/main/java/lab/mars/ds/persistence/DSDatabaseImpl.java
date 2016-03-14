@@ -102,6 +102,7 @@ public class DSDatabaseImpl implements DSDatabase {
                 Object object = row.getObject(name);
                 result.put(name, object);
             });
+            System.out.println("zxid:" + result.get("zxid"));
             if (judgeIsHandle((Long) result.get("zxid"))) {
                 m2mDataNodes.add(ResourceReflection.deserialize(
                         M2mDataNode.class, result));
@@ -185,14 +186,14 @@ public class DSDatabaseImpl implements DSDatabase {
     }
 
     @Override
-    public Long update(String key, Map<String, Object> updated) {
+    public Long update(String key, M2mDataNode updated) {
         try {
             M2mDataNode m2mDataNode = retrieve(key);
             if (m2mDataNode == null) {
                 return 0L;
             }
             delete(key);
-            m2mDataNode.setData((byte[]) updated.get("data"));
+            m2mDataNode.setData(updated.getData());
             create(m2mDataNode);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -259,8 +260,7 @@ public class DSDatabaseImpl implements DSDatabase {
                 M2mDataNode object = (M2mDataNode) ResourceReflection
                         .deserializeKryo(m2mSetDataTxn.getData());
 
-                update(m2mSetDataTxn.getPath(),
-                        ResourceReflection.serialize(object));
+                update(m2mSetDataTxn.getPath(), object);
                 break;
             }
         } catch (M2mKeeperException e) {
@@ -347,8 +347,9 @@ public class DSDatabaseImpl implements DSDatabase {
     private boolean judgeIsHandle(long zxid) {
         SortedMap<Long, RangeDO> tmap = this.endRangeDOMap.tailMap(zxid);
 
-        RangeDO rangeDO = (tmap.isEmpty()) ? this.endRangeDOMap.firstEntry()
-                .getValue() : null;
+        Long position = (tmap.isEmpty()) ? this.endRangeDOMap.firstKey() : tmap
+                .firstKey();
+        RangeDO rangeDO = endRangeDOMap.get(position);
         if (rangeDO != null && rangeDO.getStart() < zxid) {
             return true;
         }

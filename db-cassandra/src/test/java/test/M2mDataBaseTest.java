@@ -1,6 +1,14 @@
 package test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.persistence.DSDatabaseImpl;
+
 import org.junit.Test;
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.onem2m.M2mKeeperException;
@@ -8,13 +16,6 @@ import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 public class M2mDataBaseTest {
     DSDatabaseImpl m2mDataBase = new DSDatabaseImpl(false, "tests", "onem2m1",
@@ -27,8 +28,13 @@ public class M2mDataBaseTest {
 
     @Test
     public void testRetrieve() {
-
-        M2mDataNode m2mDataNode = m2mDataBase.retrieve("3333434");
+        List<RangeDO> rangeDOs = new ArrayList<RangeDO>();
+        rangeDOs.add(new RangeDO(0L, 2429425133L));
+        rangeDOs.add(new RangeDO(2429425133L, 2611217912L));
+        rangeDOs.add(new RangeDO(3582305062L, 3689081781L));
+        rangeDOs.add(new RangeDO(3848679456L, 9223372036854775807L));
+        m2mDataBase.getMaxZxid(rangeDOs);
+        M2mDataNode m2mDataNode = m2mDataBase.retrieve("223232");
         TraversalAllFields.getObjAttr(m2mDataNode);
     }
 
@@ -49,9 +55,16 @@ public class M2mDataBaseTest {
 
     @Test
     public void testUpdate() {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("data", "11".getBytes());
-        m2mDataBase.update("3333433", map);
+        List<RangeDO> rangeDOs = new ArrayList<RangeDO>();
+        rangeDOs.add(new RangeDO(0L, 2429425133L));
+        rangeDOs.add(new RangeDO(2429425133L, 2611217912L));
+        rangeDOs.add(new RangeDO(3582305062L, 3689081781L));
+        rangeDOs.add(new RangeDO(3848679456L, 9223372036854775807L));
+        m2mDataBase.getMaxZxid(rangeDOs);
+        M2mDataNode m2mDataNode = new M2mDataNode();
+        m2mDataNode.setId("223232");
+        m2mDataNode.setData("666666".getBytes());
+        m2mDataBase.update("223232", m2mDataNode);
     }
 
     @Test

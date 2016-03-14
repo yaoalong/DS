@@ -2,13 +2,14 @@ package lab.mars.ds.network.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import lab.mars.ds.network.TcpClient;
-import org.lab.mars.onem2m.proto.M2mPacket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import lab.mars.ds.network.TcpClient;
+
+import org.lab.mars.onem2m.proto.M2mPacket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PacketClientChannelHandler extends
         SimpleChannelInboundHandler<Object> {
@@ -21,7 +22,6 @@ public class PacketClientChannelHandler extends
         this.tcpClient = tcpClient;
     }
 
-
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
 
@@ -30,6 +30,7 @@ public class PacketClientChannelHandler extends
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         try {
+            System.out.println("我接收到了" + "FFF");
             readResponse((M2mPacket) msg);
         } catch (IOException e) {
             LOG.error("channel read error:{}", e);
