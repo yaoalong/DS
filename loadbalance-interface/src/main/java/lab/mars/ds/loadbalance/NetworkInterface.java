@@ -96,7 +96,6 @@ public interface NetworkInterface {
      * 根据server以及factor获取负责的servers
      * 
      * @param server
-     * @param factor
      * @return
      */
     List<String> getReplicationServer(String server);
