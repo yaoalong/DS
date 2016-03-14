@@ -40,7 +40,6 @@ public class TcpClient extends TcpClientNetwork {
                 reentrantLock.unlock();
             }
         }
-        System.out.println("Kaishi ");
         if (pendingQueue != null) {
             synchronized (pendingQueue) {
                 pendingQueue.add((M2mPacket) msg);
@@ -51,14 +50,14 @@ public class TcpClient extends TcpClientNetwork {
         synchronized (msg) {
             while (!((M2mPacket) msg).isFinished()) {
                 try {
-                    ((M2mPacket) msg).wait();
+                    msg.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            System.out.println("正式完成");
-        }
 
+        }
+        return;
     }
 
     public LinkedList<M2mPacket> getPendingQueue() {

@@ -159,6 +159,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
         M2mReplyHeader hdr = new M2mReplyHeader(request.cxid, lastZxid,
                 err.intValue());
         M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);
+        System.out.println("发送");
         channel.writeAndFlush(m2mPacket);
     }
 

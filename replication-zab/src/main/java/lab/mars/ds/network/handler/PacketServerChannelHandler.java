@@ -47,7 +47,7 @@ public class PacketServerChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        System.out.println("收到消息");
+        System.out.println("收到消息fff");
         lruManage.refresh(ctx.channel());
         M2mPacket m2mPacket = (M2mPacket) msg;
         if (preProcessPacket(m2mPacket, ctx)) {
@@ -118,6 +118,7 @@ public class PacketServerChannelHandler extends
             if (networkPool.getServers().contains(responseServer)) {
                 if (ipAndTcpClient.containsKey(responseServer)) {
                     ipAndTcpClient.get(responseServer).write(m2mPacket);
+                    ctx.writeAndFlush(m2mPacket);
                     return false;
                 } else {
                     try {

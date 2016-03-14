@@ -120,11 +120,9 @@ public class OneM2m {
 
     public static void main(String args[]) throws IOException {
         OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
-        String key = "fff43dddff";
+        String key = "ddd32fds";
         oneM2m.create(key, "111".getBytes());
-        System.out.println("FFF");
         oneM2m.setData(key, "5555".getBytes());
-        System.out.println("k");
         System.out.println(oneM2m.getData(key));
 
     }

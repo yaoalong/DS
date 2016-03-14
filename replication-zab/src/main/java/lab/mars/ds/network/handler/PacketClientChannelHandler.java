@@ -44,6 +44,7 @@ public class PacketClientChannelHandler extends
                 throw new IOException("Nothing in the queue, but got "
                         + m2mPacket.getM2mReplyHeader().getXid());
             }
+            System.out.println("第iyige");
             packet = tcpClient.getPendingQueue().remove();
             packet.setFinished(true);
             synchronized (packet) {
