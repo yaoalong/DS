@@ -1,6 +1,8 @@
 package lab.mars.ds.register.starter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import lab.mars.ds.constant.OperateConstant;
 import lab.mars.ds.loadbalance.NetworkInterface;
@@ -11,6 +13,7 @@ import lab.mars.ds.network.RegisterTcpClient;
 import lab.mars.ds.network.TcpServerNetwork;
 import lab.mars.ds.network.intialize.RegisterPacketClientChannelInitializer;
 import lab.mars.ds.network.intialize.RegisterPacketServerChannelInitializer;
+import lab.mars.ds.register.constant.RegisterConstant;
 import lab.mars.ds.register.model.RegisterM2mPacket;
 
 import org.apache.zookeeper.CreateMode;
@@ -23,7 +26,7 @@ import org.apache.zookeeper.server.quorum.QuorumPeerMain;
 
 public class Starter {
 
-    public volatile static int count = 0;
+    public static List<String> servers = new ArrayList<String>();
     private QuorumPeerMain quorumPeerMain = new QuorumPeerMain();
     private NetworkInterface networkInterface;
     private NetworkPool networkPool;
@@ -43,7 +46,8 @@ public class Starter {
         QuorumPeerConfig config = quorumPeerMain.getConfig();
         zooKeeperServer = config.getZooKeeperServer();
         try {
-            zooKeeper = new ZooKeeper(zooKeeperServer, 10000, null);
+            zooKeeper = new ZooKeeper(zooKeeperServer,
+                    RegisterConstant.SESSION_TIME, null);
         } catch (IOException e1) {
             e1.printStackTrace();
         }
@@ -106,8 +110,10 @@ public class Starter {
             }
 
             Thread.sleep(1000);
-            if (count == 0) {
-                start();
+            synchronized (servers) {
+                if (servers.size() < startFactor) {
+                    start();
+                }
             }
             check();
         } catch (InterruptedException e1) {
@@ -183,6 +189,14 @@ public class Starter {
         zooKeeper_monitor.setNetworkPool(networkInterface);
         zooKeeper_monitor.start();
 
+    }
+
+    public String getMyServer() {
+        return myServer;
+    }
+
+    public void setMyServer(String myServer) {
+        this.myServer = myServer;
     }
 
 }

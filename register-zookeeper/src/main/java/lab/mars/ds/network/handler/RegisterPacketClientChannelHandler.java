@@ -22,7 +22,11 @@ public class RegisterPacketClientChannelHandler extends
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         RegisterM2mPacket m2mPacket = (RegisterM2mPacket) msg;
         if (m2mPacket.getType() == 0) {
-            Starter.count++;
+            synchronized (Starter.servers) {
+                LOG.info("receive message:{}", m2mPacket.getBody());
+                Starter.servers.add(m2mPacket.getBody());
+            }
+
         }
     }
 

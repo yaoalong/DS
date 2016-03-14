@@ -6,7 +6,9 @@ import lab.mars.ds.register.starter.Starter;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
 
 /**
- * Author:yaoalong. Date:2016/3/4. Email:yaoalong@foxmail.com
+ * Author:yaoalong.
+ * Date:2016/3/4.
+ * Email:yaoalong@foxmail.com
  */
 public class ZooKeeperRegister implements ServiceRegister {
 

@@ -32,8 +32,8 @@ public class RegisterIntoZooKeeper extends Thread implements Watcher {
 
     public void register(String ip) throws IOException, KeeperException,
             InterruptedException {
-        zooKeeper = new ZooKeeper(zooKeeperServer, 5000, new RegisterIntoZooKeeper(
-                starter));
+        zooKeeper = new ZooKeeper(zooKeeperServer, 5000,
+                new RegisterIntoZooKeeper(starter));
         this.ip = ip;
 
     }
@@ -43,11 +43,12 @@ public class RegisterIntoZooKeeper extends Thread implements Watcher {
         try {
             countDownLatch.await();
         } catch (Exception e) {
-            LOG.error("error:{}",e.getCause());
+            LOG.error("error:{}", e.getCause());
         }
         try {
-            zooKeeper.create(RegisterConstant.ROOT_NODE + ip,RegisterConstant.NODE_VALUE,
-                    Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+            zooKeeper.create(RegisterConstant.ROOT_NODE + "/" + ip,
+                    RegisterConstant.NODE_VALUE, Ids.OPEN_ACL_UNSAFE,
+                    CreateMode.EPHEMERAL);
         } catch (KeeperException | InterruptedException e) {
             starter.check();
             LOG.error("error because of:{}", e);
@@ -56,8 +57,9 @@ public class RegisterIntoZooKeeper extends Thread implements Watcher {
 
     @Override
     public void process(WatchedEvent event) {
-        if(LOG.isInfoEnabled()){
-            LOG.info("event type:{},event path:{}",event.getType(),event.getPath());
+        if (LOG.isInfoEnabled()) {
+            LOG.info("event type:{},event path:{}", event.getType(),
+                    event.getPath());
         }
         if (KeeperState.SyncConnected == event.getState()) {
             countDownLatch.countDown();

@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class TcpClientNetwork {
 
-    private Channel channel;
+    protected Channel channel;
     protected ReentrantLock reentrantLock = new ReentrantLock();
     protected Condition condition = reentrantLock.newCondition();
     private ChannelInitializer<SocketChannel> socketChannelChannelInitializer;
@@ -33,6 +33,7 @@ public abstract class TcpClientNetwork {
             channel = future.channel();
             condition.signalAll();
             reentrantLock.unlock();
+            System.out.println("连接ok");
         });
 
     }

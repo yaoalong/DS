@@ -1,13 +1,7 @@
 package org.lab.mars.onem2m.server.quorum;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.register.ZooKeeperRegister;
-
 import org.lab.mars.onem2m.OneM2m;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.DSDatabase;
@@ -17,6 +11,11 @@ import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumMaj;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class M2mQuorumPeerMain extends Thread {
     private static final Logger LOG = LoggerFactory
@@ -35,8 +34,7 @@ public class M2mQuorumPeerMain extends Thread {
      * To start the replicated server specify the configuration file name on the
      * command line.
      *
-     * @param args
-     *            path to the configfile
+     * @param args path to the configfile
      */
     public static void main(String[] args) {
         M2mQuorumPeerMain main = new M2mQuorumPeerMain();
@@ -68,8 +66,7 @@ public class M2mQuorumPeerMain extends Thread {
         if (args.length == 1 && config.servers.size() > 0) {
             runFromConfig(config, args);
         } else {
-            LOG.error("Either no config or no quorum defined in config, running "
-                    + " in standalone mode");
+            LOG.error("Either no config or no quorum defined in config, System exit");
             System.exit(0);
 
         }

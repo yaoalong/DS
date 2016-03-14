@@ -1,18 +1,17 @@
 package lab.mars.ds.network.intialize;
 
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.socket.SocketChannel;
-
+import io.netty.channel.ChannelPipeline;
 import lab.mars.ds.network.handler.RegisterPacketClientChannelHandler;
+import lab.mars.ds.network.initializer.TcpChannelInitializer;
 
 /**
  *
  */
 public class RegisterPacketClientChannelInitializer extends
-        ChannelInitializer<SocketChannel> {
+        TcpChannelInitializer {
 
     @Override
-    protected void initChannel(SocketChannel ch) throws Exception {
-        ch.pipeline().addLast(new RegisterPacketClientChannelHandler());
+    public void init(ChannelPipeline ch) {
+        ch.addLast(new RegisterPacketClientChannelHandler());
     }
 }

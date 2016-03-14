@@ -1,10 +1,8 @@
 package lab.mars.ds.network;
 
-import io.netty.channel.Channel;
-
 import java.util.LinkedList;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
+
+import lab.mars.ds.network.intializer.PacketClientChannelInitializer;
 
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.slf4j.Logger;
@@ -16,18 +14,18 @@ import org.slf4j.LoggerFactory;
 public class TcpClient extends TcpClientNetwork {
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpClient.class);
-    private Channel channel;
 
     private LinkedList<M2mPacket> pendingQueue;
-    private ReentrantLock reentrantLock = new ReentrantLock();
-    private Condition condition = reentrantLock.newCondition();
 
     public TcpClient() {
-
+        setSocketChannelChannelInitializer(new PacketClientChannelInitializer(
+                this));
     }
 
     public TcpClient(LinkedList<M2mPacket> m2mPacket) {
+        this();
         this.pendingQueue = m2mPacket;
+
     }
 
     public void write(Object msg) {
@@ -42,6 +40,7 @@ public class TcpClient extends TcpClientNetwork {
                 reentrantLock.unlock();
             }
         }
+        System.out.println("Kaishi ");
         if (pendingQueue != null) {
             synchronized (pendingQueue) {
                 pendingQueue.add((M2mPacket) msg);
