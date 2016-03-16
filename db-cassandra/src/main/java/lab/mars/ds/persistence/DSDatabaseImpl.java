@@ -230,7 +230,6 @@ public class DSDatabaseImpl implements DSDatabase {
 
                     M2mDataNode object = (M2mDataNode) ResourceReflection
                             .deserializeKryo(m2mSetDataTxn.getData());
-
                     update(m2mSetDataTxn.getPath(), object);
                     break;
             }
