@@ -216,7 +216,6 @@ public class DSDatabaseImpl implements DSDatabase {
                             .deserializeKryo(createTxn.getData());
                     m2mDataNode.setValue(NetworkPool.md5HashingAlg(m2mDataNode
                             .getId()));
-
                     m2mDataNode.setZxid(header.getZxid());
                     create(m2mDataNode);
                     break;
