@@ -23,6 +23,9 @@ import com.google.common.collect.Sets;
 public class ResourceReflection {
     private static Set<Class> defaultClz;
 
+    
+    
+    
     static {
         defaultClz = Sets.newHashSet(Integer.class, Float.class, Double.class,
                 Boolean.class, Long.class, BigDecimal.class, String.class,

@@ -1,6 +1,5 @@
 package org.lab.mars.onem2m;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 
@@ -8,7 +7,6 @@ import lab.mars.ds.network.TcpClient;
 import lab.mars.ds.reflection.ResourceReflection;
 
 import org.lab.mars.ds.server.M2mDataNode;
-import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.proto.M2mCreateRequest;
 import org.lab.mars.onem2m.proto.M2mCreateResponse;
 import org.lab.mars.onem2m.proto.M2mDeleteRequest;
@@ -35,10 +33,6 @@ public class OneM2m {
 
     public OneM2m(String host, Integer port) {
         tcpClient = new TcpClient(new LinkedList<M2mPacket>());
-
-        System.out.println("host:" + host);
-        System.out.println("port:" + port);
-
         tcpClient.connectionOne(host, port);
     }
 
@@ -53,11 +47,7 @@ public class OneM2m {
         M2mDataNode m2mDataNode = new M2mDataNode();
         m2mDataNode.setId(path);
         m2mDataNode.setData(data);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
-        m2mDataNode.serialize(boa, "m2mData");
-        byte[] bytes = baos.toByteArray();
-        m2mCreateRequest.setData(bytes);
+        m2mCreateRequest.setData(ResourceReflection.serializeKryo(m2mDataNode));
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mCreateRequest, m2mCreateResponse);
         tcpClient.write(m2mPacket);
@@ -72,8 +62,7 @@ public class OneM2m {
         m2mRequestHeader.setKey(path);
         M2mDeleteRequest m2mDeleteRequest = new M2mDeleteRequest(path);
         M2mReplyHeader m2mReplyHeader = new M2mReplyHeader();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        M2mBinaryOutputArchive.getArchive(baos);
+        m2mDeleteRequest.setKey(path);
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mDeleteRequest, new M2mCreateResponse());
         tcpClient.write(m2mPacket);

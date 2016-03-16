@@ -1,29 +1,16 @@
 package lab.mars.ds.persistence;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
+import com.datastax.driver.core.*;
+import com.datastax.driver.core.querybuilder.Insert;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.reflection.ResourceReflection;
-
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.ZooDefs;
-import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.txn.M2mCreateTxn;
@@ -31,17 +18,10 @@ import org.lab.mars.onem2m.txn.M2mDeleteTxn;
 import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.ColumnDefinitions;
-import com.datastax.driver.core.Host;
-import com.datastax.driver.core.Metadata;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.Insert;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
+import java.io.ByteArrayOutputStream;
+import java.util.*;
+
+import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 
 /**
  * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
@@ -63,7 +43,7 @@ public class DSDatabaseImpl implements DSDatabase {
     }
 
     public DSDatabaseImpl(boolean clean, String keyspace, String table,
-            String node) {
+                          String node) {
         this.clean = clean;
         this.keyspace = keyspace;
         this.table = table;
@@ -228,40 +208,32 @@ public class DSDatabaseImpl implements DSDatabase {
             processTxnResult.zxid = header.getZxid();
             processTxnResult.err = 0;
             switch (header.getType()) {
-            case ZooDefs.OpCode.create:
-                M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
-                processTxnResult.path = createTxn.getPath();
-                ByteArrayInputStream inbaos = new ByteArrayInputStream(
-                        createTxn.getData());
-                DataInputStream dis = new DataInputStream(inbaos);
-                M2mBinaryInputArchive inboa = M2mBinaryInputArchive
-                        .getArchive(dis);
-                M2mDataNode m2mDataNode = new M2mDataNode();
-                try {
-                    m2mDataNode.deserialize(inboa, "m2mData");
+                case ZooDefs.OpCode.create:
+                    M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
+                    processTxnResult.path = createTxn.getPath();
+
+                    M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
+                            .deserializeKryo(createTxn.getData());
                     m2mDataNode.setValue(NetworkPool.md5HashingAlg(m2mDataNode
                             .getId()));
-                } catch (IOException e) {
-                    e.printStackTrace();
+
+                    m2mDataNode.setZxid(header.getZxid());
+                    create(m2mDataNode);
                     break;
-                }
-                m2mDataNode.setZxid(header.getZxid());
-                create(m2mDataNode);
-                break;
-            case ZooDefs.OpCode.delete:
-                M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;
-                processTxnResult.path = deleteTxn.getPath();
-                delete(deleteTxn.getPath());
-                break;
-            case ZooDefs.OpCode.setData:
-                M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
-                processTxnResult.path = m2mSetDataTxn.getPath();
+                case ZooDefs.OpCode.delete:
+                    M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;
+                    processTxnResult.path = deleteTxn.getPath();
+                    delete(deleteTxn.getPath());
+                    break;
+                case ZooDefs.OpCode.setData:
+                    M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
+                    processTxnResult.path = m2mSetDataTxn.getPath();
 
-                M2mDataNode object = (M2mDataNode) ResourceReflection
-                        .deserializeKryo(m2mSetDataTxn.getData());
+                    M2mDataNode object = (M2mDataNode) ResourceReflection
+                            .deserializeKryo(m2mSetDataTxn.getData());
 
-                update(m2mSetDataTxn.getPath(), object);
-                break;
+                    update(m2mSetDataTxn.getPath(), object);
+                    break;
             }
         } catch (M2mKeeperException e) {
             processTxnResult.err = e.getCode().intValue();
