@@ -7,9 +7,11 @@ package lab.mars.ds.register.constant;
  */
 public class RegisterConstant {
 
-    public static final String ROOT_NODE="/server";
+    public static final String ROOT_NODE = "/server";
 
-    public static final Integer SESSION_TIME=5000;
+    public static final Integer SESSION_TIME = 5000;
 
-    public static final byte[] NODE_VALUE="1".getBytes();
+    public static final byte[] NODE_VALUE = "1".getBytes();
+
+    public static final Integer SLEEP_TIME = 1000;
 }

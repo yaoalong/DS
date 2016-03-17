@@ -16,7 +16,6 @@
         <module>register-zookeeper</module>
         <module>loadbalance-interface</module>
         <module>loadbalance-consistenthash</module>
-        <module>replication-interface</module>
         <module>replication-zab</module>
         <module>ds-network</module>
         <module>connectmanage-interface</module>

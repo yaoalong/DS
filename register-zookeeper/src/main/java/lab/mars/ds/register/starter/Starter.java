@@ -82,7 +82,7 @@ public class Starter {
 
     public void check() {
         try {
-            Thread.sleep(2000);
+            Thread.sleep(RegisterConstant.SLEEP_TIME);
 
             while (true) {
                 try {
@@ -113,7 +113,7 @@ public class Starter {
                 }
             }
 
-            Thread.sleep(1000);
+            Thread.sleep(RegisterConstant.SLEEP_TIME);
             synchronized (servers) {
                 if (servers.size() < startFactor) {
                     start();
@@ -197,10 +197,6 @@ public class Starter {
 
     public String getMyServer() {
         return myServer;
-    }
-
-    public void setMyServer(String myServer) {
-        this.myServer = myServer;
     }
 
 }

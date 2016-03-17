@@ -16,6 +16,7 @@ public class NetworkEventLoopGroup {
 
     public static final EventLoopGroup workerGroup;
 
+
     static{
         bossGroup=new NioEventLoopGroup(NCPU);
         workerGroup=new NioEventLoopGroup(NCPU);
