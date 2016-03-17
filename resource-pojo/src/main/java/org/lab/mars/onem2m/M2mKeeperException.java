@@ -25,7 +25,7 @@ public class M2mKeeperException extends Exception {
 
     public enum Code {
 
-        OK(1), NODEEXISTS(-110);
+        OK(1), NODEEXISTS(-110),NONODE(-101);
         private final int code;
 
         Code(int code) {
@@ -47,7 +47,14 @@ public class M2mKeeperException extends Exception {
             super(Code.NODEEXISTS, path);
         }
     }
-
+    public static class NoNodeException extends M2mKeeperException {
+        public NoNodeException() {
+            super(Code.NONODE);
+        }
+        public NoNodeException(String path) {
+            super(Code.NONODE, path);
+        }
+    }
     public Integer getCode() {
         return code.code;
     }

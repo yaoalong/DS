@@ -18,18 +18,10 @@
 
 package org.lab.mars.onem2m.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
-
+import lab.mars.ds.ds.persistence.FileTxnLog;
+import lab.mars.ds.ds.persistence.PlayBackListener;
+import lab.mars.ds.ds.persistence.TxnLog;
 import lab.mars.ds.loadbalance.RangeDO;
-
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.M2mKeeperException;
@@ -45,6 +37,16 @@ import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
 /**
  * This class maintains the in memory database of zookeeper server states that
  * includes the sessions, datatree and the committed logs. It is booted up after
@@ -55,11 +57,11 @@ import org.slf4j.LoggerFactory;
  */
 public class DSDatabase implements M2mRecord {
 
+    public static final int commitLogCount = 500; // 临时会存储500个
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -2369189189754653975L;
-    public static final int commitLogCount = 500; // 临时会存储500个
     private static final Logger LOG = LoggerFactory.getLogger(DSDatabase.class);
     private static final ConcurrentHashMap<String, M2mDataNode> nodes = new ConcurrentHashMap<>();
     // protected FileTxnSnapLog snapLog;
@@ -71,6 +73,10 @@ public class DSDatabase implements M2mRecord {
     private volatile long lastProcessedZxid = 0;
 
     private List<RangeDO> rangeDOs;
+    /**
+     * 事务日志类
+     */
+    private FileTxnLog fileTxnLog;
 
     /**
      * 初始化的同时进行数据加载
@@ -144,10 +150,57 @@ public class DSDatabase implements M2mRecord {
      * @throws IOException
      */
     public long loadDataBase() throws IOException {
-
+        PlayBackListener listener = new PlayBackListener() {
+            public void onTxnLoaded(M2mTxnHeader hdr, M2mRecord txn) {
+                M2mRequest r = new M2mRequest(null, 0, hdr.getType(),
+                        null);
+                r.txn = txn;
+                r.m2mTxnHeader = hdr;
+                r.zxid = hdr.getZxid();
+                addCommittedProposal(r);
+            }
+        };
+        restore(listener);
         getLastProcessedZxid();
         initialized = true;
         return lastProcessedZxid;
+    }
+
+    public long restore(PlayBackListener playBackListener) throws IOException {
+
+        TxnLog.TxnIterator itr = fileTxnLog.read(lastProcessedZxid + 1);
+        long highestZxid = lastProcessedZxid;
+        M2mTxnHeader hdr;
+        try {
+            while (true) {
+                // iterator points to
+                // the first valid txn when initialized
+                hdr = itr.getHeader();
+                if (hdr == null) {
+                    // empty logs
+                    return lastProcessedZxid;
+                }
+                if (hdr.getZxid() < highestZxid && highestZxid != 0) {
+                    LOG.error(
+                            "{}(higestZxid) > {}(next log) for type {}",
+                            new Object[]{highestZxid, hdr.getZxid(),
+                                    hdr.getType()});
+                } else {
+                    highestZxid = hdr.getZxid();
+                }
+
+                processTxn(hdr, itr.getTxn());// 处理具体的事务
+
+                playBackListener.onTxnLoaded(hdr, itr.getTxn());
+                if (!itr.next())
+                    break;
+            }
+        } finally {
+            if (itr != null) {
+                itr.close();
+            }
+        }
+        return highestZxid;
     }
 
     public Long getLastProcessedZxid() {
@@ -163,8 +216,7 @@ public class DSDatabase implements M2mRecord {
      * maintains a list of last <i>committedLog</i> or so committed requests.
      * This is used for fast follower synchronization.
      *
-     * @param request
-     *            committed request
+     * @param request committed request
      */
     public void addCommittedProposal(M2mRequest request) {
         WriteLock wl = logLock.writeLock();
@@ -215,12 +267,10 @@ public class DSDatabase implements M2mRecord {
     /**
      * the process txn on the data
      *
-     * @param hdr
-     *            the txnheader for the txn
-     * @param txn
-     *            the transaction that needs to be processed
+     * @param hdr the txnheader for the txn
+     * @param txn the transaction that needs to be processed
      * @return the result of processing the transaction on this
-     *         datatree/zkdatabase
+     * datatree/zkdatabase
      */
     /*
      * m2m内存数据库处理事务请求
@@ -231,12 +281,8 @@ public class DSDatabase implements M2mRecord {
             setLastProcessedZxid(processTxnResult.zxid);
         }
         return processTxnResult;
-
     }
 
-    public Object getNode(String key) {
-        return m2mDataBase.retrieve(key);
-    }
 
     /*
      * 获取数据
@@ -256,33 +302,30 @@ public class DSDatabase implements M2mRecord {
 	 */
     public boolean truncateLog(long zxid) throws IOException {
         clear();
-        boolean truncated = m2mDataBase.truncate(zxid);
-        if (!truncated) {
+        if (!fileTxnLog.truncate(zxid)) {
             return false;
         }
+        loadDataBase();
         return true;
     }
 
     /**
      * deserialize a snapshot from an input archive
      *
-     * @param ia
-     *            the input archive you want to deserialize from
+     * @param ia the input archive you want to deserialize from
      * @throws IOException
      */
     public void deserializeSnapshot(M2mInputArchive ia) throws IOException {
         clear();
         SerializeUtils.deserializeSnapshot(this, ia);
-
         initialized = true;
     }
 
     /**
      * serialize the snapshot
      *
-     * @param oa
-     *            the output archive to which the snapshot needs to be
-     *            serialized
+     * @param oa the output archive to which the snapshot needs to be
+     *           serialized
      * @throws IOException
      * @throws InterruptedException
      */
@@ -291,55 +334,39 @@ public class DSDatabase implements M2mRecord {
         SerializeUtils.serializeSnapshot(peerLast, this, oa);
     }
 
-    /*
-     * 数据库的插入
+    /**
+     * 提交commit log
+     *
+     * @throws IOException
      */
-    public void commit() {
-        // for (Entry<String, M2mDataNode> m2mDataNode : getM2mData().getNodes()
-        // .entrySet()) {
-        // m2mDataBase.create(m2mDataNode.getValue());
-        //
-        // }
+    public void commit() throws IOException {
+        fileTxnLog.commit();
 
     }
 
     /**
      * append to the underlying transaction log
      *
-     * @param si
-     *            the request to append
+     * @param si the request to append
      * @return true if the append was succesfull and false if not
      */
-    // public boolean append(Request si) throws IOException {
-    // return this.snapLog.append(si);
-    // }
+    public boolean append(M2mRequest si) throws IOException {
+        return this.fileTxnLog.append(si.m2mTxnHeader, si.txn);
+    }
 
     /**
      * roll the underlying log
      */
-    // public void rollLog() throws IOException {
-    // this.snapLog.rollLog();
-    // }
+    public void rollLog() throws IOException {
+        fileTxnLog.rollLog();
+    }
+
 
     /**
-     * commit to the underlying transaction log
-     *
-     * @throws IOException
+     * 关闭事务日志资源
      */
-    // public void commit() throws IOException {
-    // this.snapLog.commit();
-    // }
-
-    /**
-     * close this database. free the resources
-     *
-     * @throws IOException
-     */
-    // public void close() throws IOException {
-    // this.snapLog.close();
-    // }
-    public void close() {
-
+    public void close() throws IOException {
+        this.fileTxnLog.close();
     }
 
     public long getMinCommittedLog() {
