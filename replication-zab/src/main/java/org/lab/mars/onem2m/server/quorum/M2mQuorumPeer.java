@@ -484,7 +484,11 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
             this.interrupt();
             getElectionAlg().shutdown();
         }
-        zkDb.close();
+        try {
+            zkDb.close();
+        } catch (IOException ie) {
+            LOG.warn("Error closing logs ", ie);
+        }
     }
 
     /**

@@ -246,14 +246,14 @@ public class M2mLearnerHandler extends Thread {
              * we are sending the diff check if we have proposals in memory to
              * be able to send a diff to the
              */
-            ReentrantReadWriteLock lock = leader.zk.getZKDatabase()
+            ReentrantReadWriteLock lock = leader.zk.getDSDatabase()
                     .getLogLock();// 主线程还在执行
             ReadLock rl = lock.readLock();
             try {
                 rl.lock();
-                final long maxCommittedLog = leader.zk.getZKDatabase()
+                final long maxCommittedLog = leader.zk.getDSDatabase()
                         .getMaxCommittedLog();
-                final long minCommittedLog = leader.zk.getZKDatabase()
+                final long minCommittedLog = leader.zk.getDSDatabase()
                         .getMinCommittedLog();
                 LOG.info("Synchronizing with Follower sid: " + sid
                         + " maxCommittedLog=0x"
@@ -263,7 +263,7 @@ public class M2mLearnerHandler extends Thread {
                         + " peerLastZxid=0x" + Long.toHexString(peerLastZxid)
                         + "dfff" + peerLastZxid);
                 // 看看是否还有需要处理的投票
-                LinkedList<Proposal> proposals = leader.zk.getZKDatabase()
+                LinkedList<Proposal> proposals = leader.zk.getDSDatabase()
                         .getCommittedLog();
                 if (proposals.size() != 0) {
                     LOG.debug("proposal size is {}", proposals.size());
@@ -333,7 +333,7 @@ public class M2mLearnerHandler extends Thread {
                     } else {
                         LOG.warn("Unhandled proposal scenario");
                     }
-                } else if (peerLastZxid == leader.zk.getZKDatabase()
+                } else if (peerLastZxid == leader.zk.getDSDatabase()
                         .getLastProcessedZxid()) {// 如果follower和Leader保持同步，那么只需要发送一个DIFF包
                     // The leader may recently take a snapshot, so the
                     // committedLog
@@ -365,7 +365,7 @@ public class M2mLearnerHandler extends Thread {
             bufferedOutput.flush();
             // Need to set the zxidToSend to the latest zxid
             if (packetToSend == M2mLeader.SNAP) {
-                zxidToSend = leader.zk.getZKDatabase().getLastProcessedZxid();// 获取对应的zxid
+                zxidToSend = leader.zk.getDSDatabase().getLastProcessedZxid();// 获取对应的zxid
             }
             oa.writeRecord(new M2mQuorumPacket(packetToSend, zxidToSend, null),
                     "packet");
@@ -380,7 +380,7 @@ public class M2mLearnerHandler extends Thread {
                         + "sent zxid of db as 0x"
                         + Long.toHexString(zxidToSend));
                 // Dump data to peer
-                leader.zk.getZKDatabase().serializeSnapshot(peerLastZxid, oa);
+                leader.zk.getDSDatabase().serializeSnapshot(peerLastZxid, oa);
                 oa.writeString("BenWasHere", "signature");
             }
             bufferedOutput.flush();

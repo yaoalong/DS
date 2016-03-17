@@ -9,10 +9,13 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lab.mars.ds.connectmanage.LRUManage;
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.network.TcpClient;
 
+import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.proto.M2mPacket;
+import org.lab.mars.onem2m.proto.M2mReplyHeader;
 import org.lab.mars.onem2m.server.NettyServerCnxn;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.lab.mars.onem2m.server.quorum.M2mHandler;
@@ -47,27 +50,37 @@ public class PacketServerChannelHandler extends
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        System.out.println("收到消息fff");
         lruManage.refresh(ctx.channel());
         M2mPacket m2mPacket = (M2mPacket) msg;
-        if (preProcessPacket(m2mPacket, ctx)) {
-            if (m2mHandler == null) {
-                NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
-                nettyServerCnxn.receiveMessage(ctx, m2mPacket);
-            } else {
-                M2mHandlerResult m2mHandlerResult = m2mHandler.recv(m2mPacket);
-
-                boolean isDistributed = m2mHandlerResult.isFlag();
-                if (isDistributed == true) {
+        try {
+            if (preProcessPacket(m2mPacket, ctx)) {
+                if (m2mHandler == null) {
                     NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
-                    nettyServerCnxn.receiveMessage(ctx,
-                            m2mHandlerResult.getM2mPacket());
+                    nettyServerCnxn.receiveMessage(ctx, m2mPacket);
+                } else {
+                    M2mHandlerResult m2mHandlerResult = m2mHandler
+                            .recv(m2mPacket);
+
+                    boolean isDistributed = m2mHandlerResult.isFlag();
+                    if (isDistributed == true) {
+                        NettyServerCnxn nettyServerCnxn = ctx.attr(STATE).get();
+                        nettyServerCnxn.receiveMessage(ctx,
+                                m2mHandlerResult.getM2mPacket());
+                    }
                 }
+
+            } else {// 需要增加对错误的处理
+
             }
-
-        } else {// 需要增加对错误的处理
-
+        } catch (LoadBalanceException e) {
+            M2mReplyHeader m2mReplyHeader = new M2mReplyHeader(0, 0,
+                    e.getCode());
+            M2mRecord m2mRecord = null;
+            M2mPacket responseM2mPacket = new M2mPacket(null, m2mReplyHeader,
+                    null, m2mRecord);
+            ctx.writeAndFlush(responseM2mPacket);
         }
+
     }
 
     @Override
@@ -99,12 +112,16 @@ public class PacketServerChannelHandler extends
      *
      * @param m2mPacket
      * @return
+     * @throws LoadBalanceException
      */
     public boolean preProcessPacket(M2mPacket m2mPacket,
-            ChannelHandlerContext ctx) {
+            ChannelHandlerContext ctx) throws LoadBalanceException {
         String key = m2mPacket.getM2mRequestHeader().getKey();
 
-        String trueServer = networkPool.getTrueServer(key);
+        String trueServer = null;
+
+        trueServer = networkPool.getTrueServer(key);
+
         if (trueServer.equals(self)) {
             return true;
         }

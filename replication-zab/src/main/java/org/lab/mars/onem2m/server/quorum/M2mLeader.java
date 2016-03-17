@@ -977,7 +977,7 @@ public class M2mLeader {
          */
         self.updateElectionVote(getEpoch());
 
-        zk.getZKDatabase().setlastProcessedZxid(zk.getZxid());
+        zk.getDSDatabase().setlastProcessedZxid(zk.getZxid());
     }
 
     /**

@@ -336,20 +336,20 @@ public class M2mLearner {
                 LOG.info("Getting a snapshot from leader");
                 // The leader is going to dump the database
                 // clear our own database and read
-                zk.getZKDatabase().clear();
-                zk.getZKDatabase().deserializeSnapshot(leaderIs);
+                zk.getDSDatabase().clear();
+                zk.getDSDatabase().deserializeSnapshot(leaderIs);
                 String signature = leaderIs.readString("signature");
                 if (!signature.equals("BenWasHere")) {
                     LOG.error("Missing signature. Got " + signature);
                     throw new IOException("Missing signature");
                 }
-                zk.getZKDatabase().commit();
-                zk.getZKDatabase().clear();
+                zk.getDSDatabase().commit();
+                zk.getDSDatabase().clear();
             } else if (qp.getType() == M2mLeader.TRUNC) {
                 // we need to truncate the log to the lastzxid of the leader
                 LOG.warn("Truncating log to get in sync with the leader 0x"
                         + Long.toHexString(qp.getZxid()));
-                boolean truncated = zk.getZKDatabase()
+                boolean truncated = zk.getDSDatabase()
                         .truncateLog(qp.getZxid());
                 if (!truncated) {
                     // not able to truncate the log
@@ -364,7 +364,7 @@ public class M2mLearner {
                 System.exit(13);
 
             }
-            zk.getZKDatabase().setlastProcessedZxid(qp.getZxid());
+            zk.getDSDatabase().setlastProcessedZxid(qp.getZxid());
             zk.createSessionTracker();
 
             long lastQueued = 0;
@@ -436,7 +436,6 @@ public class M2mLearner {
                     break;
                 case M2mLeader.UPTODATE:
                     if (!snapshotTaken) { // true for the pre v1.0 case
-                        zk.takeSnapshot();
                         self.setCurrentEpoch(newEpoch);
                     }
                     self.cnxnFactory.addZooKeeperServer(self.getHandleIp(), zk);

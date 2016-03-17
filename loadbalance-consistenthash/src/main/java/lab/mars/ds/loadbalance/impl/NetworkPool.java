@@ -170,6 +170,7 @@ public class NetworkPool implements NetworkInterface {
 
     @Override
     public String getTrueServer(String key) throws LoadBalanceException {
+
         return allConsistentBuckets.get(getAllBucket(key));
 
     }

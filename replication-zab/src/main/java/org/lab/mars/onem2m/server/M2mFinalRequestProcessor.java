@@ -83,7 +83,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 rc = zks.processTxn(hdr, txn);
             }
             if (M2mRequest.isQuorum(request.type)) {
-                zks.getZKDatabase().addCommittedProposal(request);
+                zks.getDSDatabase().addCommittedProposal(request);
             }
         }
 
@@ -131,7 +131,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 M2mGetDataRequest getDataRequest = new M2mGetDataRequest();
                 M2mByteBufferInputStream.byteBuffer2Record(request.request,
                         getDataRequest);
-                M2mDataNode m2mDataNode = (M2mDataNode) zks.getZKDatabase()
+                M2mDataNode m2mDataNode = (M2mDataNode) zks.getDSDatabase()
                         .getData(getDataRequest.getPath());
                 if (m2mDataNode != null) {
                     rsp = new M2mGetDataResponse(
@@ -155,7 +155,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
             LOG.error("Dumping request buffer: 0x" + sb.toString());
             err = Code.MARSHALLINGERROR;
         }
-        long lastZxid = zks.getZKDatabase().getLastProcessedZxid();
+        long lastZxid = zks.getDSDatabase().getLastProcessedZxid();
         M2mReplyHeader hdr = new M2mReplyHeader(request.cxid, lastZxid,
                 err.intValue());
         M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);
