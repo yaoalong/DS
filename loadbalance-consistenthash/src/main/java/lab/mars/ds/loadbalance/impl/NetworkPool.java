@@ -1,20 +1,19 @@
 package lab.mars.ds.loadbalance.impl;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.loadbalance.RangeDO;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static lab.mars.ds.loadbalance.LoadBalanceException.Code;
+import static lab.mars.ds.loadbalance.LoadBalanceException.ServerSizeTooBig;
 
 /**
  * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
@@ -111,14 +110,6 @@ public class NetworkPool implements NetworkInterface {
         initialized = true;
     }
 
-    @Override
-    public synchronized void setServers(List<String> servers) {
-        servers.forEach(t -> {
-            System.out.println("server:" + t);
-        });
-        this.servers = servers;
-    }
-
     public synchronized void setAllServers(List<String> allServers) {
         TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
         MessageDigest md5 = MD5.get();
@@ -159,24 +150,26 @@ public class NetworkPool implements NetworkInterface {
     }
 
     @Override
-    public void setNumOfVirtualNode(Integer numOfVirtualNode) {
+    public void setNumOfVirtualNode(Integer numOfVirtualNode) throws LoadBalanceException {
+        if (numOfVirtualNode == null || numOfVirtualNode < 1) {
+            throw new LoadBalanceException(Code.NUM_OF_VIRTURAL_NODE_IS_RROR, "num of virtual node is error");
+        }
         this.numOfVirtualNode = numOfVirtualNode;
     }
 
     @Override
-    public synchronized String getServer(String key) {
-        while (initialized == false) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    public synchronized String getServer(String key) throws LoadBalanceException {
+        if (key == null || key.isEmpty()) {
+            throw new LoadBalanceException(Code.KEY_PARAM_NULL, "key is null");
+        }
+        if (consistentBuckets == null || consistentBuckets.isEmpty()) {
+            throw new LoadBalanceException(Code.SERGERS_IS_NOT_INIT, "servers is not init");
         }
         return consistentBuckets.get(getBucket(key));
     }
 
     @Override
-    public String getTrueServer(String key) {
+    public String getTrueServer(String key) throws LoadBalanceException {
         return allConsistentBuckets.get(getAllBucket(key));
 
     }
@@ -240,7 +233,7 @@ public class NetworkPool implements NetworkInterface {
      * @return
      */
     @Override
-    public Long getServerFirstPosition(String key) {
+    public Long getServerFirstPosition(String key) throws LoadBalanceException {
         return getAllBucket(key);
     }
 
@@ -255,7 +248,7 @@ public class NetworkPool implements NetworkInterface {
         Long position = allserverToPosition.get(server);
         List<String> result = new ArrayList<>();
         for (long i = 0; i < position; i++) {
-            result.add(allpositionToServer.get(position + i));
+            result.add(allpositionToServer.get(i));
         }
         return result;
     }
@@ -266,10 +259,19 @@ public class NetworkPool implements NetworkInterface {
     }
 
     @Override
-    public List<String> getNextServers(String server, Integer serverSize) {
+    public List<String> getNextServers(String server, Integer serverSize) throws LoadBalanceException {
+        if (server == null || server.isEmpty()) {
+            throw new LoadBalanceException(Code.SERVER_IS_NULL, "server is null");
+        }
+        if (serverSize == null || serverSize <= 0) {
+            throw new LoadBalanceException(Code.SERVERSIZE_IS_ERROR, "server size is error");
+        }
+        if (serverSize > allpositionToServer.size() - 1) {
+            throw new ServerSizeTooBig();
+        }
         Long position = allserverToPosition.get(server);
         List<String> result = new ArrayList<>();
-        for (int i = 0; i < serverSize; i++) {
+        for (int i = 1; i <= serverSize; i++) {
             result.add(allpositionToServer.get(position + i));
         }
         return result;
@@ -306,7 +308,7 @@ public class NetworkPool implements NetworkInterface {
      */
     @Override
     public long getServerResponseForAnthorSerer(String server,
-            String reponseServer) {
+                                                String reponseServer) {
         Long position = serverFirstToPosition.get(server);
         long responsePosition = serverFirstToPosition.get(reponseServer);
         return responsePosition - position;
@@ -330,7 +332,7 @@ public class NetworkPool implements NetworkInterface {
 
     /**
      * 获取一个server应该对外提供的server
-     * 
+     *
      * @param server
      * @return
      */
@@ -346,7 +348,10 @@ public class NetworkPool implements NetworkInterface {
         return responseServers;
     }
 
-    private final long getAllBucket(String key) {
+    private final long getAllBucket(String key) throws LoadBalanceException {
+        if (key == null || key.isEmpty()) {
+            throw new LoadBalanceException(Code.KEY_PARAM_NULL, "key can't is null");
+        }
         long hc = md5HashingAlg(key);
         long result = findAllPointFor(hc);
         return result;
@@ -363,9 +368,11 @@ public class NetworkPool implements NetworkInterface {
     }
 
     @Override
-    public void setReplicationFactor(Integer replicationFactor) {
+    public void setReplicationFactor(Integer replicationFactor) throws LoadBalanceException {
+        if (replicationFactor == null || replicationFactor < 2) {
+            throw new LoadBalanceException(Code.REPLICATION_FACTOR_PARAM_ERROR, "复制因子不能小于2");
+        }
         this.replicationFactor = replicationFactor;
-
     }
 
     @Override
@@ -373,21 +380,25 @@ public class NetworkPool implements NetworkInterface {
         return servers;
     }
 
+    @Override
+    public synchronized void setServers(List<String> servers) throws LoadBalanceException {
+        if (servers == null || servers.isEmpty()) {
+            throw new LoadBalanceException(Code.SERVER_IS_NULL, "cant set null servers");
+        }
+        servers.forEach(t ->
+                System.out.println("server:" + t)
+        );
+        this.servers = servers;
+    }
+
     public TreeMap<Long, String> getConsistentBuckets() {
         return consistentBuckets;
     }
 
-    public void setConsistentBuckets(TreeMap<Long, String> consistentBuckets) {
-        this.consistentBuckets = consistentBuckets;
-    }
 
     public TreeMap<Long, String> getAllConsistentBuckets() {
         return allConsistentBuckets;
     }
 
-    public void setAllConsistentBuckets(
-            TreeMap<Long, String> allConsistentBuckets) {
-        this.allConsistentBuckets = allConsistentBuckets;
-    }
 
 }

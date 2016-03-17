@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 
 import org.junit.Test;
@@ -14,7 +15,7 @@ import org.junit.Test;
 public class NetworkPoolGetServer {
 
     @Test
-    public void testGetServerWithoutFactor() {
+    public void testGetServerWithoutFactor() throws LoadBalanceException {
 
         NetworkPool networkPool = new NetworkPool();
         List<String> servers = new ArrayList<String>();
@@ -35,7 +36,7 @@ public class NetworkPoolGetServer {
     }
 
     @Test
-    public void testGetServerWithFactor() {
+    public void testGetServerWithFactor() throws LoadBalanceException {
 
         NetworkPool networkPool = new NetworkPool();
         List<String> servers = new ArrayList<>();

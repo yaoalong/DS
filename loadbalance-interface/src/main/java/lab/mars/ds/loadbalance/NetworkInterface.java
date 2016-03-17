@@ -9,9 +9,9 @@ public interface NetworkInterface {
 
     void initialize();
 
-    void setServers(List<String> servers);
+    void setServers(List<String> servers)throws  LoadBalanceException;
 
-    void setNumOfVirtualNode(Integer factor);
+    void setNumOfVirtualNode(Integer factor)throws   LoadBalanceException;
 
     /**
      * 针对于key获取当前应该处理该key的server
@@ -19,7 +19,7 @@ public interface NetworkInterface {
      * @param key
      * @return
      */
-    String getServer(String key);
+    String getServer(String key)throws  LoadBalanceException ;
 
     Integer getServerSize();
 
@@ -52,7 +52,7 @@ public interface NetworkInterface {
      * @param key
      * @return
      */
-    Long getServerFirstPosition(String key);
+    Long getServerFirstPosition(String key) throws LoadBalanceException;
 
     /**
      * 获取key 的value得到对应的server
@@ -76,13 +76,13 @@ public interface NetworkInterface {
     Long getFirstPosition(String server);
 
     /**
-     * 获取特定serverSize的下serverSize个server
+     * 获取特定server的下serverSize个server
      * 
      * @param server
      * @param serverSize
      * @return
      */
-    List<String> getNextServers(String server, Integer serverSize);
+    List<String> getNextServers(String server, Integer serverSize)throws LoadBalanceException;
 
     /**
      * 获取第n个server
@@ -118,17 +118,17 @@ public interface NetworkInterface {
     long getServerResponseForAnthorSerer(String server, String reponseServer);
 
     /**
-     * 设置数据复制因子
-     * 
+     *
      * @param replicationFactor
+     * @throws LoadBalanceException
      */
 
-    void setReplicationFactor(Integer replicationFactor);
+    void setReplicationFactor(Integer replicationFactor)throws LoadBalanceException;
 
     /**
      * 获取真正处理的节点
      */
-    String getTrueServer(String key);
+    String getTrueServer(String key) throws LoadBalanceException;
 
     /**
      * 获取目前的存活列表

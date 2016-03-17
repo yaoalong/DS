@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 
 import org.junit.Test;
@@ -14,7 +15,7 @@ import org.junit.Test;
 @SuppressWarnings("deprecation")
 public class NetworkPoolInitial {
     @Test
-    public void testInitial() {
+    public void testInitial() throws LoadBalanceException {
 
         NetworkPool networkPool = new NetworkPool();
         List<String> servers = new ArrayList<>();
@@ -28,7 +29,7 @@ public class NetworkPoolInitial {
     }
 
     @Test
-    public void testSetFactorAndInitial() {
+    public void testSetFactorAndInitial() throws LoadBalanceException {
         NetworkPool networkPool = new NetworkPool();
         List<String> servers = new ArrayList<String>();
         for (Integer i = 0; i < 3; i++) {

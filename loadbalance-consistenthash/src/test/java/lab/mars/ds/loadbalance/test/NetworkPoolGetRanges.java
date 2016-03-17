@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 
@@ -14,7 +15,7 @@ import org.junit.Test;
  */
 public class NetworkPoolGetRanges {
     @Test
-    public void testGetRanges() {
+    public void testGetRanges() throws LoadBalanceException {
         NetworkPool networkPool = new NetworkPool();
         List<String> servers = new ArrayList<>();
         for (Integer i = 0; i < 3; i++) {

@@ -42,7 +42,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * null. This change the semantic of txnlog on the observer since it only
  * contains committed txns.
  */
-// TODO 现在没有利用到SyncRequestProcessor,需要添加
+//TODO 调研所有的processor如何优雅地关闭
 public class M2mSyncRequestProcessor extends Thread implements RequestProcessor {
     private static final Logger LOG = LoggerFactory
             .getLogger(M2mSyncRequestProcessor.class);
@@ -131,7 +131,7 @@ public class M2mSyncRequestProcessor extends Thread implements RequestProcessor 
         if (toFlush.isEmpty())
             return;
 
-         zks.getDSDatabase().commit();
+        zks.getDSDatabase().commit();
         while (!toFlush.isEmpty()) {
             M2mRequest i = toFlush.remove();
             if (nextProcessor != null) {
