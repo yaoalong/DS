@@ -11,9 +11,7 @@ import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.monitor.RegisterIntoZooKeeper;
 import lab.mars.ds.monitor.ZooKeeper_Monitor;
 import lab.mars.ds.network.RegisterTcpClient;
-import lab.mars.ds.network.TcpServerNetwork;
-import lab.mars.ds.network.intialize.RegisterPacketClientChannelInitializer;
-import lab.mars.ds.network.intialize.RegisterPacketServerChannelInitializer;
+import lab.mars.ds.network.RegisterTcpServer;
 import lab.mars.ds.register.constant.RegisterConstant;
 import lab.mars.ds.register.model.RegisterM2mPacket;
 
@@ -44,7 +42,6 @@ public class Starter {
 
     /**
      * 开始启动server 包括启动tcpserver,接收来自客户端的请求
-     * 
      */
     public void startServer() {
 
@@ -57,16 +54,17 @@ public class Starter {
             e1.printStackTrace();
         }
         networkPool = new NetworkPool();
+        System.out.println("config server size:"
+                + config.getAllServers().size());
+        config.getAllServers().forEach(t -> System.out.println("server: " + t));
         networkPool.setAllServers(config.getAllServers());
         startFactor = config.getZooKeeperStartFactor();
-        TcpServerNetwork tcpServer = new TcpServerNetwork();
-        tcpServer
-                .setChannelChannelInitializer(new RegisterPacketServerChannelInitializer(
-                        this));
+        RegisterTcpServer registerTcpServer = new RegisterTcpServer(this);
         myServer = config.getMyIp();
         String[] serverAndPort = spilitString(myServer);
         try {
-            tcpServer.bind(serverAndPort[0], Integer.valueOf(serverAndPort[1]));
+            registerTcpServer.bind(serverAndPort[0],
+                    Integer.valueOf(serverAndPort[1]) - 1);
         } catch (NumberFormatException e) {
             throw e;
         } catch (InterruptedException e) {
@@ -103,12 +101,9 @@ public class Starter {
             for (String server : networkPool.getBeforeList(myServer)) {
                 try {
                     RegisterTcpClient tcpClient = new RegisterTcpClient();
-                    tcpClient
-                            .setSocketChannelChannelInitializer(new RegisterPacketClientChannelInitializer());
                     String[] serverAndPort = spilitString(server);
-
                     tcpClient.connectionOne(serverAndPort[0],
-                            Integer.valueOf(serverAndPort[1]));
+                            Integer.valueOf(serverAndPort[1]) - 1);
                     tcpClient.write(new RegisterM2mPacket(
                             OperateConstant.DETECT.getCode(), null));
                 } catch (Exception ex) {
@@ -145,16 +140,14 @@ public class Starter {
     }
 
     public void startNextServers() throws LoadBalanceException {
-        for (String server : networkPool.getNextServers(myServer,
-                startFactor - 1)) {
+        for (String server : networkPool.getNextServers(myServer, startFactor
+                - servers.size() - 1)) {
             try {
                 RegisterTcpClient tcpClient = new RegisterTcpClient();
-                tcpClient
-                        .setSocketChannelChannelInitializer(new RegisterPacketClientChannelInitializer());
                 String[] serverAndPort = spilitString(server);
 
                 tcpClient.connectionOne(serverAndPort[0],
-                        Integer.valueOf(serverAndPort[1]));
+                        Integer.valueOf(serverAndPort[1]) - 1);
                 tcpClient.write(new RegisterM2mPacket(OperateConstant.START
                         .getCode(), null));
             } catch (Exception ex) {

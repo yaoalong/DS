@@ -14,4 +14,6 @@ public class RegisterConstant {
     public static final byte[] NODE_VALUE = "1".getBytes();
 
     public static final Integer SLEEP_TIME = 1000;
+
+    public static final Integer GET_CHILDERN_SLEEP_TIME=10000;
 }

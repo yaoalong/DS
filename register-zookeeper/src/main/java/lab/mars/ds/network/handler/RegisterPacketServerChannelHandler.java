@@ -51,7 +51,6 @@ public class RegisterPacketServerChannelHandler extends
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-
         ctx.close();
     }
 

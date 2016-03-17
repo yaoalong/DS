@@ -185,8 +185,8 @@ public class QuorumPeerConfig {
                 }
                 InetSocketAddress addr = new InetSocketAddress(parts[0],
                         Integer.parseInt(parts[1]));
-                allServers.add(parts[0] + parts[1]);
-                sidToAddress.put(sid, value);
+                allServers.add(parts[0] + ":" + parts[1]);
+                sidToAddress.put(sid, parts[0] + ":" + parts[1]);
                 if (parts.length == 2) {
                     servers.put(Long.valueOf(sid), new QuorumServer(sid, addr));
                 } else if (parts.length == 3) {
