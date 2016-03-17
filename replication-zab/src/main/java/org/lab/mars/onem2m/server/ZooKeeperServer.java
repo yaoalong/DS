@@ -80,7 +80,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     protected RequestProcessor firstProcessor;
     protected volatile boolean running;
     int requestsInProcess;
-    private DSDatabase zkDb;
+    private DSDatabase dsDB;
     private ServerCnxnFactory serverCnxnFactory;
 
     /**
@@ -92,9 +92,9 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      */
 
     public ZooKeeperServer(int tickTime, int minSessionTimeout,
-            int maxSessionTimeout, DSDatabase zkDb) {
+            int maxSessionTimeout, DSDatabase dsDB) {
         serverStats = new ServerStats(this);
-        this.zkDb = zkDb;
+        this.dsDB = dsDB;
         this.tickTime = tickTime;
         this.minSessionTimeout = minSessionTimeout;
         this.maxSessionTimeout = maxSessionTimeout;
@@ -175,43 +175,30 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      *
      * @return the zookeeper database for this server
      */
-    public DSDatabase getZKDatabase() {
-        return this.zkDb;
+    public DSDatabase getDSDatabase() {
+        return this.dsDB;
     }
 
     /**
-     * set the zkdatabase for this zookeeper server
      *
-     * @param zkDb
+     * @param dsDB
      */
-    public void setZKDatabase(DSDatabase zkDb) {
-        this.zkDb = zkDb;
+    public void setDSDatabase(DSDatabase dsDB) {
+        this.dsDB = dsDB;
     }
 
     /**
      * Restore sessions and data
      */
     public void loadData() throws IOException, InterruptedException {
-        if (zkDb.isInitialized()) {
-            setZxid(zkDb.getLastProcessedZxid());
+        if (dsDB.isInitialized()) {
+            setZxid(dsDB.getLastProcessedZxid());
         } else {
-            setZxid(zkDb.loadDataBase());
+            setZxid(dsDB.loadDataBase());
         }
 
     }
 
-    public void takeSnapshot() {
-
-        // try {
-        // txnLogFactory.save(zkDb.getDataTree(),
-        // zkDb.getSessionWithTimeOuts());
-        // } catch (IOException e) {
-        // LOG.error("Severe unrecoverable error, exiting", e);
-        // // This is a severe error that we cannot recover from,
-        // // so we need to exit
-        // System.exit(10);
-        // }
-    }
 
     /**
      * This should be called from a synchronized block on this!
@@ -265,10 +252,10 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     public void startdata() throws IOException, InterruptedException {
         // check to see if zkDb is not null
-        if (zkDb == null) {
-            zkDb = new DSDatabase(null);
+        if (dsDB == null) {
+            dsDB = new DSDatabase(null);
         }
-        if (!zkDb.isInitialized()) {
+        if (!dsDB.isInitialized()) {
             loadData();
         }
     }
@@ -318,8 +305,8 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         if (firstProcessor != null) {
             firstProcessor.shutdown();
         }
-        if (zkDb != null) {
-            zkDb.clear();
+        if (dsDB != null) {
+            dsDB.clear();
         }
 
     }
@@ -417,7 +404,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * return the last proceesed id from the datatree
      */
     public long getLastProcessedZxid() {
-        return zkDb.getLastProcessedZxid();
+        return dsDB.getLastProcessedZxid();
     }
 
     /**
@@ -514,7 +501,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      */
     public ProcessTxnResult processTxn(M2mTxnHeader hdr, M2mRecord txn) {
         ProcessTxnResult rc;
-        rc = getZKDatabase().processTxn(hdr, txn);
+        rc = getDSDatabase().processTxn(hdr, txn);
         return rc;
     }
 

@@ -211,7 +211,6 @@ public class DSDatabaseImpl implements DSDatabase {
                 case ZooDefs.OpCode.create:
                     M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
                     processTxnResult.path = createTxn.getPath();
-
                     M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
                             .deserializeKryo(createTxn.getData());
                     m2mDataNode.setValue(NetworkPool.md5HashingAlg(m2mDataNode
@@ -227,7 +226,6 @@ public class DSDatabaseImpl implements DSDatabase {
                 case ZooDefs.OpCode.setData:
                     M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
                     processTxnResult.path = m2mSetDataTxn.getPath();
-
                     M2mDataNode object = (M2mDataNode) ResourceReflection
                             .deserializeKryo(m2mSetDataTxn.getData());
                     update(m2mSetDataTxn.getPath(), object);

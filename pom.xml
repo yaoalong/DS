@@ -24,23 +24,17 @@
 
     <properties>
         <osgi.version>6.0.0</osgi.version>
-        <nami.async.version>3.5.8</nami.async.version>
-
         <slf4j.version>1.7.12</slf4j.version>
         <log.version>1.2.17</log.version>
         <junit.version>4.11</junit.version>
-
         <jackson.version>2.4.3</jackson.version>
         <jackson.smile.version>2.4.3</jackson.smile.version>
         <cassandra.driver>2.2.0-rc2</cassandra.driver>
         <kyro.version>2.24.0</kyro.version>
         <reflectasm.version>1.10.0</reflectasm.version>
-
         <resourceloader.version>1.0</resourceloader.version>
         <commons-io.version>2.4</commons-io.version>
         <guava.version>18.0</guava.version>
-
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
