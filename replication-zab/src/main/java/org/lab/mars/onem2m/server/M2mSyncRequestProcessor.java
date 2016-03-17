@@ -79,7 +79,7 @@ public class M2mSyncRequestProcessor extends Thread implements RequestProcessor 
             // we do this in an attempt to ensure that not all of the servers
             // in the ensemble take a snapshot at the same time
             while (true) {
-                M2mRequest si = null;
+                M2mRequest si;
                 if (toFlush.isEmpty()) {
                     si = queuedRequests.take();
                 } else {
@@ -147,13 +147,13 @@ public class M2mSyncRequestProcessor extends Thread implements RequestProcessor 
         LOG.info("Shutting down");
         queuedRequests.add(M2mRequest.requestOfDeath);
         try {
-            if(running){
+            if (running) {
                 this.join();
             }
             if (!toFlush.isEmpty()) {
                 flush(toFlush);
             }
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             LOG.warn("Interrupted while wating for " + this + " to finish");
         } catch (IOException e) {
             LOG.warn("Got IO exception during shutdown");

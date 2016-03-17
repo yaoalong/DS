@@ -185,6 +185,8 @@ public class QuorumPeerConfig {
                 }
                 InetSocketAddress addr = new InetSocketAddress(parts[0],
                         Integer.parseInt(parts[1]));
+                allServers.add(parts[0] + parts[1]);
+                sidToAddress.put(sid, value);
                 if (parts.length == 2) {
                     servers.put(Long.valueOf(sid), new QuorumServer(sid, addr));
                 } else if (parts.length == 3) {
@@ -229,17 +231,11 @@ public class QuorumPeerConfig {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
                 serverWeight.put(sid, Long.parseLong(value));
-            } else if (key.startsWith("zooKeeperRegister")) {
-                int dot = key.indexOf('.');
-                long sid = Long.parseLong(key.substring(dot + 1));
-                allServers.add(value);
-                sidToAddress.put(sid, value);
             } else if (key.equals("zooKeeperServer")) {
                 zooKeeperServer = value;
             } else if (key.equals("zooKeeperStartFactor")) {
                 zooKeeperStartFactor = Integer.valueOf(value);
             } else {
-
                 System.setProperty("zookeeper." + key, value);
             }
         }
