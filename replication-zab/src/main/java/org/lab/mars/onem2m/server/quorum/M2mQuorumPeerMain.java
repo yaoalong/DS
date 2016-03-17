@@ -1,7 +1,14 @@
 package org.lab.mars.onem2m.server.quorum;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.register.ZooKeeperRegister;
+
 import org.lab.mars.onem2m.OneM2m;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.DSDatabase;
@@ -11,11 +18,6 @@ import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumMaj;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class M2mQuorumPeerMain extends Thread {
     private static final Logger LOG = LoggerFactory
@@ -34,7 +36,8 @@ public class M2mQuorumPeerMain extends Thread {
      * To start the replicated server specify the configuration file name on the
      * command line.
      *
-     * @param args path to the configfile
+     * @param args
+     *            path to the configfile
      */
     public static void main(String[] args) {
         M2mQuorumPeerMain main = new M2mQuorumPeerMain();
@@ -58,7 +61,7 @@ public class M2mQuorumPeerMain extends Thread {
     }
 
     protected void initializeAndRun(String[] args) throws ConfigException,
-            IOException {
+            IOException, LoadBalanceException {
         QuorumPeerConfig config = new QuorumPeerConfig();
         if (args.length == 1) {
             config.parse(args[0]);
@@ -73,7 +76,7 @@ public class M2mQuorumPeerMain extends Thread {
     }
 
     public void runFromConfig(QuorumPeerConfig config, String[] args)
-            throws IOException {
+            throws IOException, LoadBalanceException {
 
         webPort = config.zabClientPort;
         address = config.getMyIp();
@@ -148,7 +151,11 @@ public class M2mQuorumPeerMain extends Thread {
     @Override
     public void run() {
         try {
-            initializeAndRun(configFile);
+            try {
+                initializeAndRun(configFile);
+            } catch (LoadBalanceException e) {
+                e.printStackTrace();
+            }
         } catch (ConfigException e) {
             e.printStackTrace();
         } catch (IOException e) {

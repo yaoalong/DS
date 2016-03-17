@@ -3,6 +3,7 @@ package lab.mars.ds.monitor;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.register.constant.RegisterConstant;
 import lab.mars.ds.register.starter.Starter;
@@ -48,7 +49,11 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
             }
 
         } catch (Exception e) {
-            starter.check();
+            try {
+                starter.check();
+            } catch (LoadBalanceException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
             LOG.error("zookeepeer_monitor is error because of:{}",
                     e.getMessage());
@@ -81,8 +86,13 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
             LOG.error("zookeeper is empty");
             return;
         }
-        List<String> serverStrings = zooKeeper.getChildren(RegisterConstant.ROOT_NODE, null);
-        networkPool.setServers(serverStrings);
+        List<String> serverStrings = zooKeeper.getChildren(
+                RegisterConstant.ROOT_NODE, null);
+        try {
+            networkPool.setServers(serverStrings);
+        } catch (LoadBalanceException e) {
+            e.printStackTrace();
+        }
         networkPool.initialize();
 
     }

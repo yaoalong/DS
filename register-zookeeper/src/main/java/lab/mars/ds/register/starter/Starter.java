@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lab.mars.ds.constant.OperateConstant;
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.monitor.RegisterIntoZooKeeper;
@@ -73,14 +74,15 @@ public class Starter {
         }
     }
 
-    public void mainStart(String args[]) throws ConfigException {
+    public void mainStart(String args[]) throws ConfigException,
+            LoadBalanceException {
         quorumPeerMain.parse(args);
         startServer();
         check();
 
     }
 
-    public void check() {
+    public void check() throws LoadBalanceException {
         try {
             Thread.sleep(RegisterConstant.SLEEP_TIME);
 
@@ -125,7 +127,7 @@ public class Starter {
 
     }
 
-    public void start() {
+    public void start() throws LoadBalanceException {
         if (isStarted == true) {
             return;
         }
@@ -142,7 +144,7 @@ public class Starter {
 
     }
 
-    public void startNextServers() {
+    public void startNextServers() throws LoadBalanceException {
         for (String server : networkPool.getNextServers(myServer,
                 startFactor - 1)) {
             try {

@@ -19,8 +19,8 @@ public class M2mRequest {
             null);
 
     /**
-     * @param cnxn
-     * @param sessionId
+     *
+     * @param channel
      * @param xid
      * @param type
      * @param bb
@@ -108,49 +108,6 @@ public class M2mRequest {
             return "unknown " + op;
         }
     }
-
-    // @Override
-    // public String toString() {
-    // StringBuilder sb = new StringBuilder();
-    // sb.append("sessionid:0x").append(Long.toHexString(sessionId))
-    // .append(" type:").append(op2String(type))
-    // .append(" cxid:0x").append(Long.toHexString(cxid))
-    // .append(" zxid:0x").append(Long.toHexString(hdr == null ?
-    // -2 : hdr.getZxid()))
-    // .append(" txntype:").append(hdr == null ?
-    // "unknown" : "" + hdr.getType());
-    //
-    // // best effort to print the path assoc with this request
-    // String path = "n/a";
-    // if (type != OpCode.createSession
-    // && type != OpCode.setWatches
-    // && type != OpCode.closeSession
-    // && request != null
-    // && request.remaining() >= 4)
-    // {
-    // try {
-    // // make sure we don't mess with request itself
-    // ByteBuffer rbuf = request.asReadOnlyBuffer();
-    // rbuf.clear();
-    // int pathLen = rbuf.getInt();
-    // // sanity check
-    // if (pathLen >= 0
-    // && pathLen < 4096
-    // && rbuf.remaining() >= pathLen)
-    // {
-    // byte b[] = new byte[pathLen];
-    // rbuf.get(b);
-    // path = new String(b);
-    // }
-    // } catch (Exception e) {
-    // // ignore - can't find the path, will output "n/a" instead
-    // }
-    // }
-    // sb.append(" reqpath:").append(path);
-    //
-    // return sb.toString();
-    // }
-
     public void setException(KeeperException e) {
         this.e = e;
     }

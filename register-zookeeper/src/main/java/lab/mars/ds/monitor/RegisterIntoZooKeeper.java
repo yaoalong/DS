@@ -3,6 +3,7 @@ package lab.mars.ds.monitor;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.register.constant.RegisterConstant;
 import lab.mars.ds.register.starter.Starter;
 
@@ -50,7 +51,11 @@ public class RegisterIntoZooKeeper extends Thread implements Watcher {
                     RegisterConstant.NODE_VALUE, Ids.OPEN_ACL_UNSAFE,
                     CreateMode.EPHEMERAL);
         } catch (KeeperException | InterruptedException e) {
-            starter.check();
+            try {
+                starter.check();
+            } catch (LoadBalanceException e1) {
+                e1.printStackTrace();
+            }
             LOG.error("error because of:{}", e);
         }
     }

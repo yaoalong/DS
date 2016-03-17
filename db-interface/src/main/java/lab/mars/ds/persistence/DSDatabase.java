@@ -11,7 +11,9 @@ import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
 /**
- * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
+ * Author:yaoalong. 
+ * Date:2016/3/3. 
+ * Email:yaoalong@foxmail.com
  */
 public interface DSDatabase {
     M2mDataNode retrieve(String key);

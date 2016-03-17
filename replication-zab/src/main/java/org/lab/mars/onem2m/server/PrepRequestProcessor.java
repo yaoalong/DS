@@ -77,6 +77,9 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
         try {
             while (true) {
                 M2mRequest request = submittedRequests.take();
+                if(request==M2mRequest.requestOfDeath){
+                    break;
+                }
                 pRequest(request);
             }
         } catch (InterruptedException e) {
@@ -234,7 +237,7 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
     public void shutdown() {
         LOG.info("Shutting down");
         submittedRequests.clear();
-        // submittedRequests.add(Request.requestOfDeath);
+        submittedRequests.add(M2mRequest.requestOfDeath);
         nextProcessor.shutdown();
     }
 }

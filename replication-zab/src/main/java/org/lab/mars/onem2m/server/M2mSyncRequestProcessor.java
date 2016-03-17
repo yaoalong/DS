@@ -145,8 +145,21 @@ public class M2mSyncRequestProcessor extends Thread implements RequestProcessor 
 
     public void shutdown() {
         LOG.info("Shutting down");
-        // queuedRequests.add(requestOfDeath);
-
+        queuedRequests.add(M2mRequest.requestOfDeath);
+        try {
+            if(running){
+                this.join();
+            }
+            if (!toFlush.isEmpty()) {
+                flush(toFlush);
+            }
+        } catch(InterruptedException e) {
+            LOG.warn("Interrupted while wating for " + this + " to finish");
+        } catch (IOException e) {
+            LOG.warn("Got IO exception during shutdown");
+        } catch (RequestProcessorException e) {
+            LOG.warn("Got request processor exception during shutdown");
+        }
         if (nextProcessor != null) {
             nextProcessor.shutdown();
         }

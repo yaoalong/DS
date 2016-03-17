@@ -3,6 +3,7 @@ package lab.mars.ds.network.handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lab.mars.ds.constant.OperateConstant;
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.register.model.RegisterM2mPacket;
 import lab.mars.ds.register.starter.Starter;
 
@@ -29,7 +30,11 @@ public class RegisterPacketServerChannelHandler extends
             m2mPacket.setBody(myServer);
             ctx.writeAndFlush(m2mPacket);
         } else {
-            register.start();
+            try {
+                register.start();
+            } catch (LoadBalanceException e) {
+                e.printStackTrace();
+            }
         }
     }
 
