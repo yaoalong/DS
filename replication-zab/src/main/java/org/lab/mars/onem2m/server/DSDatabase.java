@@ -30,6 +30,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import lab.mars.ds.ds.persistence.FileTxnLog;
 import lab.mars.ds.ds.persistence.PlayBackListener;
+import lab.mars.ds.ds.persistence.TxnLog;
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.persistence.DSDatabaseInterface;
 
@@ -169,40 +170,43 @@ public class DSDatabase implements M2mRecord {
     }
 
     public long restore(PlayBackListener playBackListener) throws IOException {
-        return 0L;
-        // TxnLog.TxnIterator itr = fileTxnLog.read(lastProcessedZxid + 1);
-        // long highestZxid = lastProcessedZxid;
-        // M2mTxnHeader hdr;
-        // try {
-        // while (true) {
-        // // iterator points to
-        // // the first valid txn when initialized
-        // hdr = itr.getHeader();
-        // if (hdr == null) {
-        // // empty logs
-        // return lastProcessedZxid;
-        // }
-        // if (hdr.getZxid() < highestZxid && highestZxid != 0) {
-        // LOG.error(
-        // "{}(higestZxid) > {}(next log) for type {}",
-        // new Object[]{highestZxid, hdr.getZxid(),
-        // hdr.getType()});
-        // } else {
-        // highestZxid = hdr.getZxid();
-        // }
-        //
-        // processTxn(hdr, itr.getTxn());// 处理具体的事务
-        //
-        // playBackListener.onTxnLoaded(hdr, itr.getTxn());
-        // if (!itr.next())
-        // break;
-        // }
-        // } finally {
-        // if (itr != null) {
-        // itr.close();
-        // }
-        // }
-        // return highestZxid;
+         TxnLog.TxnIterator itr = fileTxnLog.read(lastProcessedZxid + 1);
+         long highestZxid = lastProcessedZxid;
+         M2mTxnHeader hdr;
+         try {
+         while (true) {
+         // iterator points to
+         // the first valid txn when initialized
+         hdr = itr.getHeader();
+         if (hdr == null) {
+         // empty logs
+         return lastProcessedZxid;
+         }
+         if (hdr.getZxid() < highestZxid && highestZxid != 0) {
+         LOG.error(
+         "{}(higestZxid) > {}(next log) for type {}",
+         new Object[]{highestZxid, hdr.getZxid(),
+         hdr.getType()});
+         } else {
+         highestZxid = hdr.getZxid();
+         }
+
+             try {
+                 processTxn(hdr, itr.getTxn());// 处理具体的事务
+             } catch (M2mKeeperException e) {
+                 e.printStackTrace();
+             }
+
+             playBackListener.onTxnLoaded(hdr, itr.getTxn());
+         if (!itr.next())
+         break;
+         }
+         } finally {
+         if (itr != null) {
+         itr.close();
+         }
+         }
+         return highestZxid;
     }
 
     public Long getLastProcessedZxid() throws M2mKeeperException {
