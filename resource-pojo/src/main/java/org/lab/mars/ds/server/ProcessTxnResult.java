@@ -3,7 +3,6 @@
 package org.lab.mars.ds.server;
 
 public class ProcessTxnResult {
-    public int cxid;
 
     public long zxid;
 
@@ -11,6 +10,6 @@ public class ProcessTxnResult {
 
     public int type;
 
-    public String path;
+    public String id;
 
 }

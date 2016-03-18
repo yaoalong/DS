@@ -8,7 +8,6 @@ public class M2mTxnHeader implements M2mRecord {
 	 * 
 	 */
 	private static final long serialVersionUID = 3788714406614518665L;
-	private int cxid;
 	private long zxid;
 	private long time;
 	private int type;
@@ -16,20 +15,12 @@ public class M2mTxnHeader implements M2mRecord {
 	public M2mTxnHeader() {
 	}
 
-	public M2mTxnHeader(int cxid, long zxid, long time, int type) {
-		this.cxid = cxid;
+	public M2mTxnHeader(long zxid, long time, int type) {
 		this.zxid = zxid;
 		this.time = time;
 		this.type = type;
 	}
 
-	public int getCxid() {
-		return cxid;
-	}
-
-	public void setCxid(int m_) {
-		cxid = m_;
-	}
 
 	public long getZxid() {
 		return zxid;
@@ -58,7 +49,6 @@ public class M2mTxnHeader implements M2mRecord {
 	public void serialize(M2mOutputArchive a_, String tag)
 			throws java.io.IOException {
 		a_.startRecord(this, tag);
-		a_.writeInt(cxid, "cxid");
 		a_.writeLong(zxid, "zxid");
 		a_.writeLong(time, "time");
 		a_.writeInt(type, "type");
@@ -68,7 +58,6 @@ public class M2mTxnHeader implements M2mRecord {
 	public void deserialize(M2mInputArchive a_, String tag)
 			throws java.io.IOException {
 		a_.startRecord(tag);
-		cxid = a_.readInt("cxid");
 		zxid = a_.readLong("zxid");
 		time = a_.readLong("time");
 		type = a_.readInt("type");
@@ -80,7 +69,6 @@ public class M2mTxnHeader implements M2mRecord {
 			java.io.ByteArrayOutputStream s = new java.io.ByteArrayOutputStream();
 			M2mCsvOutputArchive a_ = new M2mCsvOutputArchive(s);
 			a_.startRecord(this, "");
-			a_.writeInt(cxid, "cxid");
 			a_.writeLong(zxid, "zxid");
 			a_.writeLong(time, "time");
 			a_.writeInt(type, "type");
@@ -102,12 +90,6 @@ public class M2mTxnHeader implements M2mRecord {
 		deserialize(archive, "");
 	}
 
-	public int compareTo(Object peer_) throws ClassCastException {
-
-		int ret = 0;
-
-		return ret;
-	}
 
 	public boolean equals(Object peer_) {
 

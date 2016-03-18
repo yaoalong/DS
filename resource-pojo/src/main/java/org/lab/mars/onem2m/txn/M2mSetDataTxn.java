@@ -26,21 +26,21 @@ public class M2mSetDataTxn implements M2mRecord {
 	 * 
 	 */
 	private static final long serialVersionUID = 4862502698383171029L;
-private String path;
+private String id;
   private byte[] data;
   public M2mSetDataTxn() {
   }
   public M2mSetDataTxn(
-        String path,
+        String idid,
         byte[] data) {
-    this.path=path;
+    this.id=id;
     this.data=data;
   }
-  public String getPath() {
-    return path;
+  public String getId() {
+    return id;
   }
-  public void setPath(String m_) {
-    path=m_;
+  public void setId(String m_) {
+    id=m_;
   }
   public byte[] getData() {
     return data;
@@ -50,13 +50,13 @@ private String path;
   }
   public void serialize(M2mOutputArchive a_, String tag) throws java.io.IOException {
     a_.startRecord(this,tag);
-    a_.writeString(path,"path");
+    a_.writeString(id,"id");
     a_.writeBuffer(data,"data");
     a_.endRecord(this,tag);
   }
   public void deserialize(M2mInputArchive a_, String tag) throws java.io.IOException {
     a_.startRecord(tag);
-    path=a_.readString("path");
+    id=a_.readString("id");
     data=a_.readBuffer("data");
     a_.endRecord(tag);
 }
@@ -67,7 +67,7 @@ private String path;
       M2mCsvOutputArchive a_ = 
         new M2mCsvOutputArchive(s);
       a_.startRecord(this,"");
-    a_.writeString(path,"path");
+    a_.writeString(id,"id");
     a_.writeBuffer(data,"data");
       a_.endRecord(this,"");
       return new String(s.toByteArray(), "UTF-8");
@@ -89,8 +89,8 @@ private String path;
       throw new ClassCastException("Comparing different types of records.");
     }
     M2mSetDataTxn peer = (M2mSetDataTxn) peer_;
-    int ret = 0;
-    ret = path.compareTo(peer.path);
+    int ret ;
+    ret = id.compareTo(peer.id);
  
     if (ret != 0) return ret;
     if (ret != 0) return ret;
@@ -105,7 +105,7 @@ private String path;
     }
     M2mSetDataTxn peer = (M2mSetDataTxn) peer_;
     boolean ret = false;
-    ret = path.equals(peer.path);
+    ret = id.equals(peer.id);
     if (!ret) return ret;
     if (!ret) return ret;
     if (!ret) return ret;
@@ -114,7 +114,7 @@ private String path;
   public int hashCode() {
     int result = 17;
     int ret;
-    ret = path.hashCode();
+    ret = id.hashCode();
     result = 37*result + ret;
     ret = java.util.Arrays.toString(data).hashCode();
     result = 37*result + ret;

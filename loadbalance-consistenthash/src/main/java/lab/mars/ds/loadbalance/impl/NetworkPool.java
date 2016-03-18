@@ -1,5 +1,6 @@
 package lab.mars.ds.loadbalance.impl;
 
+import java.awt.font.NumericShaper;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -198,9 +199,8 @@ public class NetworkPool implements NetworkInterface {
         for (Map.Entry<Long, String> entry : allConsistentBuckets.entrySet()) {
 
             if (server.equals(entry.getValue())) {
-                RangeDO rangeDO = new RangeDO();
-                rangeDO.setStart(pre);
-                rangeDO.setEnd(entry.getKey());
+
+                RangeDO rangeDO = new RangeDO(pre,entry.getKey());
                 result.add(rangeDO);
             }
 
@@ -208,9 +208,7 @@ public class NetworkPool implements NetworkInterface {
         }
         if (server.equals(allConsistentBuckets.firstEntry().getValue())) {
             Map.Entry<Long, String> end = allConsistentBuckets.lastEntry();
-            RangeDO rangeDO = new RangeDO();
-            rangeDO.setStart(end.getKey());
-            rangeDO.setEnd(Long.MAX_VALUE);
+            RangeDO rangeDO = new RangeDO(end.getKey(),Long.MAX_VALUE);
             result.add(rangeDO);
         }
         return result;

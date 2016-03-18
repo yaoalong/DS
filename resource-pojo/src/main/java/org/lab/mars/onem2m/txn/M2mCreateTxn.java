@@ -12,23 +12,23 @@ public class M2mCreateTxn implements M2mRecord {
 	 * 
 	 */
 	private static final long serialVersionUID = -1255742539970640049L;
-	private String path;
+	private String id;
 	private byte[] data;
 
 	public M2mCreateTxn() {
 	}
 
-	public M2mCreateTxn(String path, byte[] data) {
-		this.path = path;
+	public M2mCreateTxn(String id, byte[] data) {
+		this.id = id;
 		this.data = data;
 	}
 
 	public String getPath() {
-		return path;
+		return id;
 	}
 
 	public void setPath(String m_) {
-		path = m_;
+		id = m_;
 	}
 
 	public byte[] getData() {
@@ -42,7 +42,7 @@ public class M2mCreateTxn implements M2mRecord {
 	public void serialize(M2mOutputArchive a_, String tag)
 			throws java.io.IOException {
 		a_.startRecord(this, tag);
-		a_.writeString(path, "path");
+		a_.writeString(id, "id");
 		a_.writeBuffer(data, "data");
 		a_.endRecord(this, tag);
 	}
@@ -50,7 +50,7 @@ public class M2mCreateTxn implements M2mRecord {
 	public void deserialize(M2mInputArchive a_, String tag)
 			throws java.io.IOException {
 		a_.startRecord(tag);
-		path = a_.readString("path");
+		id = a_.readString("id");
 		data = a_.readBuffer("data");
 		a_.endRecord(tag);
 	}
@@ -60,7 +60,7 @@ public class M2mCreateTxn implements M2mRecord {
 			java.io.ByteArrayOutputStream s = new java.io.ByteArrayOutputStream();
 			M2mCsvOutputArchive a_ = new M2mCsvOutputArchive(s);
 			a_.startRecord(this, "");
-			a_.writeString(path, "path");
+			a_.writeString(id, "id");
 			a_.writeBuffer(data, "data");
 			a_.endRecord(this, "");
 			return new String(s.toByteArray(), "UTF-8");

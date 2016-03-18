@@ -23,12 +23,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import lab.mars.ds.ds.persistence.FileTxnLog;
+
 import org.lab.mars.onem2m.jute.M2mRecord;
+import org.lab.mars.onem2m.server.DSDatabase;
 import org.lab.mars.onem2m.server.M2mFinalRequestProcessor;
 import org.lab.mars.onem2m.server.M2mRequest;
-import org.lab.mars.onem2m.server.RequestProcessor;
 import org.lab.mars.onem2m.server.M2mSyncRequestProcessor;
-import org.lab.mars.onem2m.server.DSDatabase;
+import org.lab.mars.onem2m.server.RequestProcessor;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,7 @@ public class M2mFollowerZooKeeperServer extends M2mLearnerZooKeeperServer {
      * @throws IOException
      */
     M2mFollowerZooKeeperServer(FileTxnLog fileTxnLog, M2mQuorumPeer self,
-                               DSDatabase zkDb) throws IOException {
+            DSDatabase zkDb) throws IOException {
         super(fileTxnLog, self.tickTime, self.minSessionTimeout,
                 self.maxSessionTimeout, zkDb, self);
         this.pendingSyncs = new ConcurrentLinkedQueue<M2mRequest>();
@@ -87,8 +88,7 @@ public class M2mFollowerZooKeeperServer extends M2mLearnerZooKeeperServer {
     LinkedBlockingQueue<M2mRequest> pendingTxns = new LinkedBlockingQueue<M2mRequest>();// 等待处理的事务
 
     public void logRequest(M2mTxnHeader hdr, M2mRecord txn) {
-        M2mRequest request = new M2mRequest(null, hdr.getCxid(), hdr.getType(),
-                null);
+        M2mRequest request = new M2mRequest(null, 0, hdr.getType(), null);
         request.m2mTxnHeader = hdr;
         request.txn = txn;
         request.zxid = hdr.getZxid();

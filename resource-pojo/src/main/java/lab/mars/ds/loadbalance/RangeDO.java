@@ -11,9 +11,6 @@ public class RangeDO {
 
     private Long end;
 
-    public RangeDO(){
-
-    }
     public RangeDO(Long start, Long end){
         this.start=start;
         this.end=end;

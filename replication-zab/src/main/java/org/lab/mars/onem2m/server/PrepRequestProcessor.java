@@ -77,7 +77,7 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
         try {
             while (true) {
                 M2mRequest request = submittedRequests.take();
-                if(request==M2mRequest.requestOfDeath){
+                if (request == M2mRequest.requestOfDeath) {
                     break;
                 }
                 pRequest(request);
@@ -130,8 +130,7 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
     protected void pRequest2Txn(int type, long zxid, M2mRequest request,
             M2mRecord record, boolean deserialize) throws KeeperException,
             IOException, RequestProcessorException {
-        request.m2mTxnHeader = new M2mTxnHeader(request.cxid, zxid,
-                zks.getTime(), type);
+        request.m2mTxnHeader = new M2mTxnHeader(zxid, zks.getTime(), type);
         switch (type) {
         case OpCode.create:
             M2mCreateRequest createRequest = (M2mCreateRequest) record;

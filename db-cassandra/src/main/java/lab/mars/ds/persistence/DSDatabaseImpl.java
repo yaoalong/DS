@@ -221,13 +221,12 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     public ProcessTxnResult processTxn(M2mTxnHeader header, M2mRecord m2mRecord) {
         ProcessTxnResult processTxnResult = new ProcessTxnResult();
         try {
-            processTxnResult.cxid = header.getCxid();
             processTxnResult.zxid = header.getZxid();
             processTxnResult.err = 0;
             switch (header.getType()) {
                 case ZooDefs.OpCode.create:
                     M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
-                    processTxnResult.path = createTxn.getPath();
+                    processTxnResult.id = createTxn.getPath();
                     M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
                             .deserializeKryo(createTxn.getData());
                     m2mDataNode.setValue(NetworkPool.md5HashingAlg(m2mDataNode
@@ -237,15 +236,15 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                     break;
                 case ZooDefs.OpCode.delete:
                     M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;
-                    processTxnResult.path = deleteTxn.getPath();
+                    processTxnResult.id = deleteTxn.getPath();
                     delete(deleteTxn.getPath());
                     break;
                 case ZooDefs.OpCode.setData:
                     M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
-                    processTxnResult.path = m2mSetDataTxn.getPath();
+                    processTxnResult.id = m2mSetDataTxn.getId();
                     M2mDataNode object = (M2mDataNode) ResourceReflection
                             .deserializeKryo(m2mSetDataTxn.getData());
-                    update(m2mSetDataTxn.getPath(), object);
+                    update(m2mSetDataTxn.getId(), object);
                     break;
             }
         } catch (M2mKeeperException e) {

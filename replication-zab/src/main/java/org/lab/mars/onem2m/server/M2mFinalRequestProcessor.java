@@ -28,7 +28,6 @@ import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.KeeperException.Code;
-import org.lab.mars.onem2m.KeeperException.SessionMovedException;
 import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mRecord;
@@ -120,7 +119,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
             }
             switch (request.type) {
             case OpCode.create: {
-                rsp = new M2mCreateResponse(rc.path);
+                rsp = new M2mCreateResponse(rc.id);
                 err = Code.get(rc.err);
                 break;
             }
@@ -146,9 +145,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 break;
             }
             }
-        } catch (SessionMovedException e) {
-            return;
-        } catch (KeeperException e) {
+        }catch (KeeperException e) {
             err = e.code();
         } catch (Exception e) {
             LOG.error("Failed to process " + request, e);

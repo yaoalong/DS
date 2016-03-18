@@ -30,27 +30,27 @@ public class M2mDeleteTxn implements M2mRecord {
 	 * 
 	 */
 	private static final long serialVersionUID = -9099342457331038094L;
-private String path;
+private String id;
   public M2mDeleteTxn() {
   }
   public M2mDeleteTxn(
-        String path) {
-    this.path=path;
+        String id) {
+    this.id=id;
   }
   public String getPath() {
-    return path;
+    return id;
   }
   public void setPath(String m_) {
-    path=m_;
+    id=m_;
   }
   public void serialize(M2mOutputArchive a_, String tag) throws java.io.IOException {
     a_.startRecord(this,tag);
-    a_.writeString(path,"path");
+    a_.writeString(id,"id");
     a_.endRecord(this,tag);
   }
   public void deserialize(M2mInputArchive a_, String tag) throws java.io.IOException {
     a_.startRecord(tag);
-    path=a_.readString("path");
+    id=a_.readString("id");
     a_.endRecord(tag);
 }
   public String toString() {
@@ -60,7 +60,7 @@ private String path;
       M2mCsvOutputArchive a_ = 
         new M2mCsvOutputArchive(s);
       a_.startRecord(this,"");
-    a_.writeString(path,"path");
+    a_.writeString(id,"id");
       a_.endRecord(this,"");
       return new String(s.toByteArray(), "UTF-8");
     } catch (Throwable ex) {
@@ -91,7 +91,7 @@ private String path;
   public int hashCode() {
     int result = 17;
     int ret;
-    ret = path.hashCode();
+    ret = id.hashCode();
     result = 37*result + ret;
     return result;
   }
