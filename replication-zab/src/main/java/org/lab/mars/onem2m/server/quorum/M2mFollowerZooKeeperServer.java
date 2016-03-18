@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import lab.mars.ds.ds.persistence.FileTxnLog;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.server.M2mFinalRequestProcessor;
 import org.lab.mars.onem2m.server.M2mRequest;
@@ -54,14 +55,14 @@ public class M2mFollowerZooKeeperServer extends M2mLearnerZooKeeperServer {
 
     /**
      *
+     * @param fileTxnLog
      * @param self
-     * @param treeBuilder
      * @param zkDb
      * @throws IOException
      */
-    M2mFollowerZooKeeperServer(M2mQuorumPeer self,
-                             DSDatabase zkDb) throws IOException {
-        super( self.tickTime, self.minSessionTimeout,
+    M2mFollowerZooKeeperServer(FileTxnLog fileTxnLog, M2mQuorumPeer self,
+                               DSDatabase zkDb) throws IOException {
+        super(fileTxnLog, self.tickTime, self.minSessionTimeout,
                 self.maxSessionTimeout, zkDb, self);
         this.pendingSyncs = new ConcurrentLinkedQueue<M2mRequest>();
     }

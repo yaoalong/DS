@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lab.mars.ds.ds.persistence.FileTxnLog;
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.persistence.DSDatabaseImpl;
 
@@ -148,6 +149,8 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
 
     private List<RangeDO> rangeDOs;
 
+    private FileTxnLog fileTxnLog;
+
     public M2mQuorumPeer() {
         super("QuorumPeer");
     }
@@ -183,7 +186,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
         this.tickTime = tickTime;
         this.initLimit = initLimit;
         this.syncLimit = syncLimit;
-        this.zkDb = new DSDatabase(m2mDataBase);
+        this.zkDb = new DSDatabase(m2mDataBase, fileTxnLog);
         this.m2mDataBase = new DSDatabaseImpl();
         if (quorumConfig == null)
             this.quorumConfig = new M2mQuorumMaj(countParticipants(quorumPeers));
@@ -347,14 +350,15 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
         return zkDb.getLastProcessedZxid();
     }
 
-    protected M2mFollower makeFollower() throws IOException {
-        return new M2mFollower(this, new M2mFollowerZooKeeperServer(this,
-                this.zkDb));
+    protected M2mFollower makeFollower(FileTxnLog fileTxnLog)
+            throws IOException {
+        return new M2mFollower(this, new M2mFollowerZooKeeperServer(fileTxnLog,
+                this, this.zkDb));
     }
 
-    protected M2mLeader makeLeader() throws IOException {
-        return new M2mLeader(this,
-                new M2mLeaderZooKeeperServer(this, this.zkDb));
+    protected M2mLeader makeLeader(FileTxnLog fileTxnLog) throws IOException {
+        return new M2mLeader(this, new M2mLeaderZooKeeperServer(fileTxnLog,
+                this, this.zkDb));
     }
 
     protected M2mElection createElectionAlgorithm(int electionAlgorithm) {
@@ -431,7 +435,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
                 case FOLLOWING:
                     try {
                         LOG.info("FOLLOWING");
-                        setFollower(makeFollower());
+                        setFollower(makeFollower(fileTxnLog));
                         follower.followLeader();
 
                     } catch (Exception e) {
@@ -445,7 +449,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
                 case LEADING:
                     LOG.info("LEADING");
                     try {
-                        setLeader(makeLeader());
+                        setLeader(makeLeader(fileTxnLog));
                         leader.lead();
                         setLeader(null);
                     } catch (Exception e) {
@@ -849,6 +853,14 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
 
     public void setRangeDOs(List<RangeDO> rangeDOs) {
         this.rangeDOs = rangeDOs;
+    }
+
+    public void setFileTxnLog(FileTxnLog fileTxnLog) {
+        this.fileTxnLog = fileTxnLog;
+    }
+
+    public FileTxnLog getFileTxnLog() {
+        return fileTxnLog;
     }
 
     public enum ServerState {

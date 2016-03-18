@@ -140,6 +140,9 @@ public class Starter {
     }
 
     public void startNextServers() throws LoadBalanceException {
+        if (startFactor - servers.size() - 1 <= 0) {
+            return;
+        }
         for (String server : networkPool.getNextServers(myServer, startFactor
                 - servers.size() - 1)) {
             try {

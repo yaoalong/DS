@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 
 import org.lab.mars.onem2m.proto.M2mPacket;
@@ -86,15 +87,17 @@ public class NettyServerCnxn extends ServerCnxn {
      *
      * @param ctx
      * @param m2mPacket
+     * @throws LoadBalanceException
      */
-    public void receiveMessage(ChannelHandlerContext ctx, M2mPacket m2mPacket) {
+    public void receiveMessage(ChannelHandlerContext ctx, M2mPacket m2mPacket)
+            throws LoadBalanceException {
         String server = networkPool.getServer(m2mPacket.getM2mRequestHeader()
                 .getKey());
         for (Entry<String, ZooKeeperServer> entry : zookeeperServers.entrySet()) {
             System.out.println("逐渐:" + entry.getKey());
         }
         while (zookeeperServers.get(server) == null) {
-            System.out.println("为空");
+            System.out.println("为空" + server);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

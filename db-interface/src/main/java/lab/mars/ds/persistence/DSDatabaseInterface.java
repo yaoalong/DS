@@ -15,7 +15,7 @@ import org.lab.mars.onem2m.txn.M2mTxnHeader;
  * Date:2016/3/3. 
  * Email:yaoalong@foxmail.com
  */
-public interface DSDatabase {
+public interface DSDatabaseInterface{
     M2mDataNode retrieve(String key);
 
     List<M2mDataNode> retrieve(Long zxid);

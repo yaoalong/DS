@@ -33,9 +33,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
-import lab.mars.ds.persistence.DSDatabase;
 import lab.mars.ds.persistence.DSDatabaseImpl;
+import lab.mars.ds.persistence.DSDatabaseInterface;
 
 import org.lab.mars.onem2m.server.ZooKeeperServer;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeer.QuorumServer;
@@ -81,7 +82,7 @@ public class QuorumPeerConfig {
     protected M2mQuorumVerifier quorumVerifier;
     protected int snapRetainCount = 3;
     protected boolean syncEnabled = true;
-    protected DSDatabase m2mDataBase;
+    protected DSDatabaseInterface m2mDataBase;
     protected Boolean cleaned = false;
     protected String node = "127.0.0.1";
     protected String keySpace = "tests";
@@ -115,8 +116,9 @@ public class QuorumPeerConfig {
      *            the patch of the configuration file
      * @throws ConfigException
      *             error processing configuration
+     * @throws LoadBalanceException
      */
-    public void parse(String path) throws ConfigException {
+    public void parse(String path) throws ConfigException, LoadBalanceException {
         File configFile = new File(path);
 
         LOG.info("Reading configuration from: " + configFile);
@@ -151,9 +153,10 @@ public class QuorumPeerConfig {
      *            Properties to parse from.
      * @throws IOException
      * @throws ConfigException
+     * @throws LoadBalanceException
      */
     public void parseProperties(Properties zkProp) throws IOException,
-            ConfigException {
+            ConfigException, LoadBalanceException {
         String clientPortAddress = null;
         for (Entry<Object, Object> entry : zkProp.entrySet()) {
             String key = entry.getKey().toString().trim();
@@ -333,8 +336,10 @@ public class QuorumPeerConfig {
 
     /**
      * 设置不同zab集群的server
+     * 
+     * @throws LoadBalanceException
      */
-    public void setAllReplicationServers() {
+    public void setAllReplicationServers() throws LoadBalanceException {
         networkPool = new NetworkPool();
         for (M2mAddressToId m2mAddressToId : addressToSid) {
             Long sid = m2mAddressToId.getSid();

@@ -1,10 +1,12 @@
 package org.lab.mars.onem2m.server.quorum;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import lab.mars.ds.ds.persistence.FileTxnLog;
 import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.register.ZooKeeperRegister;
@@ -117,10 +119,11 @@ public class M2mQuorumPeerMain extends Thread {
                         Integer.valueOf((i) + "")));
                 quorumPeer.setQuorumVerifier(new M2mQuorumMaj(servers.size()));
                 quorumPeer.setQuorumPeers(servers);// 设置对应的服务器信息
+                quorumPeer.setFileTxnLog(new FileTxnLog(new File(config.getDataDir()+"/log")));
                 quorumPeer.setElectionType(config.getElectionAlg());
                 quorumPeer.setCnxnFactory(cnxnFactory);
 
-                quorumPeer.setZKDatabase(new DSDatabase(config.m2mDataBase));
+                quorumPeer.setZKDatabase(new DSDatabase(config.m2mDataBase,quorumPeer.getFileTxnLog()));
                 quorumPeer.setMyid(config.getServerId());
                 quorumPeer.setTickTime(config.getTickTime());
                 quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());

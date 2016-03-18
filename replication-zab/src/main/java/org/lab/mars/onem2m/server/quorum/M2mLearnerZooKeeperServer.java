@@ -17,6 +17,7 @@
  */
 package org.lab.mars.onem2m.server.quorum;
 
+import lab.mars.ds.ds.persistence.FileTxnLog;
 import org.lab.mars.onem2m.server.ServerCnxn;
 import org.lab.mars.onem2m.server.DSDatabase;
 
@@ -27,11 +28,11 @@ import java.util.HashMap;
  * Parent class for all ZooKeeperServers for Learners
  */
 public abstract class M2mLearnerZooKeeperServer extends QuorumZooKeeperServer {
-    public M2mLearnerZooKeeperServer(int tickTime,
+    public M2mLearnerZooKeeperServer(FileTxnLog fileTxnLog, int tickTime,
                                      int minSessionTimeout, int maxSessionTimeout,
                                      DSDatabase zkDb, M2mQuorumPeer self)
             throws IOException {
-        super(tickTime, minSessionTimeout, maxSessionTimeout,
+        super(fileTxnLog,tickTime, minSessionTimeout, maxSessionTimeout,
                  zkDb, self);
     }
 

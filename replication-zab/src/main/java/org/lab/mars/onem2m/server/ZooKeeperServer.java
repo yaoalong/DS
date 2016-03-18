@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import lab.mars.ds.ds.persistence.FileTxnLog;
 import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.data.StatPersisted;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
@@ -80,6 +81,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     protected RequestProcessor firstProcessor;
     protected volatile boolean running;
     int requestsInProcess;
+    private FileTxnLog fileTxnLog;
     private DSDatabase dsDB;
     private ServerCnxnFactory serverCnxnFactory;
 
@@ -91,9 +93,10 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * @throws IOException
      */
 
-    public ZooKeeperServer(int tickTime, int minSessionTimeout,
-            int maxSessionTimeout, DSDatabase dsDB) {
+    public ZooKeeperServer(FileTxnLog fileTxnLog,int tickTime, int minSessionTimeout,
+                           int maxSessionTimeout, DSDatabase dsDB) {
         serverStats = new ServerStats(this);
+        this.fileTxnLog=fileTxnLog;
         this.dsDB = dsDB;
         this.tickTime = tickTime;
         this.minSessionTimeout = minSessionTimeout;
@@ -110,7 +113,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * @throws IOException
      */
     public ZooKeeperServer(int tickTime) throws IOException {
-        this(tickTime, -1, -1, new DSDatabase(null));
+        this(null,tickTime, -1, -1, new DSDatabase(null, null));
     }
 
     /**
@@ -128,7 +131,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * @throws IOException
      */
     public ZooKeeperServer() throws IOException {
-        this(DEFAULT_TICK_TIME, -1, -1, new DSDatabase(null));
+        serverStats=new ServerStats(this);
     }
 
     public static int getSnapCount() {
@@ -199,7 +202,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     }
 
-
     /**
      * This should be called from a synchronized block on this!
      */
@@ -253,7 +255,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public void startdata() throws IOException, InterruptedException {
         // check to see if zkDb is not null
         if (dsDB == null) {
-            dsDB = new DSDatabase(null);
+            dsDB = new DSDatabase(null, null);
         }
         if (!dsDB.isInitialized()) {
             loadData();

@@ -20,6 +20,7 @@ package org.lab.mars.onem2m.server.quorum;
 
 import java.io.IOException;
 
+import lab.mars.ds.ds.persistence.FileTxnLog;
 import org.lab.mars.onem2m.server.DSDatabase;
 import org.lab.mars.onem2m.server.M2mFinalRequestProcessor;
 import org.lab.mars.onem2m.server.PrepRequestProcessor;
@@ -35,9 +36,9 @@ import org.lab.mars.onem2m.server.ServerCnxn;
 public class M2mLeaderZooKeeperServer extends QuorumZooKeeperServer {
     M2mCommitProcessor commitProcessor;
 
-    M2mLeaderZooKeeperServer(M2mQuorumPeer self, DSDatabase zkDb)
+    M2mLeaderZooKeeperServer(FileTxnLog fileTxnLog,M2mQuorumPeer self, DSDatabase zkDb)
             throws IOException {
-        super(self.tickTime, self.minSessionTimeout, self.maxSessionTimeout,
+        super(fileTxnLog,self.tickTime, self.minSessionTimeout, self.maxSessionTimeout,
                 zkDb, self);
     }
 
