@@ -225,7 +225,6 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         return new QueryBuilder(cluster);
     }
 
-    // TODO 关闭资源
     @Override
     public void close() {
 

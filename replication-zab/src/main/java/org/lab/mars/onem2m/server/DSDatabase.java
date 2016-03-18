@@ -376,6 +376,7 @@ public class DSDatabase implements M2mRecord {
      */
     public void close() throws IOException {
         this.fileTxnLog.close();
+        this.m2mDataBase.close();
     }
 
     public long getMinCommittedLog() {
