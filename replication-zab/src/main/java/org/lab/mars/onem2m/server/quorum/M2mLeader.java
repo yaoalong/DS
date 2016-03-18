@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.server.M2mFinalRequestProcessor;
 import org.lab.mars.onem2m.server.M2mRequest;
@@ -347,8 +348,9 @@ public class M2mLeader {
      * 
      * @throws IOException
      * @throws InterruptedException
+     * @throws M2mKeeperException
      */
-    void lead() throws IOException, InterruptedException {
+    void lead() throws IOException, InterruptedException, M2mKeeperException {
         self.end_fle = System.currentTimeMillis();
         LOG.info("LEADING - LEADER ELECTION TOOK - "
                 + (self.end_fle - self.start_fle));

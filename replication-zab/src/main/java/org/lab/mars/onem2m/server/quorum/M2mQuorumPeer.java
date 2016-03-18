@@ -33,6 +33,7 @@ import lab.mars.ds.ds.persistence.FileTxnLog;
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.persistence.DSDatabaseImpl;
 
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.server.DSDatabase;
 import org.lab.mars.onem2m.server.ServerCnxnFactory;
 import org.lab.mars.onem2m.server.ZooKeeperServer;
@@ -285,16 +286,28 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
                 LOG.error("zookeeper monitor start errror:{}", e);
             }
         }
-        loadDataBase();
+        try {
+            loadDataBase();
+        } catch (M2mKeeperException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-        startLeaderElection();
+        try {
+            startLeaderElection();
+        } catch (M2mKeeperException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         super.start();
     }
 
     /**
      * 将Zxid写入文件中
+     * 
+     * @throws M2mKeeperException
      */
-    private void loadDataBase() {
+    private void loadDataBase() throws M2mKeeperException {
         ;
         try {
             zkDb.setRangeDOs(rangeDOs);
@@ -316,7 +329,7 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
 
     }
 
-    synchronized public void startLeaderElection() {
+    synchronized public void startLeaderElection() throws M2mKeeperException {
         try {
             currentVote = new M2mVote(myid, getLastLoggedZxid(),
                     getCurrentEpoch());
@@ -342,8 +355,9 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
      * returns the highest zxid that this host has seen
      *
      * @return the highest zxid for this host
+     * @throws M2mKeeperException
      */
-    public long getLastLoggedZxid() {
+    public long getLastLoggedZxid() throws M2mKeeperException {
         if (!zkDb.isInitialized()) {
             loadDataBase();
         }

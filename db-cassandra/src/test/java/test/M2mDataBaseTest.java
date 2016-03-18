@@ -22,12 +22,12 @@ public class M2mDataBaseTest {
             "192.168.10.124");
 
     @Test
-    public void test() {
+    public void test() throws M2mKeeperException {
         m2mDataBase.truncate((long) 4);
     }
 
     @Test
-    public void testRetrieve() {
+    public void testRetrieve() throws M2mKeeperException {
         List<RangeDO> rangeDOs = new ArrayList<RangeDO>();
         rangeDOs.add(new RangeDO(0L, 2429425133L));
         rangeDOs.add(new RangeDO(2429425133L, 2611217912L));
@@ -39,12 +39,12 @@ public class M2mDataBaseTest {
     }
 
     @Test
-    public void testDelete() {
+    public void testDelete() throws M2mKeeperException {
         m2mDataBase.delete("3333433");
     }
 
     @Test
-    public void testRetrieve1() {
+    public void testRetrieve1() throws M2mKeeperException {
 
         List<M2mDataNode> m2mDataNodes = m2mDataBase.retrieve(634L);
         m2mDataNodes.forEach(m2mDataNode -> {
@@ -54,7 +54,7 @@ public class M2mDataBaseTest {
     }
 
     @Test
-    public void testUpdate() {
+    public void testUpdate() throws M2mKeeperException {
         List<RangeDO> rangeDOs = new ArrayList<RangeDO>();
         rangeDOs.add(new RangeDO(0L, 2429425133L));
         rangeDOs.add(new RangeDO(2429425133L, 2611217912L));
@@ -68,7 +68,7 @@ public class M2mDataBaseTest {
     }
 
     @Test
-    public void testCreate() throws M2mKeeperException.NodeExistsException {
+    public void testCreate() throws M2mKeeperException {
         Random random = new Random();
         for (int i = 0; i < 10; i++) {
             M2mDataNode m2mDataNode = new M2mDataNode();

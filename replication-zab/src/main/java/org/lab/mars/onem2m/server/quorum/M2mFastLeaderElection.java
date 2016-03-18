@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumCnxManager.Message;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeer.ServerState;
@@ -695,7 +696,7 @@ public class M2mFastLeaderElection implements M2mElection {
      *            epoch id
      */
     protected boolean checkLeader(HashMap<Long, M2mVote> votes, long leader,
-                                  long electionEpoch) {
+            long electionEpoch) {
 
         boolean predicate = true;
 
@@ -732,7 +733,7 @@ public class M2mFastLeaderElection implements M2mElection {
      * @return
      */
     protected boolean ooePredicate(HashMap<Long, M2mVote> recv,
-                                   HashMap<Long, M2mVote> ooe, Notification n) {
+            HashMap<Long, M2mVote> ooe, Notification n) {
 
         return (termPredicate(recv, new M2mVote(n.version, n.leader, n.zxid,
                 n.electionEpoch, n.peerEpoch, n.state)) && checkLeader(ooe,
@@ -791,7 +792,13 @@ public class M2mFastLeaderElection implements M2mElection {
      */
     private long getInitLastLoggedZxid() {
 
-        return self.getLastLoggedZxid();
+        try {
+            return self.getLastLoggedZxid();
+        } catch (M2mKeeperException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return 0L;
 
     }
 
@@ -983,8 +990,9 @@ public class M2mFastLeaderElection implements M2mElection {
                          * Before joining an established ensemble, verify a
                          * majority is following the same leader.
                          */
-                        outofelection.put(n.sid, new M2mVote(n.version, n.leader,
-                                n.zxid, n.electionEpoch, n.peerEpoch, n.state));
+                        outofelection.put(n.sid, new M2mVote(n.version,
+                                n.leader, n.zxid, n.electionEpoch, n.peerEpoch,
+                                n.state));
 
                         if (ooePredicate(outofelection, outofelection, n)) {
                             synchronized (this) {

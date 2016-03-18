@@ -31,7 +31,9 @@ import java.util.List;
 import java.util.Random;
 
 import lab.mars.ds.ds.persistence.FileTxnLog;
+
 import org.lab.mars.ds.server.ProcessTxnResult;
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.data.StatPersisted;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
@@ -93,10 +95,10 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * @throws IOException
      */
 
-    public ZooKeeperServer(FileTxnLog fileTxnLog,int tickTime, int minSessionTimeout,
-                           int maxSessionTimeout, DSDatabase dsDB) {
+    public ZooKeeperServer(FileTxnLog fileTxnLog, int tickTime,
+            int minSessionTimeout, int maxSessionTimeout, DSDatabase dsDB) {
         serverStats = new ServerStats(this);
-        this.fileTxnLog=fileTxnLog;
+        this.fileTxnLog = fileTxnLog;
         this.dsDB = dsDB;
         this.tickTime = tickTime;
         this.minSessionTimeout = minSessionTimeout;
@@ -113,7 +115,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * @throws IOException
      */
     public ZooKeeperServer(int tickTime) throws IOException {
-        this(null,tickTime, -1, -1, new DSDatabase(null, null));
+        this(null, tickTime, -1, -1, new DSDatabase(null, null));
     }
 
     /**
@@ -131,7 +133,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * @throws IOException
      */
     public ZooKeeperServer() throws IOException {
-        serverStats=new ServerStats(this);
+        serverStats = new ServerStats(this);
     }
 
     public static int getSnapCount() {
@@ -192,8 +194,11 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     /**
      * Restore sessions and data
+     * 
+     * @throws M2mKeeperException
      */
-    public void loadData() throws IOException, InterruptedException {
+    public void loadData() throws IOException, InterruptedException,
+            M2mKeeperException {
         if (dsDB.isInitialized()) {
             setZxid(dsDB.getLastProcessedZxid());
         } else {
@@ -252,7 +257,8 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     protected void registerJMX() {
     }
 
-    public void startdata() throws IOException, InterruptedException {
+    public void startdata() throws IOException, InterruptedException,
+            M2mKeeperException {
         // check to see if zkDb is not null
         if (dsDB == null) {
             dsDB = new DSDatabase(null, null);
@@ -404,9 +410,17 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     /**
      * return the last proceesed id from the datatree
+     * 
+     * @throws M2mKeeperException
      */
     public long getLastProcessedZxid() {
-        return dsDB.getLastProcessedZxid();
+        try {
+            return dsDB.getLastProcessedZxid();
+        } catch (M2mKeeperException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return 0L;
     }
 
     /**
@@ -501,7 +515,8 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     /*
      * 在这里处理事务请求,应用到数据数据库
      */
-    public ProcessTxnResult processTxn(M2mTxnHeader hdr, M2mRecord txn) {
+    public ProcessTxnResult processTxn(M2mTxnHeader hdr, M2mRecord txn)
+            throws M2mKeeperException {
         ProcessTxnResult rc;
         rc = getDSDatabase().processTxn(hdr, txn);
         return rc;

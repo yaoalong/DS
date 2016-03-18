@@ -25,7 +25,10 @@ public class M2mKeeperException extends Exception {
 
     public enum Code {
 
-        OK(1), NODEEXISTS(-110),NONODE(-101);
+        OK(1), NODEEXISTS(-110),NONODE(-101),
+        PARAM_ERROR(-100),
+        HANDLE_RANGE_NOT_INIT(-99),
+        RANGEDO_CAN_NOT_NULL(-98);
         private final int code;
 
         Code(int code) {

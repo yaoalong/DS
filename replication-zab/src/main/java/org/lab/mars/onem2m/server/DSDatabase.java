@@ -18,10 +18,21 @@
 
 package org.lab.mars.onem2m.server;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
 import lab.mars.ds.ds.persistence.FileTxnLog;
 import lab.mars.ds.ds.persistence.PlayBackListener;
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.persistence.DSDatabaseInterface;
+
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.M2mKeeperException;
@@ -36,16 +47,6 @@ import org.lab.mars.onem2m.server.util.SerializeUtils;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 /**
  * This class maintains the in memory database of zookeeper server states that
@@ -149,8 +150,9 @@ public class DSDatabase implements M2mRecord {
      *
      * @return the last valid zxid on disk
      * @throws IOException
+     * @throws M2mKeeperException
      */
-    public long loadDataBase() throws IOException {
+    public long loadDataBase() throws IOException, M2mKeeperException {
         PlayBackListener listener = new PlayBackListener() {
             public void onTxnLoaded(M2mTxnHeader hdr, M2mRecord txn) {
                 M2mRequest r = new M2mRequest(null, 0, hdr.getType(), null);
@@ -203,7 +205,7 @@ public class DSDatabase implements M2mRecord {
         // return highestZxid;
     }
 
-    public Long getLastProcessedZxid() {
+    public Long getLastProcessedZxid() throws M2mKeeperException {
         lastProcessedZxid = m2mDataBase.getMaxZxid(rangeDOs);
         return lastProcessedZxid;
     }
@@ -216,7 +218,8 @@ public class DSDatabase implements M2mRecord {
      * maintains a list of last <i>committedLog</i> or so committed requests.
      * This is used for fast follower synchronization.
      *
-     * @param request committed request
+     * @param request
+     *            committed request
      */
     public void addCommittedProposal(M2mRequest request) {
         WriteLock wl = logLock.writeLock();
@@ -267,15 +270,19 @@ public class DSDatabase implements M2mRecord {
     /**
      * the process txn on the data
      *
-     * @param hdr the txnheader for the txn
-     * @param txn the transaction that needs to be processed
+     * @param hdr
+     *            the txnheader for the txn
+     * @param txn
+     *            the transaction that needs to be processed
      * @return the result of processing the transaction on this
-     * datatree/zkdatabase
+     *         datatree/zkdatabase
+     * @throws M2mKeeperException
      */
     /*
      * m2m内存数据库处理事务请求
      */
-    public ProcessTxnResult processTxn(M2mTxnHeader hdr, M2mRecord txn) {
+    public ProcessTxnResult processTxn(M2mTxnHeader hdr, M2mRecord txn)
+            throws M2mKeeperException {
         ProcessTxnResult processTxnResult = m2mDataBase.processTxn(hdr, txn);
         if (processTxnResult.zxid > getLastProcessedZxid()) {
             setLastProcessedZxid(processTxnResult.zxid);
@@ -286,7 +293,7 @@ public class DSDatabase implements M2mRecord {
     /*
      * 获取数据
      */
-    public Object getData(String key) {
+    public Object getData(String key) throws M2mKeeperException {
         return m2mDataBase.retrieve(key);
     }
 
@@ -299,7 +306,8 @@ public class DSDatabase implements M2mRecord {
     /*
      *
 	 */
-    public boolean truncateLog(long zxid) throws IOException {
+    public boolean truncateLog(long zxid) throws IOException,
+            M2mKeeperException {
         clear();
         if (!fileTxnLog.truncate(zxid)) {
             return false;
@@ -311,7 +319,8 @@ public class DSDatabase implements M2mRecord {
     /**
      * deserialize a snapshot from an input archive
      *
-     * @param ia the input archive you want to deserialize from
+     * @param ia
+     *            the input archive you want to deserialize from
      * @throws IOException
      */
     public void deserializeSnapshot(M2mInputArchive ia) throws IOException {
@@ -323,8 +332,9 @@ public class DSDatabase implements M2mRecord {
     /**
      * serialize the snapshot
      *
-     * @param oa the output archive to which the snapshot needs to be
-     *           serialized
+     * @param oa
+     *            the output archive to which the snapshot needs to be
+     *            serialized
      * @throws IOException
      * @throws InterruptedException
      */
@@ -346,7 +356,8 @@ public class DSDatabase implements M2mRecord {
     /**
      * append to the underlying transaction log
      *
-     * @param si the request to append
+     * @param si
+     *            the request to append
      * @return true if the append was succesfull and false if not
      */
     public boolean append(M2mRequest si) throws IOException {
@@ -389,7 +400,12 @@ public class DSDatabase implements M2mRecord {
 
     public void serialize(Long peerLast, M2mOutputArchive archive, String tag)
             throws IOException {
-        List<M2mDataNode> dataNodes = m2mDataBase.retrieve(peerLast);
+        List<M2mDataNode> dataNodes = null;
+        try {
+            dataNodes = m2mDataBase.retrieve(peerLast);
+        } catch (M2mKeeperException e) {
+            e.printStackTrace();
+        }
         archive.writeInt(dataNodes.size(), "count");
         for (M2mDataNode m2mDataNode : dataNodes) {
             archive.writeString(m2mDataNode.getId(), "key");
@@ -409,7 +425,7 @@ public class DSDatabase implements M2mRecord {
             nodes.put(key, m2mDataNode);
             try {
                 m2mDataBase.create(m2mDataNode);
-            } catch (M2mKeeperException.NodeExistsException e) {
+            } catch (M2mKeeperException e) {
             }
             count--;
         }

@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mInputArchive;
@@ -251,8 +252,10 @@ public class M2mLearner {
      * @param pktType
      * @return the zxid the Leader sends for synchronization purposes.
      * @throws IOException
+     * @throws M2mKeeperException
      */
-    protected long registerWithLeader(int pktType) throws IOException {
+    protected long registerWithLeader(int pktType) throws IOException,
+            M2mKeeperException {
         /*
          * Send follower info, including last zxid and sid
          */
@@ -349,8 +352,13 @@ public class M2mLearner {
                 // we need to truncate the log to the lastzxid of the leader
                 LOG.warn("Truncating log to get in sync with the leader 0x"
                         + Long.toHexString(qp.getZxid()));
-                boolean truncated = zk.getDSDatabase()
-                        .truncateLog(qp.getZxid());
+                boolean truncated = false;
+                try {
+                    truncated = zk.getDSDatabase().truncateLog(qp.getZxid());
+                } catch (M2mKeeperException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 if (!truncated) {
                     // not able to truncate the log
                     LOG.error("Not able to truncate the log "
@@ -402,7 +410,12 @@ public class M2mLearner {
                                     + ", but next proposal is "
                                     + pif.hdr.getZxid());
                         } else {
-                            zk.processTxn(pif.hdr, pif.rec);
+                            try {
+                                zk.processTxn(pif.hdr, pif.rec);
+                            } catch (M2mKeeperException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
                             packetsNotCommitted.remove();
                         }
                     } else {
@@ -428,7 +441,11 @@ public class M2mLearner {
                     lastQueued = packet.hdr.getZxid();
                     if (!snapshotTaken) {
                         // Apply to db directly if we haven't taken the snapshot
-                        zk.processTxn(packet.hdr, packet.rec);
+                        try {
+                            zk.processTxn(packet.hdr, packet.rec);
+                        } catch (M2mKeeperException e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         packetsNotCommitted.add(packet);
                         packetsCommitted.add(qp.getZxid());

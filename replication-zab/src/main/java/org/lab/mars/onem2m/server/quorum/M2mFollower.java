@@ -21,6 +21,7 @@ package org.lab.mars.onem2m.server.quorum;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.server.util.M2mSerializeUtils;
 import org.lab.mars.onem2m.server.util.ZxidUtils;
@@ -66,7 +67,13 @@ public class M2mFollower extends M2mLearner {
             InetSocketAddress addr = findLeader();
             try {
                 connectToLeader(addr);
-                long newEpochZxid = registerWithLeader(M2mLeader.FOLLOWERINFO);
+                long newEpochZxid = 0;
+                try {
+                    newEpochZxid = registerWithLeader(M2mLeader.FOLLOWERINFO);
+                } catch (M2mKeeperException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
                 // check to see if the leader zxid is lower than ours
                 // this should never happen but is just a safety check

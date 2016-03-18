@@ -32,6 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
@@ -333,21 +334,29 @@ public class M2mLearnerHandler extends Thread {
                     } else {
                         LOG.warn("Unhandled proposal scenario");
                     }
-                } else if (peerLastZxid == leader.zk.getDSDatabase()
-                        .getLastProcessedZxid()) {// 如果follower和Leader保持同步，那么只需要发送一个DIFF包
-                    // The leader may recently take a snapshot, so the
-                    // committedLog
-                    // is empty. We don't need to send snapshot if the follow
-                    // is already sync with in-memory db.
-                    LOG.debug("committedLog is empty but leader and follower "
-                            + "are in sync, zxid=0x{}",
-                            Long.toHexString(peerLastZxid));
-                    packetToSend = M2mLeader.DIFF;
-                    zxidToSend = peerLastZxid;
-                } else {
-                    // just let the state transfer happen
-                    LOG.debug("proposals is empty");
-                }
+                } else
+                    try {
+                        if (peerLastZxid == leader.zk.getDSDatabase()
+                                .getLastProcessedZxid()) {// 如果follower和Leader保持同步，那么只需要发送一个DIFF包
+                            // The leader may recently take a snapshot, so the
+                            // committedLog
+                            // is empty. We don't need to send snapshot if the
+                            // follow
+                            // is already sync with in-memory db.
+                            LOG.debug(
+                                    "committedLog is empty but leader and follower "
+                                            + "are in sync, zxid=0x{}",
+                                    Long.toHexString(peerLastZxid));
+                            packetToSend = M2mLeader.DIFF;
+                            zxidToSend = peerLastZxid;
+                        } else {
+                            // just let the state transfer happen
+                            LOG.debug("proposals is empty");
+                        }
+                    } catch (M2mKeeperException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
 
                 LOG.info("Sending " + M2mLeader.getPacketType(packetToSend));// 发送的类型
                 leaderLastZxid = leader.startForwarding(this, updates);
@@ -365,7 +374,13 @@ public class M2mLearnerHandler extends Thread {
             bufferedOutput.flush();
             // Need to set the zxidToSend to the latest zxid
             if (packetToSend == M2mLeader.SNAP) {
-                zxidToSend = leader.zk.getDSDatabase().getLastProcessedZxid();// 获取对应的zxid
+                try {
+                    zxidToSend = leader.zk.getDSDatabase()
+                            .getLastProcessedZxid();
+                } catch (M2mKeeperException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }// 获取对应的zxid
             }
             oa.writeRecord(new M2mQuorumPacket(packetToSend, zxidToSend, null),
                     "packet");

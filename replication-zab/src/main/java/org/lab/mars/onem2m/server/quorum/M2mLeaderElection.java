@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeer.ServerState;
 import org.slf4j.Logger;
@@ -58,8 +59,8 @@ public class M2mLeaderElection implements M2mElection {
         public int numValidVotes;
     }
 
-    protected ElectionResult countVotes(HashMap<InetSocketAddress, M2mVote> votes,
-            HashSet<Long> heardFrom) {
+    protected ElectionResult countVotes(
+            HashMap<InetSocketAddress, M2mVote> votes, HashSet<Long> heardFrom) {
         final ElectionResult result = new ElectionResult();
         // Initialize with null vote
         result.vote = new M2mVote(Long.MIN_VALUE, Long.MIN_VALUE);
@@ -141,7 +142,13 @@ public class M2mLeaderElection implements M2mElection {
     public M2mVote lookForLeader() throws InterruptedException {
 
         try {
-            self.setCurrentVote(new M2mVote(self.getId(), self.getLastLoggedZxid()));
+            try {
+                self.setCurrentVote(new M2mVote(self.getId(), self
+                        .getLastLoggedZxid()));
+            } catch (M2mKeeperException e2) {
+                // TODO Auto-generated catch block
+                e2.printStackTrace();
+            }
             // We are going to look for a leader by casting a vote for ourself
             byte requestBytes[] = new byte[4];
             ByteBuffer requestBuffer = ByteBuffer.wrap(requestBytes);
@@ -224,8 +231,13 @@ public class M2mLeaderElection implements M2mElection {
                 // for ourselves as otherwise we may hang on to a vote
                 // for a dead peer
                 if (result.numValidVotes == 0) {
-                    self.setCurrentVote(new M2mVote(self.getId(), self
-                            .getLastLoggedZxid()));
+                    try {
+                        self.setCurrentVote(new M2mVote(self.getId(), self
+                                .getLastLoggedZxid()));
+                    } catch (M2mKeeperException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 } else {
                     if (result.winner.getId() >= 0) {
                         self.setCurrentVote(result.vote);

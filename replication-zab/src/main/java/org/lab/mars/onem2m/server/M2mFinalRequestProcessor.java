@@ -29,6 +29,7 @@ import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.KeeperException;
 import org.lab.mars.onem2m.KeeperException.Code;
 import org.lab.mars.onem2m.KeeperException.SessionMovedException;
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.proto.M2mCreateResponse;
@@ -80,7 +81,12 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 M2mTxnHeader hdr = request.m2mTxnHeader;
                 M2mRecord txn = request.txn;
                 hdr.setZxid(request.zxid);
-                rc = zks.processTxn(hdr, txn);
+                try {
+                    rc = zks.processTxn(hdr, txn);
+                } catch (M2mKeeperException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
             if (M2mRequest.isQuorum(request.type)) {
                 zks.getDSDatabase().addCommittedProposal(request);
@@ -155,7 +161,13 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
             LOG.error("Dumping request buffer: 0x" + sb.toString());
             err = Code.MARSHALLINGERROR;
         }
-        long lastZxid = zks.getDSDatabase().getLastProcessedZxid();
+        long lastZxid = 0;
+        try {
+            lastZxid = zks.getDSDatabase().getLastProcessedZxid();
+        } catch (M2mKeeperException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         M2mReplyHeader hdr = new M2mReplyHeader(request.cxid, lastZxid,
                 err.intValue());
         M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);

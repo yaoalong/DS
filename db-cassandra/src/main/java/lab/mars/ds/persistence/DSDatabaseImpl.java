@@ -1,50 +1,33 @@
 package lab.mars.ds.persistence;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
-
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
+import com.datastax.driver.core.*;
+import com.datastax.driver.core.querybuilder.Insert;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.reflection.ResourceReflection;
-
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.ZooDefs;
-import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.txn.M2mCreateTxn;
 import org.lab.mars.onem2m.txn.M2mDeleteTxn;
 import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.ColumnDefinitions;
-import com.datastax.driver.core.Host;
-import com.datastax.driver.core.Metadata;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.Insert;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
+import java.util.*;
+
+import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static org.lab.mars.onem2m.M2mKeeperException.*;
 
 /**
- * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
+ * Author:yaoalong.
+ * Date:2016/3/3.
+ * Email:yaoalong@foxmail.com
  */
 public class DSDatabaseImpl implements DSDatabaseInterface {
-    static ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    static M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
     private String keyspace;
     private String table;
     private String node;
@@ -59,7 +42,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     }
 
     public DSDatabaseImpl(boolean clean, String keyspace, String table,
-            String node) {
+                          String node) {
         this.clean = clean;
         this.keyspace = keyspace;
         this.table = table;
@@ -87,7 +70,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         }
     }
 
-    private List<M2mDataNode> getM2mDataNodes(ResultSet resultSet) {
+    private List<M2mDataNode> getM2mDataNodes(ResultSet resultSet)throws  M2mKeeperException {
         List<M2mDataNode> m2mDataNodes = new ArrayList<>();
         Map<String, Object> result = new HashMap<String, Object>();
         for (Row row : resultSet.all()) {
@@ -98,7 +81,6 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                 Object object = row.getObject(name);
                 result.put(name, object);
             });
-            System.out.println("zxid:" + result.get("zxid"));
             if (judgeIsHandle((Long) result.get("zxid"))) {
                 m2mDataNodes.add(ResourceReflection.deserialize(
                         M2mDataNode.class, result));
@@ -140,6 +122,9 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                 return null;
             }
             List<M2mDataNode> m2mDataNodes = getM2mDataNodes(resultSet);
+            if (m2mDataNodes.size() == 0) {
+                return null;
+            }
             return m2mDataNodes.get(0);
 
         } catch (Exception ex) {
@@ -149,15 +134,21 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     }
 
     /**
-     * 插入数据
+     *
+     * @param object
+     * @return
+     * @throws M2mKeeperException
      */
     @Override
     public Long create(Object object)
-            throws M2mKeeperException.NodeExistsException {
-
-        M2mDataNode m2mDataNode = retrieve(((M2mDataNode) object).getId());
-        if (m2mDataNode != null && m2mDataNode.getId() != null) {
-            throw new M2mKeeperException.NodeExistsException();
+            throws M2mKeeperException {
+        M2mDataNode m2mDataNode=(M2mDataNode)object;
+        if(m2mDataNode.getId()==null||m2mDataNode.getData()==null||m2mDataNode.getValue()==0||m2mDataNode.getZxid()==0){
+            throw  new M2mKeeperException(Code.PARAM_ERROR,"M2mDataNode 参数错误");
+        }
+        M2mDataNode resultM2mDataNode = retrieve(((M2mDataNode) object).getId());
+        if (resultM2mDataNode != null && resultM2mDataNode.getId() != null) {
+            throw new NodeExistsException();
         }
         Map<String, Object> map = ResourceReflection.serialize(object);
         Insert insert = query().insertInto(keyspace, table);
@@ -167,9 +158,15 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     }
 
     @Override
-    public Long delete(String key) {
+    public Long delete(String key)throws M2mKeeperException {
         try {
+            if(key==null||key.isEmpty()){
+                throw new M2mKeeperException(Code.PARAM_ERROR,"delete key can't is null");
+            }
             M2mDataNode m2mDataNode = retrieve(key);
+            if(m2mDataNode==null){
+                throw new M2mKeeperException(Code.PARAM_ERROR,"key is not exists");
+            }
             Statement delete = query().delete().from(keyspace, table)
                     .where(eq("label", 0))
                     .and(eq("zxid", m2mDataNode.getZxid()));
@@ -182,11 +179,14 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     }
 
     @Override
-    public Long update(String key, M2mDataNode updated) {
+    public Long update(String key, M2mDataNode updated) throws  M2mKeeperException{
         try {
+            if(key==null||updated==null){
+                throw new M2mKeeperException(Code.PARAM_ERROR,"key or updated is error");
+            }
             M2mDataNode m2mDataNode = retrieve(key);
-            if (m2mDataNode == null) {
-                return 0L;
+            if(m2mDataNode==null){
+                throw new M2mKeeperException(Code.PARAM_ERROR,"key is not exists");
             }
             delete(key);
             m2mDataNode.setData(updated.getData());
@@ -202,6 +202,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         return new QueryBuilder(cluster);
     }
 
+    //TODO 关闭资源
     @Override
     public void close() {
 
@@ -224,28 +225,28 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             processTxnResult.zxid = header.getZxid();
             processTxnResult.err = 0;
             switch (header.getType()) {
-            case ZooDefs.OpCode.create:
-                M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
-                processTxnResult.path = createTxn.getPath();
-                M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
-                        .deserializeKryo(createTxn.getData());
-                m2mDataNode.setValue(NetworkPool.md5HashingAlg(m2mDataNode
-                        .getId()));
-                m2mDataNode.setZxid(header.getZxid());
-                create(m2mDataNode);
-                break;
-            case ZooDefs.OpCode.delete:
-                M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;
-                processTxnResult.path = deleteTxn.getPath();
-                delete(deleteTxn.getPath());
-                break;
-            case ZooDefs.OpCode.setData:
-                M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
-                processTxnResult.path = m2mSetDataTxn.getPath();
-                M2mDataNode object = (M2mDataNode) ResourceReflection
-                        .deserializeKryo(m2mSetDataTxn.getData());
-                update(m2mSetDataTxn.getPath(), object);
-                break;
+                case ZooDefs.OpCode.create:
+                    M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
+                    processTxnResult.path = createTxn.getPath();
+                    M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
+                            .deserializeKryo(createTxn.getData());
+                    m2mDataNode.setValue(NetworkPool.md5HashingAlg(m2mDataNode
+                            .getId()));
+                    m2mDataNode.setZxid(header.getZxid());
+                    create(m2mDataNode);
+                    break;
+                case ZooDefs.OpCode.delete:
+                    M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;
+                    processTxnResult.path = deleteTxn.getPath();
+                    delete(deleteTxn.getPath());
+                    break;
+                case ZooDefs.OpCode.setData:
+                    M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
+                    processTxnResult.path = m2mSetDataTxn.getPath();
+                    M2mDataNode object = (M2mDataNode) ResourceReflection
+                            .deserializeKryo(m2mSetDataTxn.getData());
+                    update(m2mSetDataTxn.getPath(), object);
+                    break;
             }
         } catch (M2mKeeperException e) {
             processTxnResult.err = e.getCode().intValue();
@@ -255,7 +256,10 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     }
 
     @Override
-    public boolean truncate(Long zxid) {
+    public boolean truncate(Long zxid)throws  M2mKeeperException {
+        if(zxid==null){
+            throw new M2mKeeperException(Code.PARAM_ERROR,"zxid can't is null");
+        }
         try {
 
             List<M2mDataNode> m2mDataNodes = retrieve(zxid);
@@ -277,7 +281,10 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
      * @return
      */
     @Override
-    public List<M2mDataNode> retrieve(Long zxid) {
+    public List<M2mDataNode> retrieve(Long zxid)throws M2mKeeperException {
+        if(zxid==null||zxid<=0){
+            throw  new M2mKeeperException(Code.PARAM_ERROR,"zxid can't is null");
+        }
         try {
             Select.Selection selection = query().select();
             Select select = selection.from(keyspace, table);
@@ -287,7 +294,6 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             if (resultSet == null) {
                 return null;
             }
-
             return getM2mDataNodes(resultSet);
 
         } catch (Exception ex) {
@@ -328,7 +334,10 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         return result;
     }
 
-    private boolean judgeIsHandle(long zxid) {
+    private boolean judgeIsHandle(long zxid)throws M2mKeeperException {
+        if(endRangeDOMap.size()==0){
+            throw  new M2mKeeperException(Code.HANDLE_RANGE_NOT_INIT,"handle range not init");
+        }
         SortedMap<Long, RangeDO> tmap = this.endRangeDOMap.tailMap(zxid);
 
         Long position = (tmap.isEmpty()) ? this.endRangeDOMap.firstKey() : tmap
@@ -341,7 +350,11 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     }
 
     @Override
-    public Long getMaxZxid(List<RangeDO> rangeDOs) {
+    public Long getMaxZxid(List<RangeDO> rangeDOs)throws  M2mKeeperException {
+
+        if(rangeDOs==null||rangeDOs.size()==0){
+            throw  new M2mKeeperException(Code.RANGEDO_CAN_NOT_NULL,"RangeDOs can't is null");
+        }
         long result = 0;
         for (RangeDO rangeDO : rangeDOs) {
             endRangeDOMap.put(rangeDO.getEnd(), rangeDO);
@@ -349,7 +362,6 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             if (temp > result) {
                 result = temp;
             }
-
         }
         return result;
 
