@@ -30,7 +30,9 @@ public class LRUManage implements ConnectManager {
             return false;
         }
     };
+    public LRUManage(){
 
+    }
     public LRUManage(int size) {
         this.size = size;
     }
@@ -39,9 +41,10 @@ public class LRUManage implements ConnectManager {
     public synchronized void refresh(Channel channel) {
         connectMessages.get(channel);
     }
-
     @Override
     public synchronized void add(Channel channel) {
         connectMessages.put(channel, true);
     }
+
+
 }
