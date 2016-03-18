@@ -96,7 +96,7 @@ public class M2mDataBaseTest {
         M2mTxnHeader m2mTxnHeader = new M2mTxnHeader();
         m2mTxnHeader.setType(OpCode.setData);
         M2mSetDataTxn m2mSetDataTxn = new M2mSetDataTxn();
-        m2mSetDataTxn.setPath("11111");
+        m2mSetDataTxn.setId("11111");
         M2mDataNode m2mDataNode = new M2mDataNode();
         m2mDataNode.setId(11111 + "");
         m2mDataNode.setLabel(0);
