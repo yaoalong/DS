@@ -34,7 +34,6 @@ public class TcpServerNetwork {
 
     public void close() {
         channels.forEach(channel -> channel.close());
-
     }
 
     public void setChannelChannelInitializer(

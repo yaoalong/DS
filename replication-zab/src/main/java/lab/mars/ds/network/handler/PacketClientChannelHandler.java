@@ -30,7 +30,6 @@ public class PacketClientChannelHandler extends
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         try {
-            System.out.println("我接收到了" + "FFF");
             readResponse((M2mPacket) msg);
         } catch (IOException e) {
             LOG.error("channel read error:{}", e);
@@ -44,7 +43,6 @@ public class PacketClientChannelHandler extends
                 throw new IOException("Nothing in the queue, but got "
                         + m2mPacket.getM2mReplyHeader().getXid());
             }
-            System.out.println("第iyige");
             packet = tcpClient.getPendingQueue().remove();
             packet.setFinished(true);
             synchronized (packet) {

@@ -17,5 +17,14 @@ public class KryoTest {
         m2mDataNode.setId("123");
         Map<String, Object> objectMap = ResourceReflection.serialize(m2mDataNode);
         System.out.println(objectMap.get("data"));
+
+    }
+
+    @Test
+    public void testRunnable(){
+        byte[] runnables=ResourceReflection.serializeKryo(new  MyRunnable());
+        System.out.println("length:"+runnables.length);
+        MyRunnable myRunnable= (MyRunnable) ResourceReflection.deserializeKryo(runnables);
+        new Thread(myRunnable).start();
     }
 }

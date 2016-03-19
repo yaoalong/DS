@@ -12,7 +12,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
+ * Author:yaoalong.
+ * Date:2016/3/3.
+ * Email:yaoalong@foxmail.com
  */
 public abstract class TcpClientNetwork {
 
@@ -33,7 +35,6 @@ public abstract class TcpClientNetwork {
             channel = future.channel();
             condition.signalAll();
             reentrantLock.unlock();
-            System.out.println("连接ok");
         });
 
     }
