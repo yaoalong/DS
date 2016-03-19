@@ -26,7 +26,7 @@ public class M2mSerializeUtils {
 
         hdr.deserialize(ia, "hdr");
         bais.mark(bais.available());
-        M2mRecord txn = null;
+        M2mRecord txn ;
         switch (hdr.getType()) {
             case OpCode.create:
                 txn = new M2mCreateTxn();

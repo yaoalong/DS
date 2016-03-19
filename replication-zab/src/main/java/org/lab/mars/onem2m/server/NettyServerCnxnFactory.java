@@ -20,7 +20,6 @@ package org.lab.mars.onem2m.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Map;
 
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.network.TcpServer;
@@ -35,14 +34,12 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
             .getLogger(NettyServerCnxnFactory.class);
     private Integer clientPort;
     private TcpServer tcpServer;
-    private Map<String, Long> allServers;
     /*
      * 获取本机的ip地址
      */
     private String myIp;
     private NetworkPool networkPool;
     private Integer replicationFactor;
-    private boolean isTemporyAdd;
 
     public NettyServerCnxnFactory(M2mQuorumPeerMain m2mQuorumPeerMain) {
         super(m2mQuorumPeerMain);
@@ -153,19 +150,6 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
     public void setReplicationFactory(Integer replicationFactor) {
         this.replicationFactor = replicationFactor;
 
-    }
-
-    public void setTemporyAdd(boolean isTemporyAdd) {
-        this.isTemporyAdd = isTemporyAdd;
-    }
-
-    public void setAllServers(Map<String, Long> allServers) {
-        this.allServers = allServers;
-    }
-
-    @Override
-    public Map<String, Long> getAllServer() {
-        return allServers;
     }
 
 }

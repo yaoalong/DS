@@ -63,20 +63,5 @@ public abstract class Op {
      */
     abstract Op withChroot(String addRootPrefix);
 
-    /**
-     * Performs client path validations.
-     *
-     * @throws IllegalArgumentException
-     *             if an invalid path is specified
-     * @throws KeeperException.BadArgumentsException
-     *             if an invalid create mode flag is specified
-     */
-    void validate() throws KeeperException {
-    }
-
-    // ////////////////
-    // these internal classes are public, but should not generally be
-    // referenced.
-    //
 
 }

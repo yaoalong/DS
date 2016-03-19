@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lab.mars.ds.loadbalance.impl.NetworkPool;
@@ -152,7 +151,5 @@ public abstract class ServerCnxnFactory {
     public ConcurrentHashMap<String, ZooKeeperServer> getZkServers() {
         return zkServers;
     }
-
-    public abstract Map<String, Long> getAllServer();
 
 }

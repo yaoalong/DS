@@ -29,8 +29,8 @@ public class M2mQuorumPeerMain extends Thread {
     public volatile boolean isStarted;
     private M2mHandler m2mHandler;
     private OneM2m oneM2m;
-    private volatile Integer webPort;
-    private volatile String address;
+    private volatile Integer zabClientPort;
+    private volatile String myAddress;
 
     private String[] configFile;
 
@@ -80,8 +80,8 @@ public class M2mQuorumPeerMain extends Thread {
     public void runFromConfig(QuorumPeerConfig config, String[] args)
             throws IOException, LoadBalanceException {
 
-        webPort = config.zabClientPort;
-        address = config.getMyIp();
+        zabClientPort = config.zabClientPort;
+        myAddress = config.getMyIp();
         LOG.info("Starting quorum peer");
         try {
             NetworkPool networkPool = new NetworkPool();
@@ -96,34 +96,34 @@ public class M2mQuorumPeerMain extends Thread {
             cnxnFactory.configure(config.zabClientPort, 5, m2mHandler,
                     config.numberOfConnections);
             cnxnFactory.setMyIp(config.getMyIp());
-            cnxnFactory.setAllServers(config.allServers);
             cnxnFactory.setReplicationFactory(config.getReplication_factor());// 设置复制因子
 
             ZooKeeperRegister zooKeeperRegister = new ZooKeeperRegister();
             zooKeeperRegister.starter(args, networkPool);
-            zooKeeperRegister.register(address + ":" + webPort);
+            zooKeeperRegister.register(myAddress + ":" + zabClientPort);
             List<M2mQuorumPeer> quorumPeers = new ArrayList<M2mQuorumPeer>();
 
-            for (long i = 0; i < config.positionToServers.size(); i++) {
+            for (int i = 0; i < config.quorumServersList.size(); i++) {
                 M2mQuorumPeer quorumPeer;
                 M2mQuorumServer m2mQuorumServer = config.getM2mQuorumServers();
                 HashMap<Long, QuorumServer> servers = m2mQuorumServer
-                        .getPositionToServers().get(i);
+                        .getQuorumsList().get(i);
 
                 if (i == 0) {
                     quorumPeer = new M2mQuorumPeer(true);
                 } else {
                     quorumPeer = new M2mQuorumPeer();
                 }
-                quorumPeer.setHandleIp(m2mQuorumServer.getServers().get(
-                        Integer.valueOf((i) + "")));
+                quorumPeer.setHandleIp(m2mQuorumServer.getServers().get(i));
                 quorumPeer.setQuorumVerifier(new M2mQuorumMaj(servers.size()));
                 quorumPeer.setQuorumPeers(servers);// 设置对应的服务器信息
-                quorumPeer.setFileTxnLog(new FileTxnLog(new File(config.getDataDir()+"/log")));
+                quorumPeer.setFileTxnLog(new FileTxnLog(new File(config
+                        .getDataDir() + "/log")));
                 quorumPeer.setElectionType(config.getElectionAlg());
                 quorumPeer.setCnxnFactory(cnxnFactory);
 
-                quorumPeer.setZKDatabase(new DSDatabase(config.m2mDataBase,quorumPeer.getFileTxnLog()));
+                quorumPeer.setZKDatabase(new DSDatabase(config.m2mDataBase,
+                        quorumPeer.getFileTxnLog()));
                 quorumPeer.setMyid(config.getServerId());
                 quorumPeer.setTickTime(config.getTickTime());
                 quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());
@@ -183,14 +183,14 @@ public class M2mQuorumPeerMain extends Thread {
             return null;
         }
         if (oneM2m == null) {
-            while (address == null && webPort == null) {
+            while (myAddress == null && zabClientPort == null) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            oneM2m = new OneM2m(address, webPort);
+            oneM2m = new OneM2m(myAddress, zabClientPort);
 
         }
 

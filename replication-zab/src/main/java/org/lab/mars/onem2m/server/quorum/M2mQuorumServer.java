@@ -7,17 +7,16 @@ import java.util.List;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeer.QuorumServer;
 
 public class M2mQuorumServer {
-    private HashMap<Long, HashMap<Long, QuorumServer>> positionToServers = new HashMap<>();
+    private List<HashMap<Long, QuorumServer>> quorumsList;
 
     private List<String> servers = new ArrayList<>();
 
-    public HashMap<Long, HashMap<Long, QuorumServer>> getPositionToServers() {
-        return positionToServers;
+    public List<HashMap<Long, QuorumServer>> getQuorumsList() {
+        return quorumsList;
     }
 
-    public void setPositionToServers(
-            HashMap<Long, HashMap<Long, QuorumServer>> positionToServers) {
-        this.positionToServers = positionToServers;
+    public void setQuorumsList(List<HashMap<Long, QuorumServer>> quorumsList) {
+        this.quorumsList = quorumsList;
     }
 
     public List<String> getServers() {

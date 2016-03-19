@@ -288,15 +288,8 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
         }
         try {
             loadDataBase();
-        } catch (M2mKeeperException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        try {
             startLeaderElection();
         } catch (M2mKeeperException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         super.start();
@@ -316,7 +309,6 @@ public class M2mQuorumPeer extends Thread implements QuorumStats.Provider {
 
             // load the epochs
             long lastProcessedZxid = zkDb.getLastProcessedZxid();
-            // System.exit(1);
             long epochOfZxid = ZxidUtils.getEpochFromZxid(lastProcessedZxid);
 
             System.out.println("epoch of zxid::::" + epochOfZxid);

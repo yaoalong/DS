@@ -53,12 +53,12 @@ public class QuorumPeerConfig {
     /**
      * 将所有机器拆分成不同的zab集群
      */
-    protected final HashMap<Long, HashMap<Long, QuorumServer>> positionToServers = new HashMap<>();
+    protected final List<HashMap<Long, QuorumServer>> quorumServersList = new ArrayList<>();
     /**
      * 一个服务器对应的sid
      */
 
-    protected final Map<String, Long> allServers = new HashMap<String, Long>();
+    protected final Map<String, Long> allServerToSids = new HashMap<String, Long>();
     protected InetSocketAddress clientPortAddress;
     protected String dataDir;
     protected String dataLogDir;
@@ -76,7 +76,6 @@ public class QuorumPeerConfig {
     protected int syncLimit;
     protected int electionAlg = 3;
     protected int electionPort = 2182;
-    protected HashMap<Long, Integer> sidAndWebPort = new HashMap<Long, Integer>();
     protected long serverId;
     protected String myIp;
     protected M2mQuorumVerifier quorumVerifier;
@@ -100,12 +99,11 @@ public class QuorumPeerConfig {
      * 不同机器实例对应的客户端端口号
      */
     private HashMap<Long, Integer> sidToClientPort = new HashMap<>();
-    private boolean isTemporyAdd = false;
     private Integer webPort;
 
     protected Integer numOfVirtualNode;
 
-    protected int numberOfConnections = 16;
+    protected Integer numberOfConnections;
 
     protected Integer zabClientPort;
 
@@ -215,14 +213,8 @@ public class QuorumPeerConfig {
                 numOfVirtualNode = Integer.valueOf(value);
             } else if (key.startsWith("zabPort")) {
                 int dot = key.indexOf('.');
-                System.out.println(key + "key");
                 long sid = Long.parseLong(key.substring(dot + 1));
                 sidToClientPort.put(sid, Integer.valueOf(value));
-            } else if (key.startsWith("webPort")) {
-                int dot = key.indexOf('.');
-                long sid = Long.parseLong(key.substring(dot + 1));
-                webPort = Integer.valueOf(value);
-                sidAndWebPort.put(sid, webPort);
             } else if (key.equals("zabClientPort")) {
                 zabClientPort = Integer.valueOf(value);
             } else if (key.equals("numberOfConnections")) {
@@ -305,9 +297,6 @@ public class QuorumPeerConfig {
             quorumVerifier = new M2mQuorumMaj(servers.size());
 
             m2mDataBase = new DSDatabaseImpl(cleaned, keySpace, table, node);
-
-            System.out.println("ok");
-
             File myIdFile = new File(dataDir, "myid");
             if (!myIdFile.exists()) {
                 throw new IllegalArgumentException(myIdFile.toString()
@@ -341,29 +330,31 @@ public class QuorumPeerConfig {
      */
     public void setAllReplicationServers() throws LoadBalanceException {
         networkPool = new NetworkPool();
+        // TODO 将allServerString这里修改为函数式
         for (M2mAddressToId m2mAddressToId : addressToSid) {
             Long sid = m2mAddressToId.getSid();
             Integer port = sidToClientPort.get(sid);
             String address = m2mAddressToId.getAddress();
             allServerStrings.add(address + ":" + port);
-            allServers.put(address + ":" + port, sid);
+            allServerToSids.put(address + ":" + port, sid);
         }
         if (numOfVirtualNode != null) {
             networkPool.setNumOfVirtualNode(numOfVirtualNode);
         }
-        networkPool.setNumOfVirtualNode(numOfVirtualNode);
-        networkPool.setReplicationFactor(replication_factor);
+        if (replication_factor != null) {
+            networkPool.setReplicationFactor(replication_factor);
+        }
+
         networkPool.setAllServers(allServerStrings);
         List<String> responseServers = networkPool.getReponseServers(myIp + ":"
                 + zabClientPort);
-        long i = 0;
         for (String responseServer : responseServers) {
             List<String> replicationServer = networkPool
                     .getReplicationServer(responseServer);
             HashMap<Long, QuorumServer> map = new HashMap<>();
 
             for (String server : replicationServer) {
-                Long sid = allServers.get(server);
+                Long sid = allServerToSids.get(server);
                 QuorumServer quorumServer = servers.get(sid);
                 String address = quorumServer.addr.getAddress()
                         .getHostAddress();
@@ -381,11 +372,10 @@ public class QuorumPeerConfig {
                         firstInetSocketAddress, secondInetSocketAddress);
                 map.put(sid, myQuorumServer);
             }
-            positionToServers.put(i, map);
-            i++;
+            quorumServersList.add(map);
         }
 
-        m2mQuorumServers.setPositionToServers(positionToServers);
+        m2mQuorumServers.setQuorumsList(quorumServersList);
         m2mQuorumServers.setServers(responseServers);
 
     }
@@ -492,14 +482,6 @@ public class QuorumPeerConfig {
 
     public NetworkPool getNetworkPool() {
         return networkPool;
-    }
-
-    public boolean isTemporyAdd() {
-        return isTemporyAdd;
-    }
-
-    public void setTemporyAdd(boolean isTemporyAdd) {
-        this.isTemporyAdd = isTemporyAdd;
     }
 
     public Integer getWebPort() {
