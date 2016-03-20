@@ -95,9 +95,13 @@ public class NetworkPool implements NetworkInterface {
     }
 
     public void populateConsistentBuckets() {
+
+        this.consistentBuckets = getConsistentBuckets(servers);
+        initialized = true;
+    }
+    public TreeMap<Long,String> getConsistentBuckets(List<String> servers){
         TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
         MessageDigest md5 = MD5.get();
-
         for (int i = 0; i < servers.size(); i++) {
             for (long j = 0; j < numOfVirtualNode; j++) {
                 byte[] d = md5.digest((servers.get(i) + "-" + j).getBytes());
@@ -111,27 +115,10 @@ public class NetworkPool implements NetworkInterface {
                 }
             }
         }
-        this.consistentBuckets = newConsistentBuckets;
-        initialized = true;
+        return newConsistentBuckets;
     }
-
     public synchronized void setAllServers(List<String> allServers) {
-        TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
-        MessageDigest md5 = MD5.get();
-
-        for (int i = 0; i < allServers.size(); i++) {
-            for (long j = 0; j < numOfVirtualNode; j++) {
-                byte[] d = md5.digest((allServers.get(i) + "-" + j).getBytes());
-                for (int h = 0; h < 1; h++) {
-                    Long k = ((long) (d[3 + h * 4] & 0xFF) << 24)
-                            | ((long) (d[2 + h * 4] & 0xFF) << 16)
-                            | ((long) (d[1 + h * 4] & 0xFF) << 8)
-                            | ((long) (d[0 + h * 4] & 0xFF));
-
-                    newConsistentBuckets.put(k, allServers.get(i));
-                }
-            }
-        }
+        TreeMap<Long, String> newConsistentBuckets = getConsistentBuckets(allServers);
         long position = 0;
         for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
 
@@ -241,6 +228,9 @@ public class NetworkPool implements NetworkInterface {
      */
     @Override
     public Long getServerFirstPosition(String key) throws LoadBalanceException {
+        if(key==null||key.isEmpty()){
+            throw new LoadBalanceException(Code.KEY_PARAM_NULL,"key can't is null");
+        }
         return getAllBucket(key);
     }
 
