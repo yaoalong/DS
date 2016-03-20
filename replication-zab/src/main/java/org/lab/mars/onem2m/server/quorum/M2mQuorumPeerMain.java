@@ -44,6 +44,7 @@ public class M2mQuorumPeerMain extends Thread {
     public static void main(String[] args) {
         M2mQuorumPeerMain main = new M2mQuorumPeerMain();
         try {
+            main.bindHandler(new CRUDM2mHandler());
             main.initializeAndRun(args);
         } catch (IllegalArgumentException e) {
             LOG.error("Invalid arguments, exiting abnormally", e);
@@ -79,7 +80,6 @@ public class M2mQuorumPeerMain extends Thread {
 
     public void runFromConfig(QuorumPeerConfig config, String[] args)
             throws IOException, LoadBalanceException {
-
         zabClientPort = config.zabClientPort;
         myAddress = config.getMyIp();
         LOG.info("Starting quorum peer");
