@@ -11,7 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 
+import org.lab.mars.onem2m.M2mKeeperException.Code;
 import org.lab.mars.onem2m.proto.M2mPacket;
+import org.lab.mars.onem2m.proto.M2mReplyHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,15 +98,25 @@ public class NettyServerCnxn extends ServerCnxn {
         for (Entry<String, ZooKeeperServer> entry : zookeeperServers.entrySet()) {
             System.out.println("逐渐:" + entry.getKey());
         }
-        while (zookeeperServers.get(server) == null) {
-            System.out.println("为空" + server);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        if (zookeeperServers.get(server) == null) {
+            for (int i = 0; i < 5; i++) {// 重新尝试五次
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
-        zookeeperServers.get(server).processPacket(ctx, m2mPacket);
+        if (zookeeperServers.get(server) == null) {
+            M2mReplyHeader m2mReplyHeader = new M2mReplyHeader(0, 0L,
+                    Code.SERVICE_IS_NOT_INIT.getCode());
+            M2mPacket result = new M2mPacket(m2mPacket.getM2mRequestHeader(),
+                    m2mReplyHeader, null, null);
+            ctx.writeAndFlush(result);
+        } else {
+            zookeeperServers.get(server).processPacket(ctx, m2mPacket);
+        }
+
     }
 
     @Override

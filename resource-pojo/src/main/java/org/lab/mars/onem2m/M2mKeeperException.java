@@ -25,14 +25,16 @@ public class M2mKeeperException extends Exception {
 
     public enum Code {
 
-        OK(1), NODEEXISTS(-110),NONODE(-101),
-        PARAM_ERROR(-100),
-        HANDLE_RANGE_NOT_INIT(-99),
-        RANGEDO_CAN_NOT_NULL(-98);
+        OK(1), NODEEXISTS(-110), NONODE(-101), PARAM_ERROR(-100), HANDLE_RANGE_NOT_INIT(
+                -99), RANGEDO_CAN_NOT_NULL(-98), SERVICE_IS_NOT_INIT(-49);
         private final int code;
 
         Code(int code) {
             this.code = code;
+        }
+
+        public int getCode() {
+            return code;
         }
     }
 
@@ -50,14 +52,17 @@ public class M2mKeeperException extends Exception {
             super(Code.NODEEXISTS, path);
         }
     }
+
     public static class NoNodeException extends M2mKeeperException {
         public NoNodeException() {
             super(Code.NONODE);
         }
+
         public NoNodeException(String path) {
             super(Code.NONODE, path);
         }
     }
+
     public Integer getCode() {
         return code.code;
     }

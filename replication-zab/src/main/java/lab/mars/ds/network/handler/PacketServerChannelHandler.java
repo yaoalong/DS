@@ -118,9 +118,7 @@ public class PacketServerChannelHandler extends
             ChannelHandlerContext ctx) throws LoadBalanceException {
         String key = m2mPacket.getM2mRequestHeader().getKey();
 
-        String trueServer = null;
-
-        trueServer = networkPool.getTrueServer(key);
+        String trueServer = networkPool.getTrueServer(key);
 
         if (trueServer.equals(self)) {
             return true;
@@ -146,7 +144,6 @@ public class PacketServerChannelHandler extends
 
                         tcpClient.write(m2mPacket);
                         ctx.writeAndFlush(m2mPacket);
-
                         ipAndTcpClient.put(server, tcpClient);
                         return false;
                     } catch (Exception e) {
