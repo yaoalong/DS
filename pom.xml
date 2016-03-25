@@ -20,6 +20,7 @@
         <module>ds-network</module>
         <module>connectmanage-interface</module>
         <module>connectmanage-lru</module>
+        <module>ds-web</module>
     </modules>
 
     <properties>
