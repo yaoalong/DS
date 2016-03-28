@@ -53,6 +53,8 @@ public class NetworkPool implements NetworkInterface {
 
     private Integer replicationFactor = 2;
 
+    private List<String> allServers;
+
     /**
      * 计算一个key的hash值
      *
@@ -118,6 +120,7 @@ public class NetworkPool implements NetworkInterface {
         return newConsistentBuckets;
     }
     public synchronized void setAllServers(List<String> allServers) {
+        this.allServers=allServers;
         TreeMap<Long, String> newConsistentBuckets = getConsistentBuckets(allServers);
         long position = 0;
         for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
@@ -384,6 +387,7 @@ public class NetworkPool implements NetworkInterface {
         return servers;
     }
 
+
     @Override
     public synchronized void setServers(List<String> servers)
             throws LoadBalanceException {
@@ -395,12 +399,18 @@ public class NetworkPool implements NetworkInterface {
         this.servers = servers;
     }
 
+    @Override
     public TreeMap<Long, String> getConsistentBuckets() {
         return consistentBuckets;
     }
 
+    @Override
     public TreeMap<Long, String> getAllConsistentBuckets() {
         return allConsistentBuckets;
+    }
+@Override
+    public ConcurrentHashMap<Long, String> getAllpositionToServer() {
+        return allpositionToServer;
     }
 
 }

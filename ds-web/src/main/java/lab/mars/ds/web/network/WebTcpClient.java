@@ -1,4 +1,4 @@
-package lab.mars.dds.web.network;
+package lab.mars.ds.web.network;
 
 import io.netty.channel.Channel;
 import lab.mars.ds.network.TcpClientNetwork;
@@ -26,18 +26,5 @@ public class WebTcpClient extends TcpClientNetwork {
         channel.writeAndFlush(msg);
     }
 
-    public void close() {
-        if (channel != null) {
-            channel.close();
-        }
-    }
-
-    public Channel getChannel() {
-        return channel;
-    }
-
-    public void setChannel(Channel channel) {
-        this.channel = channel;
-    }
 
 }

@@ -1,4 +1,4 @@
-package lab.mars.dds.web.network;
+package lab.mars.ds.web.network;
 
 import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.network.TcpServerNetwork;

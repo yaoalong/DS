@@ -44,19 +44,6 @@ public class M2mWebServerStatusResponse implements M2mRecord {
         a_.endRecord(tag);
     }
 
-    public String toString() {
-        try {
-            java.io.ByteArrayOutputStream s = new java.io.ByteArrayOutputStream();
-            M2mCsvOutputArchive a_ = new M2mCsvOutputArchive(s);
-            a_.startRecord(this, "");
-            a_.writeBuffer(data, "data");
-            a_.endRecord(this, "");
-            return new String(s.toByteArray(), "UTF-8");
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-        return "ERROR";
-    }
 
     public void write(java.io.DataOutput out) throws java.io.IOException {
         M2mBinaryOutputArchive archive = new M2mBinaryOutputArchive(out);
@@ -70,10 +57,7 @@ public class M2mWebServerStatusResponse implements M2mRecord {
 
     public int hashCode() {
         int result = 17;
-        int ret;
-        ret = java.util.Arrays.toString(data).hashCode();
-        result = 37 * result + ret;
-        result = 37 * result + ret;
+
         return result;
     }
 

@@ -1,6 +1,8 @@
 package lab.mars.ds.loadbalance;
 
 import java.util.List;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
@@ -136,5 +138,11 @@ public interface NetworkInterface {
      * @return
      */
     List<String> getServers();
+
+     TreeMap<Long, String> getConsistentBuckets();
+
+     TreeMap<Long, String> getAllConsistentBuckets();
+     ConcurrentHashMap<Long, String> getAllpositionToServer() ;
+
 
 }
