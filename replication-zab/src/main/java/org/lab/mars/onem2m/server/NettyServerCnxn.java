@@ -23,7 +23,6 @@ public class NettyServerCnxn extends ServerCnxn {
     Channel channel;
 
     int sessionTimeout;
-    AtomicLong outstandingCount = new AtomicLong();
     ServerCnxnFactory factory;
     boolean initialized;
     /**
@@ -107,6 +106,7 @@ public class NettyServerCnxn extends ServerCnxn {
                 }
             }
         }
+       factory.addPacketCount();
         if (zookeeperServers.get(server) == null) {
             M2mReplyHeader m2mReplyHeader = new M2mReplyHeader(0, 0L,
                     Code.SERVICE_IS_NOT_INIT.getCode());
@@ -121,7 +121,7 @@ public class NettyServerCnxn extends ServerCnxn {
 
     @Override
     public long getOutstandingRequests() {
-        return outstandingCount.longValue();
+        return 0L;
     }
 
     @Override

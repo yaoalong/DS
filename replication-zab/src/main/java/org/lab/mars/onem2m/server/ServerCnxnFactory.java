@@ -18,17 +18,15 @@
 
 package org.lab.mars.onem2m.server;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
-
 import lab.mars.ds.loadbalance.impl.NetworkPool;
-
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeerMain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class ServerCnxnFactory {
 
@@ -36,15 +34,15 @@ public abstract class ServerCnxnFactory {
     /**
      * The buffer will cause the connection to be close when we do a send.
      */
-    static final ByteBuffer closeConn = ByteBuffer.allocate(0);
     protected final HashSet<ServerCnxn> cnxns = new HashSet<ServerCnxn>();
-    protected ZooKeeperServer zkServer;
 
     /**
      * 多个ZooKeeper 不同的ip对应的是不同的ZooKeeperServer
      */
     protected ConcurrentHashMap<String, ZooKeeperServer> zkServers = new ConcurrentHashMap<String, ZooKeeperServer>();
     protected M2mQuorumPeerMain m2mQuorumPeerMain;
+
+    protected  Long packetCount=0L;
     Logger LOG = LoggerFactory.getLogger(ServerCnxnFactory.class);
 
     public ServerCnxnFactory(M2mQuorumPeerMain m2mQuorumPeerMain) {
@@ -66,12 +64,12 @@ public abstract class ServerCnxnFactory {
     }
 
     static public ServerCnxnFactory createFactory(int clientPort,
-            int maxClientCnxns) throws IOException {
+                                                  int maxClientCnxns) throws IOException {
         return createFactory(new InetSocketAddress(clientPort), maxClientCnxns);
     }
 
     static public ServerCnxnFactory createFactory(InetSocketAddress addr,
-            int maxClientCnxns) throws IOException {
+                                                  int maxClientCnxns) throws IOException {
         ServerCnxnFactory factory = createFactory();
         factory.configure(addr, maxClientCnxns);
         return factory;
@@ -120,7 +118,7 @@ public abstract class ServerCnxnFactory {
      * @param zooKeeperServer
      */
     final public void addZooKeeperServer(String ip,
-            ZooKeeperServer zooKeeperServer) {
+                                         ZooKeeperServer zooKeeperServer) {
         this.zkServers.put(ip, zooKeeperServer);
         zooKeeperServer.setServerCnxnFactory(this);
         if (ip.equals(getMyIp())) {
@@ -150,6 +148,17 @@ public abstract class ServerCnxnFactory {
 
     public ConcurrentHashMap<String, ZooKeeperServer> getZkServers() {
         return zkServers;
+    }
+
+    public void addPacketCount(){
+        synchronized (packetCount){
+            packetCount++;
+        }
+    }
+    public Long getPacketCount(){
+        synchronized (packetCount){
+            return packetCount;
+        }
     }
 
 }

@@ -305,5 +305,4 @@ public abstract class ServerCnxn implements Stats {
             return "EndOfStreamException: " + getMessage();
         }
     }
-
 }
