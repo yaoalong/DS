@@ -28,7 +28,7 @@ public class PacketServerChannelHandler extends
     private static final AttributeKey<NettyServerCnxn> STATE = AttributeKey
             .valueOf("PacketServerChannelHandler.nettyServerCnxn");
     private static Logger LOG = LoggerFactory
-            .getLogger(RegisterPacketServerChannelHandler.class);
+            .getLogger(PacketServerChannelHandler.class);
     private final LinkedList<M2mPacket> pendingQueue = new LinkedList<M2mPacket>();
     private ServerCnxnFactory serverCnxnFactory;
     private ConcurrentHashMap<String, TcpClient> ipAndTcpClient = new ConcurrentHashMap<>();
