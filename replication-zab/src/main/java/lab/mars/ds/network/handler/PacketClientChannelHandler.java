@@ -15,7 +15,7 @@ public class PacketClientChannelHandler extends
         SimpleChannelInboundHandler<Object> {
 
     private static final Logger LOG = LoggerFactory
-            .getLogger(RegisterPacketClientChannelHandler.class);
+            .getLogger(PacketClientChannelHandler.class);
     private TcpClient tcpClient;
 
     public PacketClientChannelHandler(TcpClient tcpClient) {
