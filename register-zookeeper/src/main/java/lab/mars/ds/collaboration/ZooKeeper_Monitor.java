@@ -62,6 +62,7 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
                 if (zooKeeper == null) {
                     return;
                 }
+
                 getChildrens();
             } catch (KeeperException | InterruptedException e) {
                 LOG.error("error:{}", e.getMessage());
