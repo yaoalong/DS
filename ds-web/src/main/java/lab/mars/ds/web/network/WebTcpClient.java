@@ -1,6 +1,5 @@
 package lab.mars.ds.web.network;
 
-import io.netty.channel.Channel;
 import lab.mars.ds.network.TcpClientNetwork;
 import lab.mars.ds.web.network.initializer.WebClientChannelInitializer;
 
