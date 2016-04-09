@@ -24,6 +24,4 @@ public class WebTcpClient extends TcpClientNetwork {
         }
         channel.writeAndFlush(msg);
     }
-
-
 }

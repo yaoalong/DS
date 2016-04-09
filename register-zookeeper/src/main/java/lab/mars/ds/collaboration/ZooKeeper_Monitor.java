@@ -1,7 +1,11 @@
 package lab.mars.ds.collaboration;
 
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
 import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.NetworkInterface;
+
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -10,9 +14,6 @@ import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 /*
  * 监控zookeeper,从而可以获取在线机器列表
@@ -35,11 +36,6 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
             zooKeeper = new ZooKeeper(zooKeeperServer, 5000, this);
             countDownLatch.await();
             getChildrens();
-
-            while (true) {
-                zooKeeper.getChildren("/server", this);
-                Thread.sleep(1000);
-            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +71,8 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
     /*
      * 去修改networkPool的服务器列表
      */
-    private void getChildrens() throws KeeperException, InterruptedException, LoadBalanceException {
+    private void getChildrens() throws KeeperException, InterruptedException,
+            LoadBalanceException {
         if (zooKeeper == null) {
             LOG.error("zookeeper is empty");
             return;
@@ -85,7 +82,6 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
         loadBalanceService.setServers(serverStrings);
 
     }
-
 
     public void setZooKeeperServer(String zooKeeperServer) {
         this.zooKeeperServer = zooKeeperServer;

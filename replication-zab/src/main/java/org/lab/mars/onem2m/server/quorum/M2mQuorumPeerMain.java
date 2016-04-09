@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import lab.mars.ds.collaboration.ZKRegisterAndMonitorService;
 import lab.mars.ds.ds.persistence.FileTxnLog;
 import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
-import lab.mars.ds.register.ZooKeeperRegister;
+import lab.mars.ds.web.network.WebTcpServer;
 
 import org.lab.mars.onem2m.OneM2m;
 import org.lab.mars.onem2m.proto.M2mPacket;
@@ -97,10 +98,9 @@ public class M2mQuorumPeerMain extends Thread {
                     config.numberOfConnections);
             cnxnFactory.setMyIp(config.getMyIp());
             cnxnFactory.setReplicationFactory(config.getReplication_factor());// 设置复制因子
-
-            ZooKeeperRegister zooKeeperRegister = new ZooKeeperRegister();
-            zooKeeperRegister.starter(args, networkPool);
-            zooKeeperRegister.register(myAddress + ":" + zabClientPort);
+            ZKRegisterAndMonitorService zkRegisterAndMonitorService = new ZKRegisterAndMonitorService();
+            zkRegisterAndMonitorService.register(config.zooKeeperServerString,
+                    myAddress + ":" + zabClientPort, networkPool);
             List<M2mQuorumPeer> quorumPeers = new ArrayList<M2mQuorumPeer>();
 
             for (int i = 0; i < config.quorumServersList.size(); i++) {
@@ -142,6 +142,9 @@ public class M2mQuorumPeerMain extends Thread {
                 quorumPeers.add(quorumPeer);
 
             }
+            WebTcpServer webTcpServer = new WebTcpServer(networkPool);
+            webTcpServer.bind(config.getMyIp(),
+                    config.sidAndWebPort.get(config.serverId));
             for (M2mQuorumPeer quorumPeer : quorumPeers) {
                 quorumPeer.join();
             }

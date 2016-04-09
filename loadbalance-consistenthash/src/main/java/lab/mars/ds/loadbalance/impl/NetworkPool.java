@@ -1,6 +1,5 @@
 package lab.mars.ds.loadbalance.impl;
 
-import java.awt.font.NumericShaper;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -101,7 +100,8 @@ public class NetworkPool implements NetworkInterface {
         this.consistentBuckets = getConsistentBuckets(servers);
         initialized = true;
     }
-    public TreeMap<Long,String> getConsistentBuckets(List<String> servers){
+
+    public TreeMap<Long, String> getConsistentBuckets(List<String> servers) {
         TreeMap<Long, String> newConsistentBuckets = new TreeMap<Long, String>();
         MessageDigest md5 = MD5.get();
         for (int i = 0; i < servers.size(); i++) {
@@ -119,8 +119,9 @@ public class NetworkPool implements NetworkInterface {
         }
         return newConsistentBuckets;
     }
+
     public synchronized void setAllServers(List<String> allServers) {
-        this.allServers=allServers;
+        this.allServers = allServers;
         TreeMap<Long, String> newConsistentBuckets = getConsistentBuckets(allServers);
         long position = 0;
         for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
@@ -190,7 +191,7 @@ public class NetworkPool implements NetworkInterface {
 
             if (server.equals(entry.getValue())) {
 
-                RangeDO rangeDO = new RangeDO(pre,entry.getKey());
+                RangeDO rangeDO = new RangeDO(pre, entry.getKey());
                 result.add(rangeDO);
             }
 
@@ -198,7 +199,7 @@ public class NetworkPool implements NetworkInterface {
         }
         if (server.equals(allConsistentBuckets.firstEntry().getValue())) {
             Map.Entry<Long, String> end = allConsistentBuckets.lastEntry();
-            RangeDO rangeDO = new RangeDO(end.getKey(),Long.MAX_VALUE);
+            RangeDO rangeDO = new RangeDO(end.getKey(), Long.MAX_VALUE);
             result.add(rangeDO);
         }
         return result;
@@ -231,8 +232,9 @@ public class NetworkPool implements NetworkInterface {
      */
     @Override
     public Long getServerFirstPosition(String key) throws LoadBalanceException {
-        if(key==null||key.isEmpty()){
-            throw new LoadBalanceException(Code.KEY_PARAM_NULL,"key can't is null");
+        if (key == null || key.isEmpty()) {
+            throw new LoadBalanceException(Code.KEY_PARAM_NULL,
+                    "key can't is null");
         }
         return getAllBucket(key);
     }
@@ -387,7 +389,6 @@ public class NetworkPool implements NetworkInterface {
         return servers;
     }
 
-
     @Override
     public synchronized void setServers(List<String> servers)
             throws LoadBalanceException {
@@ -397,6 +398,7 @@ public class NetworkPool implements NetworkInterface {
         }
         servers.forEach(t -> System.out.println("server:" + t));
         this.servers = servers;
+        initialize();
     }
 
     @Override
@@ -408,7 +410,8 @@ public class NetworkPool implements NetworkInterface {
     public TreeMap<Long, String> getAllConsistentBuckets() {
         return allConsistentBuckets;
     }
-@Override
+
+    @Override
     public ConcurrentHashMap<Long, String> getAllpositionToServer() {
         return allpositionToServer;
     }
