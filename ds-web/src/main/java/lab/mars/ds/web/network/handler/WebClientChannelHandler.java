@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 
 import lab.mars.ds.web.network.protocol.M2mWebPacket;
 import lab.mars.ds.web.network.protocol.M2mWebRetriveKeyResponse;
@@ -64,9 +65,10 @@ public class WebClientChannelHandler extends
         if (WebServerChannelHandler.serverResult.get(m2mRequestHeader.getXid()) >= replicationFactor) {
             M2mWebPacket m2mWebPacket = new M2mWebPacket(m2mRequestHeader,
                     m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
-                    new M2mWebRetriveKeyResponse(WebServerChannelHandler.result
-                            .get(m2mPacket.getM2mRequestHeader().getXid())
-                            .getServers()));
+                    new M2mWebRetriveKeyResponse(
+                            (List<String>) WebServerChannelHandler.result.get(
+                                    m2mPacket.getM2mRequestHeader().getXid())
+                                    .getServers()));
             WebServerChannelHandler.result.get(m2mRequestHeader.getXid())
                     .getCtx().writeAndFlush(m2mWebPacket);
             WebServerChannelHandler.result.remove(m2mRequestHeader.getXid());

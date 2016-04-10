@@ -3,11 +3,6 @@ package lab.mars.ds.web.network.handler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import lab.mars.ds.loadbalance.NetworkInterface;
-import lab.mars.ds.web.network.constant.WebOperateType;
-import lab.mars.ds.web.network.protocol.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +11,19 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import lab.mars.ds.loadbalance.NetworkInterface;
+import lab.mars.ds.web.network.constant.WebOperateType;
+import lab.mars.ds.web.network.protocol.M2mServerStatus;
+import lab.mars.ds.web.network.protocol.M2mServerStatusDO;
+import lab.mars.ds.web.network.protocol.M2mServerStatusDOs;
+import lab.mars.ds.web.network.protocol.M2mWebPacket;
+import lab.mars.ds.web.network.protocol.M2mWebRetriveKeyResponse;
+import lab.mars.ds.web.network.protocol.M2mWebServerStatusResponse;
+import lab.mars.ds.web.network.protocol.RetriveServerAndCtx;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServerChannelHandler extends
         SimpleChannelInboundHandler<Object> {
@@ -37,7 +45,10 @@ public class WebServerChannelHandler extends
             System.out.println("接收到了数据");
             M2mWebPacket m2mPacket = (M2mWebPacket) msg;
             int operateType = m2mPacket.getM2mRequestHeader().getType();
-            System.out.println(operateType + "操作类型");
+            System.out
+                    .println("hahs"
+                            + (operateType == WebOperateType.retriveLocalKey
+                                    .getCode()));
             if (operateType == WebOperateType.getStatus.getCode()) {
                 try {
                     lookAllServerStatus(m2mPacket, ctx.channel());
@@ -47,86 +58,109 @@ public class WebServerChannelHandler extends
                                 e.getMessage());
                     }
                 }
-//            } else if (operateType == WebOperateType.retriveLocalKey.getCode()) { // 查看本地是否包含一个key
-//                String key = m2mPacket.getM2mRequestHeader().getKey();
-//                if (key == null) {
-//                    if (LOG.isInfoEnabled()) {
-//                        LOG.info("key is null");
-//                    }
-//                }
-//                final ConcurrentHashMap<String, ZooKeeperServer> zookeeperServers = serverCnxnFactory
-//                        .getZkServers();
-//                Set<String> servers = new HashSet<String>();
-//                for (Map.Entry<String, ZooKeeperServer> entry : zookeeperServers
-//                        .entrySet()) {
-//                    ZooKeeperServer zooKeeperServer = entry.getValue();
-//                    ZKDatabase zkDatabase = zooKeeperServer.getZKDatabase();
-//                    if (zkDatabase.getM2mData().getNodes().containsKey(key)) {
-//                        servers.add(entry.getKey());
-//                    }
-//                }
-//                m2mPacket.getM2mRequestHeader().setType(
-//                        WebOperateType.ReplyRetriverRemoteKey.getCode());
-//                M2mWebPacket m2mWebPacket = new M2mWebPacket(
-//                        m2mPacket.getM2mRequestHeader(),
-//                        m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
-//                        new M2mWebRetriveKeyResponse(servers));
-//                ctx.writeAndFlush(m2mWebPacket);
-//            } else if (operateType == WebOperateType.retriveRemoteKey.getCode()) {
-//                System.out.println("进入到这里");
-//                String server = networkPool.getSock(m2mPacket
-//                        .getM2mRequestHeader().getKey());
-//                int zxid = getNextZxid();
-//                result.put(zxid, new RetriveServerAndCtx(ctx,
-//                        new HashSet<String>()));
-//                serverResult.put(zxid, 0);
-//                m2mPacket.getM2mRequestHeader().setXid(zxid);
-//                m2mPacket.getM2mRequestHeader().setType(
-//                        WebOperateType.retriveLocalKey.getCode());
-//                Long position = networkPool.getServerPosition().get(server);
-//                for (int i = 0; i < serverCnxnFactory.getReplicationFactor(); i++) {
-//
-//                    String address = spilitString(networkPool
-//                            .getPositionToServer().get(position + i))[0];
-//                    Integer webPort = NetworkPool.webPort.get(networkPool
-//                            .getPositionToServer().get(position + i));
-//                    WebTcpClient tcpClient = new WebTcpClient(
-//                            serverCnxnFactory.getReplicationFactor());
-//                    if (webAddressAndPortToChannel.containsKey(address
-//                            + webPort)) {
-//                        webAddressAndPortToChannel.get(address + webPort)
-//                                .writeAndFlush(m2mPacket);
-//                    } else {
-//                        tcpClient.connectionOne(address, webPort);
-//                        tcpClient.write(m2mPacket);
-//                        webAddressAndPortToChannel.put(address + webPort,
-//                                tcpClient.getChannel());
-//
-//                    }
-//
-//                }
-//
-//            }
-//            else if(operateType==WebOperateType.lookServerLoad.getCode()){
-//
-//            }
-//            else if(operateType==WebOperateType.lookRemoteServerLoad.getCode()){
-//
-//            }
-//            else {
-//                if (LOG.isDebugEnabled()) {
-//                    LOG.info("invalid operate type : {}", m2mPacket
-//                            .getM2mRequestHeader().getType());
-//                }
-//            }
-//        }
+            } else if (operateType == WebOperateType.retriveLocalKey.getCode()) {
+                System.out.println("xxxx");
+                String key = m2mPacket.getM2mRequestHeader().getKey();
+                List<String> servers = networkInterface
+                        .getReplicationServers(networkInterface
+                                .getTrueServer(key));
+
+                List<String> resultList = servers.stream().distinct()
+                        .collect(Collectors.toList());
+                resultList.forEach(t -> {
+                    System.out.println("result:" + t);
+                });
+                M2mWebPacket m2mWebPacket = new M2mWebPacket(
+                        m2mPacket.getM2mRequestHeader(),
+                        m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
+                        new M2mWebRetriveKeyResponse(servers));
+                ctx.writeAndFlush(m2mWebPacket);
+                System.out.println("发送wanbi");
             }
+            // } else if (operateType ==
+            // WebOperateType.retriveLocalKey.getCode()) { // 查看本地是否包含一个key
+            // String key = m2mPacket.getM2mRequestHeader().getKey();
+            // if (key == null) {
+            // if (LOG.isInfoEnabled()) {
+            // LOG.info("key is null");
+            // }
+            // }
+            // final ConcurrentHashMap<String, ZooKeeperServer> zookeeperServers
+            // = serverCnxnFactory
+            // .getZkServers();
+            // Set<String> servers = new HashSet<String>();
+            // for (Map.Entry<String, ZooKeeperServer> entry : zookeeperServers
+            // .entrySet()) {
+            // ZooKeeperServer zooKeeperServer = entry.getValue();
+            // ZKDatabase zkDatabase = zooKeeperServer.getZKDatabase();
+            // if (zkDatabase.getM2mData().getNodes().containsKey(key)) {
+            // servers.add(entry.getKey());
+            // }
+            // }
+            // m2mPacket.getM2mRequestHeader().setType(
+            // WebOperateType.ReplyRetriverRemoteKey.getCode());
+            // M2mWebPacket m2mWebPacket = new M2mWebPacket(
+            // m2mPacket.getM2mRequestHeader(),
+            // m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
+            // new M2mWebRetriveKeyResponse(servers));
+            // ctx.writeAndFlush(m2mWebPacket);
+            // } else if (operateType ==
+            // WebOperateType.retriveRemoteKey.getCode()) {
+            // System.out.println("进入到这里");
+            // String server = networkPool.getSock(m2mPacket
+            // .getM2mRequestHeader().getKey());
+            // int zxid = getNextZxid();
+            // result.put(zxid, new RetriveServerAndCtx(ctx,
+            // new HashSet<String>()));
+            // serverResult.put(zxid, 0);
+            // m2mPacket.getM2mRequestHeader().setXid(zxid);
+            // m2mPacket.getM2mRequestHeader().setType(
+            // WebOperateType.retriveLocalKey.getCode());
+            // Long position = networkPool.getServerPosition().get(server);
+            // for (int i = 0; i < serverCnxnFactory.getReplicationFactor();
+            // i++) {
+            //
+            // String address = spilitString(networkPool
+            // .getPositionToServer().get(position + i))[0];
+            // Integer webPort = NetworkPool.webPort.get(networkPool
+            // .getPositionToServer().get(position + i));
+            // WebTcpClient tcpClient = new WebTcpClient(
+            // serverCnxnFactory.getReplicationFactor());
+            // if (webAddressAndPortToChannel.containsKey(address
+            // + webPort)) {
+            // webAddressAndPortToChannel.get(address + webPort)
+            // .writeAndFlush(m2mPacket);
+            // } else {
+            // tcpClient.connectionOne(address, webPort);
+            // tcpClient.write(m2mPacket);
+            // webAddressAndPortToChannel.put(address + webPort,
+            // tcpClient.getChannel());
+            //
+            // }
+            //
+            // }
+            //
+            // }
+            // else if(operateType==WebOperateType.lookServerLoad.getCode()){
+            //
+            // }
+            // else
+            // if(operateType==WebOperateType.lookRemoteServerLoad.getCode()){
+            //
+            // }
+            // else {
+            // if (LOG.isDebugEnabled()) {
+            // LOG.info("invalid operate type : {}", m2mPacket
+            // .getM2mRequestHeader().getType());
+            // }
+            // }
+            // }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
-
 
     /**
      * 去查询所有的server的状态
@@ -135,10 +169,11 @@ public class WebServerChannelHandler extends
      * @param channel
      * @throws IOException
      */
-    public void lookAllServerStatus(M2mWebPacket m2mWebPacket,
-                                    Channel channel) throws IOException {
+    public void lookAllServerStatus(M2mWebPacket m2mWebPacket, Channel channel)
+            throws IOException {
         M2mServerStatusDOs m2mServerStatuses = new M2mServerStatusDOs();
-        final TreeMap<Long, String> survivalServers = networkInterface.getConsistentBuckets();
+        final TreeMap<Long, String> survivalServers = networkInterface
+                .getConsistentBuckets();
         List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<>();
         List<String> serverStrings = survivalServers
                 .entrySet()
@@ -169,8 +204,7 @@ public class WebServerChannelHandler extends
                 }).count();
 
         m2mServerStatuses.setM2mServerStatusDOs(m2mServerStatusDOs);
-        M2mWebServerStatusResponse m2mWebServerStatusResponse = new
-                M2mWebServerStatusResponse();
+        M2mWebServerStatusResponse m2mWebServerStatusResponse = new M2mWebServerStatusResponse();
         M2mWebPacket m2mPacket = M2mWebPacketHandle.createM2mWebPacket(
                 m2mWebPacket.getM2mRequestHeader(),
                 m2mWebPacket.getM2mReplyHeader(), m2mWebPacket.getRequest(),

@@ -212,9 +212,15 @@ public class NetworkPool implements NetworkInterface {
 
     @Override
     public List<String> getReplicationServers(String server) {
-
+        serverFirstToHash.forEach((s, t) -> {
+            System.out.println("S:" + s);
+            System.out.println("t:" + t);
+        });
         long firstLong = serverFirstToHash.get(server);
+
+        System.out.println("repliccationFactor:" + replicationFactor);
         List<String> result = new ArrayList<>();
+
         while (result.size() < replicationFactor - 1) {
             long temp = findAllPointFor(firstLong + 1);
             String positionServer = consistentBuckets.get(temp);
@@ -223,6 +229,7 @@ public class NetworkPool implements NetworkInterface {
                 result.add(positionServer);
             }
         }
+        result.add(server);
         return result;
     }
 

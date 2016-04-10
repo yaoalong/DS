@@ -2,25 +2,26 @@ package lab.mars.ds.web.network.protocol;
 
 import org.lab.mars.onem2m.jute.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class M2mWebRetriveKeyResponse implements M2mRecord {
     /**
      * 
      */
     private static final long serialVersionUID = 3367783772293345229L;
-    private Set<String> servers;
+    private List<String> servers;
 
-    public M2mWebRetriveKeyResponse(Set<String> servers) {
+    public M2mWebRetriveKeyResponse(List<String> servers) {
         this.servers = servers;
     }
 
-    public Set<String> getServers() {
+    public List<String> getServers() {
         return servers;
     }
 
-    public void setServers(Set<String> servers) {
+    public void setServers(List<String> servers) {
         this.servers = servers;
     }
 
@@ -38,7 +39,7 @@ public class M2mWebRetriveKeyResponse implements M2mRecord {
             throws java.io.IOException {
         a_.startRecord(tag);
         int size = a_.readInt("size");
-        Set<String> serverStrings = new HashSet<String>();
+        List<String> serverStrings = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             String server = a_.readString("server");
             serverStrings.add(server);
