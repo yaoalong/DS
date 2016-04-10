@@ -14,13 +14,7 @@ import java.util.stream.Collectors;
 
 import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.web.network.constant.WebOperateType;
-import lab.mars.ds.web.network.protocol.M2mServerStatus;
-import lab.mars.ds.web.network.protocol.M2mServerStatusDO;
-import lab.mars.ds.web.network.protocol.M2mServerStatusDOs;
-import lab.mars.ds.web.network.protocol.M2mWebPacket;
-import lab.mars.ds.web.network.protocol.M2mWebRetriveKeyResponse;
-import lab.mars.ds.web.network.protocol.M2mWebServerStatusResponse;
-import lab.mars.ds.web.network.protocol.RetriveServerAndCtx;
+import lab.mars.ds.web.network.protocol.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +69,35 @@ public class WebServerChannelHandler extends
                         m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                         new M2mWebRetriveKeyResponse(servers));
                 ctx.writeAndFlush(m2mWebPacket);
-                System.out.println("发送wanbi");
+            }
+            else if(operateType==WebOperateType.lookRemoteServerLoad.getCode()){
+
+                List<M2mServerLoadDO> m2mServerLoadDOs = new ArrayList<M2mServerLoadDO>();
+                for (int i = 0; i < 5; i++) {
+                    M2mServerLoadDO m2mServerLoadDO = new M2mServerLoadDO();
+                    m2mServerLoadDO.setY(Long.valueOf(i));
+                    m2mServerLoadDO.setLabel("192.168.10.1" + i);
+                    m2mServerLoadDOs.add(m2mServerLoadDO);
+                }
+                M2mWebPacket m2mWebPacket = new M2mWebPacket(
+                        m2mPacket.getM2mRequestHeader(),
+                        m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
+                        new M2mWebServerLoadResponse(m2mServerLoadDOs));
+                ctx.writeAndFlush(m2mWebPacket);
+            }
+            else if(operateType==WebOperateType.lookReplicationServers.getCode()){
+                String server=m2mPacket.getM2mRequestHeader().getKey();
+                List<String> servers=networkInterface.getReplicationServer(server);
+                List<M2mServerStatusDO> result=new ArrayList<>();
+                servers.forEach(t->{
+                    M2mServerStatusDO m2mServerStatusDO=new M2mServerStatusDO();
+                    m2mServerStatusDO.setIp(t);
+                });
+                M2mWebPacket m2mWebPacket = new M2mWebPacket(
+                        m2mPacket.getM2mRequestHeader(),
+                        m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
+                        new M2mWebReplicationServersResponse(result));
+                ctx.writeAndFlush(m2mWebPacket);
             }
             // } else if (operateType ==
             // WebOperateType.retriveLocalKey.getCode()) { // 查看本地是否包含一个key

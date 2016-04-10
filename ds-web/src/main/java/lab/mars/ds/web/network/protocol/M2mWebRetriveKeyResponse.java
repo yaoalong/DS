@@ -8,13 +8,17 @@ import java.util.List;
 
 public class M2mWebRetriveKeyResponse implements M2mRecord {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 3367783772293345229L;
     private List<String> servers;
 
     public M2mWebRetriveKeyResponse(List<String> servers) {
         this.servers = servers;
+    }
+
+    public static String signature() {
+        return "LGetDataResponse(BLStat(lllliiiliil))";
     }
 
     public List<String> getServers() {
@@ -74,9 +78,5 @@ public class M2mWebRetriveKeyResponse implements M2mRecord {
     public int hashCode() {
         int result = 17;
         return result;
-    }
-
-    public static String signature() {
-        return "LGetDataResponse(BLStat(lllliiiliil))";
     }
 }

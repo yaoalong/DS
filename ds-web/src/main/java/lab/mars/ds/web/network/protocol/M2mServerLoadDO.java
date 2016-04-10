@@ -8,23 +8,22 @@ public class M2mServerLoadDO implements Serializable {
      * 
      */
     private static final long serialVersionUID = 7514662116801082052L;
-    private String ip;
-    private Long count;
+    private String label;
+    private Long y;
 
-    public String getIp() {
-        return ip;
+    public String getLabel() {
+        return label;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
-    public Long getCount() {
-        return count;
+    public Long getY() {
+        return y;
     }
 
-    public void setCount(Long count) {
-        this.count = count;
+    public void setY(Long y) {
+        this.y = y;
     }
-
 }
