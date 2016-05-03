@@ -6,13 +6,15 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.web.network.WebTcpClient;
 import lab.mars.ds.web.network.constant.WebOperateType;
-import lab.mars.ds.web.network.protocol.*;
+import lab.mars.ds.web.protocol.*;
+import org.lab.mars.onem2m.server.NettyServerCnxnFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -32,9 +34,10 @@ public class WebServerChannelHandler extends
             .getLogger(WebServerChannelHandler.class);
     private NetworkInterface networkInterface;
     private AtomicInteger zxid = new AtomicInteger(0);
-
-    public WebServerChannelHandler(NetworkInterface networkInterface) {
-        this.networkInterface = networkInterface;
+    private NettyServerCnxnFactory nettyServerCnxnFactory;
+    public WebServerChannelHandler(NettyServerCnxnFactory nettyServerCnxnFactory) {
+        this.nettyServerCnxnFactory=nettyServerCnxnFactory;
+        this.networkInterface = nettyServerCnxnFactory.getNetworkPool();
     }
 
     @Override
@@ -70,14 +73,21 @@ public class WebServerChannelHandler extends
                         new M2mWebRetriveKeyResponse(servers));
                 ctx.writeAndFlush(m2mWebPacket);
             } else if (operateType == WebOperateType.lookRemoteServerLoad.getCode()) {
+                System.out.println("开始处理远程serverLoad");
                 m2mPacket.getM2mRequestHeader().setType(WebOperateType.lookServerLoad.getCode());
-                serverLoadAndCtxConcurrentHashMap.put(zxid.getAndIncrement(),new ServerLoadAndCtx(ctx,new ArrayList<M2mServerLoadDO>()));
-                for(String server:networkInterface.getServers()){
+                int cid=zxid.getAndIncrement();
+                m2mPacket.getM2mRequestHeader().setXid(cid);
+                System.out.println("cid:"+cid+" channel:"+ctx.toString());
+                serverLoadAndCtxConcurrentHashMap.put(cid,new ServerLoadAndCtx(ctx,new ArrayList<M2mServerLoadDO>()));
+                serverLoadResult.put(cid,0);
+                for(Map.Entry<Long,String> entry:nettyServerCnxnFactory.getWebServer().entrySet()){
                     WebTcpClient webTcpClient=new WebTcpClient(null);
-                    String[] value=spilitString(server);
+                    System.out.println("fvx"+entry.getValue());
+                    String[] value=spilitString(entry.getValue());
                     webTcpClient.connectionOne(value[0],Integer.valueOf(value[1]));
                     webTcpClient.write(m2mPacket);
                 }
+                System.out.println("GGG");
             } else if (operateType == WebOperateType.lookReplicationServers.getCode()) {
                 String server = m2mPacket.getM2mRequestHeader().getKey();
                 List<String> servers = networkInterface.getReplicationServer(server);
@@ -93,16 +103,17 @@ public class WebServerChannelHandler extends
                 ctx.writeAndFlush(m2mWebPacket);
             }
             else if(operateType== WebOperateType.lookServerLoad.getCode()){
+                    System.out.println("开始处理本地serverLoad");
                  List<M2mServerLoadDO> m2mServerLoadDOs=new ArrayList<>();
                     M2mServerLoadDO m2mServerLoadDO=new M2mServerLoadDO();
-                 m2mServerLoadDO.setLabel("my");
-                m2mServerLoadDO.setY(1L);
+                 m2mServerLoadDO.setLabel(nettyServerCnxnFactory.getMyWebIp());
+                m2mServerLoadDO.setY(nettyServerCnxnFactory.getPacketCount());
                 m2mServerLoadDOs.add(m2mServerLoadDO);
                  M2mWebPacket m2mWebPacket = new M2mWebPacket(
                  m2mPacket.getM2mRequestHeader(),
                  m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                  new M2mWebServerLoadResponse(m2mServerLoadDOs));
-                ctx.writeAndFlush(m2mServerLoadDOs);
+                ctx.writeAndFlush(m2mWebPacket);
             }
             // } else if (operateType ==
             // WebOperateType.retriveLocalKey.getCode()) { // 查看本地是否包含一个key

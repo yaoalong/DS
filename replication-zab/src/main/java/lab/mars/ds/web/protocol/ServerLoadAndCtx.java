@@ -1,9 +1,8 @@
-package lab.mars.ds.web.network.protocol;
+package lab.mars.ds.web.protocol;
 
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Author:yaoalong.

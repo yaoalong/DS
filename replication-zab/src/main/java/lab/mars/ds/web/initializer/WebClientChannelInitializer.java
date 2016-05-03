@@ -1,4 +1,4 @@
-package lab.mars.ds.web.network.initializer;
+package lab.mars.ds.web.initializer;
 
 import io.netty.channel.ChannelPipeline;
 import lab.mars.ds.network.initializer.TcpChannelInitializer;

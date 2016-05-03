@@ -20,6 +20,7 @@ package org.lab.mars.onem2m.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.network.TcpServer;
@@ -41,6 +42,9 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
     private String myIp;
     private NetworkPool networkPool;
     private Integer replicationFactor;
+    private String myWebIp;
+
+    private HashMap<Long,String> webServers;
      public NettyServerCnxnFactory(M2mQuorumPeerMain m2mQuorumPeerMain) {
         super(m2mQuorumPeerMain);
     }
@@ -142,6 +146,14 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
         this.networkPool = networkPool;
     }
 
+    public String getMyWebIp() {
+        return myWebIp;
+    }
+
+    public void setMyWebIp(String myWebIp) {
+        this.myWebIp = myWebIp;
+    }
+
     @Override
     public Integer getReplicationFactor() {
         return replicationFactor;
@@ -152,4 +164,11 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 
     }
 
+    public HashMap<Long, String> getWebServer() {
+        return webServers;
+    }
+
+    public void setWebServer(HashMap<Long, String> webServer) {
+        this.webServers = webServer;
+    }
 }

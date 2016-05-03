@@ -132,9 +132,9 @@ public abstract class ServerCnxnFactory {
      * @param ip
      */
     final public void removeZookeeper(String ip) {
-        if (ip.equals(getMyIp())) {
-            m2mQuorumPeerMain.isStarted = false;
-        }
+//        if (ip.equals(getMyIp())) {
+//            m2mQuorumPeerMain.isStarted = false;
+//        }
         this.zkServers.remove(ip);
     }
 

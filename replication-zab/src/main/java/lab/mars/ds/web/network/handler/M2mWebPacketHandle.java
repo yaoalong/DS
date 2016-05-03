@@ -1,7 +1,7 @@
 package lab.mars.ds.web.network.handler;
 
-import lab.mars.ds.web.network.protocol.M2mWebPacket;
-import lab.mars.ds.web.network.protocol.M2mWebServerStatusResponse;
+import lab.mars.ds.web.protocol.M2mWebPacket;
+import lab.mars.ds.web.protocol.M2mWebServerStatusResponse;
 import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.proto.M2mReplyHeader;

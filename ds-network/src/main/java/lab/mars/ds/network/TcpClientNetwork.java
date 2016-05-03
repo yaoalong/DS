@@ -22,17 +22,24 @@ public abstract class TcpClientNetwork {
     protected ReentrantLock reentrantLock = new ReentrantLock();
     protected Condition condition = reentrantLock.newCondition();
     private ChannelInitializer<SocketChannel> socketChannelChannelInitializer;
-
+    protected  int port;
     public void connectionOne(String host, int port) {
-
+this.port=port;
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(NetworkEventLoopGroup.workerGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .handler(socketChannelChannelInitializer);
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
+            if(future.isSuccess()){
+                System.out.println("XXXXX");
+            }
+            else{
+                System.out.println("MEM");
+            }
             reentrantLock.lock();
             channel = future.channel();
+
             condition.signalAll();
             reentrantLock.unlock();
         });

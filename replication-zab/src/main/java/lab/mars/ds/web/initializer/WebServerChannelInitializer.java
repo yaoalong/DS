@@ -1,9 +1,8 @@
-package lab.mars.ds.web.network.initializer;
-
+package lab.mars.ds.web.initializer;
 import io.netty.channel.ChannelPipeline;
-import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.network.initializer.TcpChannelInitializer;
 import lab.mars.ds.web.network.handler.WebServerChannelHandler;
+import org.lab.mars.onem2m.server.NettyServerCnxnFactory;
 
 /**
  * 

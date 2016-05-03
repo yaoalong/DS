@@ -111,6 +111,8 @@ public class QuorumPeerConfig {
 
     public HashMap<Long, Integer> sidAndWebPort = new HashMap<Long, Integer>();
 
+
+    protected HashMap<Long,String> webServers=new HashMap<>();
     /**
      * Parse a ZooKeeper configuration file
      *
@@ -231,6 +233,11 @@ public class QuorumPeerConfig {
                 long sid = Long.parseLong(key.substring(dot + 1));
                 webPort = Integer.valueOf(value);
                 sidAndWebPort.put(sid, webPort);
+            }
+            else if (key.startsWith("webServer")) {
+                int dot = key.indexOf('.');
+                long sid = Long.parseLong(key.substring(dot + 1));
+                webServers.put(sid,value);
             } else {
                 System.setProperty("zookeeper." + key, value);
             }

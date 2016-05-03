@@ -3,10 +3,10 @@ package lab.mars.ds.web.network.handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lab.mars.ds.web.network.constant.WebOperateType;
-import lab.mars.ds.web.network.protocol.M2mServerLoadDO;
-import lab.mars.ds.web.network.protocol.M2mWebPacket;
-import lab.mars.ds.web.network.protocol.M2mWebRetriveKeyResponse;
-import lab.mars.ds.web.network.protocol.M2mWebServerLoadResponse;
+import lab.mars.ds.web.protocol.M2mServerLoadDO;
+import lab.mars.ds.web.protocol.M2mWebPacket;
+import lab.mars.ds.web.protocol.M2mWebRetriveKeyResponse;
+import lab.mars.ds.web.protocol.M2mWebServerLoadResponse;
 import org.lab.mars.onem2m.proto.M2mRequestHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +56,11 @@ public class WebClientChannelHandler extends
         }
         M2mWebPacket m2mPacket = (M2mWebPacket) msg;
         if(m2mPacket.getM2mRequestHeader().getType()== WebOperateType.lookServerLoad.getCode()){
+
             M2mWebServerLoadResponse m2mWebServerLoadResponse = (M2mWebServerLoadResponse) m2mPacket
                     .getResponse();
             M2mRequestHeader m2mRequestHeader = m2mPacket.getM2mRequestHeader();
+            System.out.println("yaoalong"+m2mPacket.getM2mRequestHeader().getXid());
             for (M2mServerLoadDO index: m2mWebServerLoadResponse.getM2mServerLoadDOs()) {
                 WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap
                         .get(m2mPacket.getM2mRequestHeader().getXid()).getM2mServerLoadDOs()
@@ -68,7 +70,8 @@ public class WebClientChannelHandler extends
             WebServerChannelHandler.serverLoadResult.put(m2mRequestHeader.getXid(),
                     WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader
                             .getXid()) + 1);
-            if (WebServerChannelHandler.serverResult.get(m2mRequestHeader.getXid()) >= 2) {
+            System.out.println("FFFF"+WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader.getXid()));
+            if (WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader.getXid()) >= 3) {
                 M2mWebPacket m2mWebPacket = new M2mWebPacket(m2mRequestHeader,
                         m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                         new M2mWebServerLoadResponse(
@@ -77,9 +80,13 @@ public class WebClientChannelHandler extends
                                         .getM2mServerLoadDOs()));
                 WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.get(m2mRequestHeader.getXid())
                         .getCtx().writeAndFlush(m2mWebPacket);
+                System.out.println("啊哦那个弯沉个"+m2mRequestHeader.getXid());
+                System.out.println("cid:"+m2mRequestHeader.getXid()+" channel:"+ WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.get(m2mRequestHeader.getXid())
+                        .getCtx().toString());
                 WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.remove(m2mRequestHeader.getXid());
-                WebServerChannelHandler.serverResult.remove(m2mRequestHeader
+                WebServerChannelHandler.serverLoadResult.remove(m2mRequestHeader
                         .getXid());
+
             }
         }
         else{
