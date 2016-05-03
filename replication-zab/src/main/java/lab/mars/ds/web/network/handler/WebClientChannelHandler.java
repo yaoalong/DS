@@ -2,19 +2,17 @@ package lab.mars.ds.web.network.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import java.net.InetSocketAddress;
-import java.util.List;
-
 import lab.mars.ds.web.network.constant.WebOperateType;
 import lab.mars.ds.web.network.protocol.M2mServerLoadDO;
 import lab.mars.ds.web.network.protocol.M2mWebPacket;
 import lab.mars.ds.web.network.protocol.M2mWebRetriveKeyResponse;
-
 import lab.mars.ds.web.network.protocol.M2mWebServerLoadResponse;
 import org.lab.mars.onem2m.proto.M2mRequestHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.List;
 
 /**
  * 
@@ -58,7 +56,7 @@ public class WebClientChannelHandler extends
         }
         M2mWebPacket m2mPacket = (M2mWebPacket) msg;
         if(m2mPacket.getM2mRequestHeader().getType()== WebOperateType.lookServerLoad.getCode()){
-            M2mWebServerLoadResponse  m2mWebServerLoadResponse = (M2mWebServerLoadResponse) m2mPacket
+            M2mWebServerLoadResponse m2mWebServerLoadResponse = (M2mWebServerLoadResponse) m2mPacket
                     .getResponse();
             M2mRequestHeader m2mRequestHeader = m2mPacket.getM2mRequestHeader();
             for (M2mServerLoadDO index: m2mWebServerLoadResponse.getM2mServerLoadDOs()) {

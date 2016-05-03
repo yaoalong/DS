@@ -49,7 +49,7 @@ import org.slf4j.MDC;
 public class QuorumPeerConfig {
     private static final Logger LOG = LoggerFactory
             .getLogger(QuorumPeerConfig.class);
-    protected final HashMap<Long, QuorumServer> servers = new HashMap<Long, QuorumServer>(); // sid、服务器选举的配置信息
+    public final HashMap<Long, QuorumServer> servers = new HashMap<Long, QuorumServer>(); // sid、服务器选举的配置信息
     /**
      * 将所有机器拆分成不同的zab集群
      */
@@ -58,12 +58,12 @@ public class QuorumPeerConfig {
      * 一个服务器对应的sid
      */
 
-    protected final Map<String, Long> allServerToSids = new HashMap<String, Long>();
-    protected InetSocketAddress clientPortAddress;
-    protected String dataDir;
-    protected String dataLogDir;
-    protected int tickTime = ZooKeeperServer.DEFAULT_TICK_TIME;
-    protected int maxClientCnxns = 60;
+    public final Map<String, Long> allServerToSids = new HashMap<String, Long>();
+    public InetSocketAddress clientPortAddress;
+    public String dataDir;
+    public String dataLogDir;
+    public int tickTime = ZooKeeperServer.DEFAULT_TICK_TIME;
+    public int maxClientCnxns = 60;
     /**
      * defaults to -1 if not set explicitly
      */
@@ -71,29 +71,29 @@ public class QuorumPeerConfig {
     /**
      * defaults to -1 if not set explicitly
      */
-    protected int maxSessionTimeout = -1;
-    protected int initLimit;
-    protected int syncLimit;
-    protected int electionAlg = 3;
-    protected int electionPort = 2182;
-    protected long serverId;
-    protected String myIp;
-    protected M2mQuorumVerifier quorumVerifier;
-    protected int snapRetainCount = 3;
-    protected boolean syncEnabled = true;
-    protected DSDatabaseInterface m2mDataBase;
-    protected Boolean cleaned = false;
-    protected String node = "127.0.0.1";
-    protected String keySpace = "tests";
-    protected String table = "student";
-    protected String zooKeeperServer;
-    protected Integer replication_factor;
+    public int maxSessionTimeout = -1;
+    public int initLimit;
+    public int syncLimit;
+    public int electionAlg = 3;
+    public int electionPort = 2182;
+    public long serverId;
+    public String myIp;
+    public M2mQuorumVerifier quorumVerifier;
+    public int snapRetainCount = 3;
+    public boolean syncEnabled = true;
+    public DSDatabaseInterface m2mDataBase;
+    public Boolean cleaned = false;
+    public String node = "127.0.0.1";
+    public String keySpace = "tests";
+    public String table = "student";
+    public String zooKeeperServer;
+    public Integer replication_factor;
     /**
      * 用这个来判断自己在环中的位置
      */
-    protected NetworkPool networkPool;
-    protected List<M2mAddressToId> addressToSid = new ArrayList<>();
-    protected List<String> allServerStrings = new ArrayList<String>();
+    public NetworkPool networkPool;
+    public List<M2mAddressToId> addressToSid = new ArrayList<>();
+    public List<String> allServerStrings = new ArrayList<String>();
     M2mQuorumServer m2mQuorumServers = new M2mQuorumServer();
     /**
      * 不同机器实例对应的客户端端口号
@@ -101,15 +101,15 @@ public class QuorumPeerConfig {
     private HashMap<Long, Integer> sidToClientPort = new HashMap<>();
     private Integer webPort;
 
-    protected Integer numOfVirtualNode;
+    public Integer numOfVirtualNode;
 
-    protected Integer numberOfConnections;
+    public Integer numberOfConnections;
 
-    protected Integer zabClientPort;
+    public Integer zabClientPort;
 
-    protected String zooKeeperServerString;
+    public String zooKeeperServerString;
 
-    protected HashMap<Long, Integer> sidAndWebPort = new HashMap<Long, Integer>();
+    public HashMap<Long, Integer> sidAndWebPort = new HashMap<Long, Integer>();
 
     /**
      * Parse a ZooKeeper configuration file

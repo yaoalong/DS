@@ -24,6 +24,7 @@ import java.net.InetSocketAddress;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
 import lab.mars.ds.network.TcpServer;
 
+import lab.mars.ds.util.Statistics;
 import org.lab.mars.onem2m.server.quorum.M2mHandler;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeerMain;
 import org.slf4j.Logger;
@@ -40,8 +41,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
     private String myIp;
     private NetworkPool networkPool;
     private Integer replicationFactor;
-
-    public NettyServerCnxnFactory(M2mQuorumPeerMain m2mQuorumPeerMain) {
+     public NettyServerCnxnFactory(M2mQuorumPeerMain m2mQuorumPeerMain) {
         super(m2mQuorumPeerMain);
     }
 

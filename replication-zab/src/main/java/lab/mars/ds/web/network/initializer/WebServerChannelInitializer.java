@@ -1,9 +1,9 @@
 package lab.mars.ds.web.network.initializer;
 
+import lab.mars.ds.web.network.handler.WebServerChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import lab.mars.ds.loadbalance.NetworkInterface;
 import lab.mars.ds.network.initializer.TcpChannelInitializer;
-import lab.mars.ds.web.network.handler.WebServerChannelHandler;
 
 /**
  * 
@@ -12,15 +12,15 @@ import lab.mars.ds.web.network.handler.WebServerChannelHandler;
  * @Email yaoalong@foxmail.com
  */
 public class WebServerChannelInitializer extends TcpChannelInitializer {
-    private NettyServerCnxnFactory nettyServerCnxnFactory;
+    private NetworkInterface networkInterface;
 
-    public WebServerChannelInitializer(NettyServerCnxnFactory nettyServerCnxnFactory) {
-        this.nettyServerCnxnFactory = nettyServerCnxnFactory;
+    public WebServerChannelInitializer(NetworkInterface networkInterface) {
+        this.networkInterface = networkInterface;
     }
 
     @Override
     public void init(ChannelPipeline ch) {
-        ch.addLast(new WebServerChannelHandler(nettyServerCnxnFactory));
+        ch.addLast(new WebServerChannelHandler(networkInterface));
 
     }
 }

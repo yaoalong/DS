@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,8 +33,8 @@ public class WebServerChannelHandler extends
     private NetworkInterface networkInterface;
     private AtomicInteger zxid = new AtomicInteger(0);
 
-    public WebServerChannelHandler(NettyServerCnxnFactory nettyServerCnxnFactory) {
-        this.nettyServerCnxnFactory = nettyServerCnxnFactory;
+    public WebServerChannelHandler(NetworkInterface networkInterface) {
+        this.networkInterface = networkInterface;
     }
 
     @Override
@@ -93,7 +92,7 @@ public class WebServerChannelHandler extends
                         new M2mWebReplicationServersResponse(result));
                 ctx.writeAndFlush(m2mWebPacket);
             }
-            else if(operateType==WebOperateType.lookServerLoad.getCode()){
+            else if(operateType== WebOperateType.lookServerLoad.getCode()){
                  List<M2mServerLoadDO> m2mServerLoadDOs=new ArrayList<>();
                     M2mServerLoadDO m2mServerLoadDO=new M2mServerLoadDO();
                  m2mServerLoadDO.setLabel("my");

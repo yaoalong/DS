@@ -10,6 +10,7 @@ import lab.mars.ds.collaboration.ZKRegisterAndMonitorService;
 import lab.mars.ds.ds.persistence.FileTxnLog;
 import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.NetworkPool;
+import lab.mars.ds.util.Statistics;
 import lab.mars.ds.web.network.WebTcpServer;
 
 import org.lab.mars.onem2m.OneM2m;
@@ -86,6 +87,7 @@ public class M2mQuorumPeerMain extends Thread {
         LOG.info("Starting quorum peer");
         try {
             NetworkPool networkPool = new NetworkPool();
+            Statistics statistics=new Statistics();
             networkPool.setReplicationFactor(config.replication_factor);
             networkPool.setNumOfVirtualNode(config.numOfVirtualNode);
             networkPool.setAllServers(config.allServerStrings);
@@ -142,7 +144,7 @@ public class M2mQuorumPeerMain extends Thread {
                 quorumPeers.add(quorumPeer);
 
             }
-            WebTcpServer webTcpServer = new WebTcpServer(networkPool);
+            WebTcpServer webTcpServer = new WebTcpServer(cnxnFactory);
             webTcpServer.bind(config.getMyIp(),
                     config.sidAndWebPort.get(config.serverId));
             for (M2mQuorumPeer quorumPeer : quorumPeers) {
