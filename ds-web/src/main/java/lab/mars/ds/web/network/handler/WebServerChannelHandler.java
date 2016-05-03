@@ -3,22 +3,22 @@ package lab.mars.ds.web.network.handler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lab.mars.ds.loadbalance.NetworkInterface;
+import lab.mars.ds.web.network.constant.WebOperateType;
+import lab.mars.ds.web.network.protocol.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import lab.mars.ds.loadbalance.NetworkInterface;
-import lab.mars.ds.web.network.constant.WebOperateType;
-import lab.mars.ds.web.network.protocol.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * 对于web模块的server handler
+ */
 public class WebServerChannelHandler extends
         SimpleChannelInboundHandler<Object> {
     private static final ConcurrentHashMap<String, Channel> webAddressAndPortToChannel = new ConcurrentHashMap<String, Channel>();
@@ -39,10 +39,6 @@ public class WebServerChannelHandler extends
             System.out.println("接收到了数据");
             M2mWebPacket m2mPacket = (M2mWebPacket) msg;
             int operateType = m2mPacket.getM2mRequestHeader().getType();
-            System.out
-                    .println("hahs"
-                            + (operateType == WebOperateType.retriveLocalKey
-                                    .getCode()));
             if (operateType == WebOperateType.getStatus.getCode()) {
                 try {
                     lookAllServerStatus(m2mPacket, ctx.channel());
@@ -69,8 +65,7 @@ public class WebServerChannelHandler extends
                         m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                         new M2mWebRetriveKeyResponse(servers));
                 ctx.writeAndFlush(m2mWebPacket);
-            }
-            else if(operateType==WebOperateType.lookRemoteServerLoad.getCode()){
+            } else if (operateType == WebOperateType.lookRemoteServerLoad.getCode()) {
 
                 List<M2mServerLoadDO> m2mServerLoadDOs = new ArrayList<M2mServerLoadDO>();
                 for (int i = 0; i < 5; i++) {
@@ -84,13 +79,12 @@ public class WebServerChannelHandler extends
                         m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                         new M2mWebServerLoadResponse(m2mServerLoadDOs));
                 ctx.writeAndFlush(m2mWebPacket);
-            }
-            else if(operateType==WebOperateType.lookReplicationServers.getCode()){
-                String server=m2mPacket.getM2mRequestHeader().getKey();
-                List<String> servers=networkInterface.getReplicationServer(server);
-                List<M2mServerStatusDO> result=new ArrayList<>();
-                servers.forEach(t->{
-                    M2mServerStatusDO m2mServerStatusDO=new M2mServerStatusDO();
+            } else if (operateType == WebOperateType.lookReplicationServers.getCode()) {
+                String server = m2mPacket.getM2mRequestHeader().getKey();
+                List<String> servers = networkInterface.getReplicationServer(server);
+                List<M2mServerStatusDO> result = new ArrayList<>();
+                servers.forEach(t -> {
+                    M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
                     m2mServerStatusDO.setIp(t);
                 });
                 M2mWebPacket m2mWebPacket = new M2mWebPacket(
@@ -194,36 +188,27 @@ public class WebServerChannelHandler extends
     public void lookAllServerStatus(M2mWebPacket m2mWebPacket, Channel channel)
             throws IOException {
         M2mServerStatusDOs m2mServerStatuses = new M2mServerStatusDOs();
-        final TreeMap<Long, String> survivalServers = networkInterface
-                .getConsistentBuckets();
+//        final TreeMap<Long, String> survivalServers = networkInterface
+//                .getConsistentBuckets();
         List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<>();
-        List<String> serverStrings = survivalServers
-                .entrySet()
-                .stream()
-                .map(entry -> {
-                    M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-                    m2mServerStatusDO.setId(entry.getKey());
-                    m2mServerStatusDO.setIp(entry.getValue());
-                    m2mServerStatusDO.setStatus(M2mServerStatus.STARTED
-                            .getStatus());
-                    m2mServerStatusDOs.add(m2mServerStatusDO);
-                    return entry.getValue();
-                }).collect(Collectors.toList());
-
-        networkInterface
-                .getAllConsistentBuckets()
-                .entrySet()
-                .stream()
-                .filter(entry -> (!serverStrings.contains(entry.getKey())))
-                .map(entry -> {
-                    M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-                    m2mServerStatusDO.setId(entry.getKey());
-                    m2mServerStatusDO.setIp(entry.getValue());
-                    m2mServerStatusDO.setStatus(M2mServerStatus.STOPED
-                            .getStatus());
-                    m2mServerStatusDOs.add(m2mServerStatusDO);
-                    return entry.getKey();
-                }).count();
+        List<String> survivalServers = networkInterface.getServers();
+        List<String> allServers = networkInterface.getAllServers();
+        survivalServers.forEach(t -> {
+            M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
+            m2mServerStatusDO.setIp(t);
+            m2mServerStatusDO.setStatus(M2mServerStatus.STARTED
+                    .getStatus());
+            m2mServerStatusDOs.add(m2mServerStatusDO);
+        });
+        allServers.forEach(t -> {
+            if (!survivalServers.contains(t)){
+                M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
+                m2mServerStatusDO.setIp(t);
+                m2mServerStatusDO.setStatus(M2mServerStatus.STARTED
+                        .getStatus());
+                m2mServerStatusDOs.add(m2mServerStatusDO);
+            }
+        });
 
         m2mServerStatuses.setM2mServerStatusDOs(m2mServerStatusDOs);
         M2mWebServerStatusResponse m2mWebServerStatusResponse = new M2mWebServerStatusResponse();
@@ -241,8 +226,6 @@ public class WebServerChannelHandler extends
 
         ctx.fireChannelRegistered();
     }
-
-    ;
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {

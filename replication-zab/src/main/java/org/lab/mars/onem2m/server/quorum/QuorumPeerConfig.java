@@ -223,7 +223,8 @@ public class QuorumPeerConfig {
                 zabClientPort = Integer.valueOf(value);
             } else if (key.equals("numberOfConnections")) {
                 numberOfConnections = Integer.valueOf(value);
-            } else if (key.equals("zooKeeperServerString")) {
+            } else if (key.equals("zooKeeperServer")) {
+                System.out.println("ZooKeeperServer:"+value);
                 zooKeeperServerString = value;
             } else if (key.startsWith("webPort")) {
                 int dot = key.indexOf('.');

@@ -423,4 +423,9 @@ public class NetworkPool implements NetworkInterface {
         return allpositionToServer;
     }
 
+    @Override
+    public List<String> getAllServers() {
+        return allServers;
+    }
+
 }

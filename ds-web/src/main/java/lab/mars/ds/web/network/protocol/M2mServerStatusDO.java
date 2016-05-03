@@ -11,7 +11,7 @@ package lab.mars.ds.web.network.protocol;
  */
 public class M2mServerStatusDO {
 
-    private Long id;
+    private long id;
 
     private String ip;
 

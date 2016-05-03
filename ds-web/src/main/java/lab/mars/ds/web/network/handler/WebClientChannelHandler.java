@@ -19,6 +19,10 @@ import org.slf4j.LoggerFactory;
  * @Date 2016年1月24日
  * @Email yaoalong@foxmail.com
  */
+
+/**
+ * 对于web模块的消息handler
+ */
 public class WebClientChannelHandler extends
         SimpleChannelInboundHandler<Object> {
     private static final Logger LOG = LoggerFactory
