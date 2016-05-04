@@ -191,9 +191,9 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
 
         System.out.println("repliccationFactor:" + replicationFactor);
         List<String> result = new ArrayList<>();
-
+        long temp=firstLong;
         while (result.size() < replicationFactor - 1) {
-            long temp = findAllPointFor(firstLong + 1);
+             temp = findAllPointFor(temp + 1);
             String positionServer = consistentBuckets.get(temp);
             if (!result.contains(positionServer)
                     && !server.equals(positionServer)) {
@@ -271,8 +271,9 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
         long firstLong = serverFirstToHash.get(server);
         List<String> result = new ArrayList<>();
         result.add(server);
+        long temp=firstLong;
         while (result.size() < replicationFactor) {
-            long temp = findAllPointFor(firstLong + 1);
+             temp = findAllPointFor(temp + 1);
             String positionServer = allConsistentBuckets.get(temp);
             if (!result.contains(positionServer)
                     && !server.equals(positionServer)) {
@@ -328,7 +329,6 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
                 responseServers.add(index.getKey());
             }
         }
-
         return responseServers;
     }
 

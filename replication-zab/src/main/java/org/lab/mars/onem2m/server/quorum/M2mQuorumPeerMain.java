@@ -4,7 +4,6 @@ import lab.mars.ds.collaboration.ZKRegisterAndMonitorService;
 import lab.mars.ds.ds.persistence.FileTxnLog;
 import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
-import lab.mars.ds.util.Statistics;
 import lab.mars.ds.web.network.WebTcpServer;
 import org.lab.mars.onem2m.OneM2m;
 import org.lab.mars.onem2m.proto.M2mPacket;
@@ -85,7 +84,6 @@ public class M2mQuorumPeerMain extends Thread {
         LOG.info("Starting quorum peer");
         try {
             LoadBalanceConsistentHash networkPool = new LoadBalanceConsistentHash();
-            Statistics statistics = new Statistics();
             networkPool.setReplicationFactor(config.replication_factor);
             networkPool.setNumOfVirtualNode(config.numOfVirtualNode);
             networkPool.setAllServers(config.allServerStrings);
