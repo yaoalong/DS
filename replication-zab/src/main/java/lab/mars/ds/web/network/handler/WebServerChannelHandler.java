@@ -28,9 +28,9 @@ public class WebServerChannelHandler extends
     private static final ConcurrentHashMap<String, Channel> webAddressAndPortToChannel = new ConcurrentHashMap<String, Channel>();
     static ConcurrentHashMap<Integer, RetriveServerAndCtx> retriveServerAndCtxConcurrentHashMap = new ConcurrentHashMap<Integer, RetriveServerAndCtx>();
     static ConcurrentHashMap<Integer, ServerLoadAndCtx> serverLoadAndCtxConcurrentHashMap = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<Integer, Integer> serverResult = new ConcurrentHashMap<Integer, Integer>();
+    static ConcurrentHashMap<Integer, AtomicInteger> serverResult = new ConcurrentHashMap<>();
 
-    static ConcurrentHashMap<Integer, Integer> serverLoadResult = new ConcurrentHashMap<>();
+    static ConcurrentHashMap<Integer, AtomicInteger> serverLoadResult = new ConcurrentHashMap<>();
     private static Logger LOG = LoggerFactory
             .getLogger(WebServerChannelHandler.class);
     private LoadBalanceConsistentHash networkInterface;
@@ -81,7 +81,7 @@ public class WebServerChannelHandler extends
                 m2mPacket.getM2mRequestHeader().setXid(cid);
                 System.out.println("cid:" + cid + " channel:" + ctx.toString());
                 serverLoadAndCtxConcurrentHashMap.put(cid, new ServerLoadAndCtx(ctx, new ArrayList<M2mServerLoadDO>()));
-                serverLoadResult.put(cid, 0);
+                serverLoadResult.put(cid, new AtomicInteger(0));
                 for (String server: nettyServerCnxnFactory.getWebServers()) {
                     WebTcpClient webTcpClient = new WebTcpClient(null);
                     System.out.println("fvx" + server);
@@ -96,7 +96,7 @@ public class WebServerChannelHandler extends
                 m2mPacket.getM2mRequestHeader().setXid(cid);
                 System.out.println("cid:" + cid + " channel:" + ctx.toString());
                 retriveServerAndCtxConcurrentHashMap.put(cid, new RetriveServerAndCtx(ctx, new HashSet<String>()));
-                serverResult.put(cid, 0);
+                serverResult.put(cid, new AtomicInteger(0));
                 for (String server : nettyServerCnxnFactory.getWebServers()) {
                     WebTcpClient webTcpClient = new WebTcpClient(null);
                     String[] value = spilitString(server);

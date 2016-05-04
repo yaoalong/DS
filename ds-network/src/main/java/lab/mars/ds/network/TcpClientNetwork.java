@@ -21,20 +21,21 @@ public abstract class TcpClientNetwork {
     protected Channel channel;
     protected ReentrantLock reentrantLock = new ReentrantLock();
     protected Condition condition = reentrantLock.newCondition();
+    protected int port;
     private ChannelInitializer<SocketChannel> socketChannelChannelInitializer;
-    protected  int port;
+
     public void connectionOne(String host, int port) {
-this.port=port;
+        System.out.println("开始连接host:" + host + "port" + port);
+        this.port = port;
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(NetworkEventLoopGroup.workerGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .handler(socketChannelChannelInitializer);
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
-            if(future.isSuccess()){
-                System.out.println("XXXXX");
-            }
-            else{
+            if (future.isSuccess()) {
+                System.out.println("XXXXX"+port);
+            } else {
                 System.out.println("MEM");
             }
             reentrantLock.lock();

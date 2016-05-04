@@ -67,11 +67,9 @@ public class WebClientChannelHandler extends
                         .add(index);
 
             }
-            WebServerChannelHandler.serverLoadResult.put(m2mRequestHeader.getXid(),
-                    WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader
-                            .getXid()) + 1);
+            WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader.getXid()).getAndIncrement();
             System.out.println("FFFF"+WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader.getXid()));
-            if (WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader.getXid()) >= 3) {
+            if (WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader.getXid()).get() >= 3) {
                 M2mWebPacket m2mWebPacket = new M2mWebPacket(m2mRequestHeader,
                         m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                         new M2mWebServerLoadResponse(
@@ -98,10 +96,8 @@ public class WebClientChannelHandler extends
                         .add(server);
 
             }
-            WebServerChannelHandler.serverResult.put(m2mRequestHeader.getXid(),
-                    WebServerChannelHandler.serverResult.get(m2mRequestHeader
-                            .getXid()) + 1);
-            if (WebServerChannelHandler.serverResult.get(m2mRequestHeader.getXid()) >= replicationFactor) {
+            WebServerChannelHandler.serverResult.get(m2mRequestHeader.getXid()).getAndIncrement();
+            if (WebServerChannelHandler.serverResult.get(m2mRequestHeader.getXid()).get() >= replicationFactor) {
                 M2mWebPacket m2mWebPacket = new M2mWebPacket(m2mRequestHeader,
                         m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                         new M2mWebRetriveKeyResponse(
