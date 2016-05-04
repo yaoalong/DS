@@ -21,9 +21,10 @@ public class NetworkPoolGetServer {
         for (Integer i = 0; i < 3; i++) {
             servers.add("192.168.10.131:" + (2181 + i));
         }
+        networkPool.setNumOfVirtualNode(4);
         networkPool.setServers(servers);
         networkPool.initialize();
-
+        networkPool.setAllServers(servers);
         for (Map.Entry<Long, String> entry : networkPool
                 .getAllConsistentBuckets().entrySet()) {
             System.out.println(entry.getKey() + "::::" + entry.getValue());

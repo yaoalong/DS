@@ -82,9 +82,6 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
                         "++++ trying to initialize with no servers");
             }
 
-            // only create up to maxCreate connections at once
-
-            // initalize our internal hashing structures
             populateConsistentBuckets();
         } catch (Exception ex) {
             LOG.error("error occur:{}", ex.getMessage());
@@ -191,9 +188,9 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
 
         System.out.println("repliccationFactor:" + replicationFactor);
         List<String> result = new ArrayList<>();
-        long temp=firstLong;
+        long temp = firstLong;
         while (result.size() < replicationFactor - 1) {
-             temp = findAllPointFor(temp + 1);
+            temp = findAllPointFor(temp + 1);
             String positionServer = consistentBuckets.get(temp);
             if (!result.contains(positionServer)
                     && !server.equals(positionServer)) {
@@ -271,9 +268,9 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
         long firstLong = serverFirstToHash.get(server);
         List<String> result = new ArrayList<>();
         result.add(server);
-        long temp=firstLong;
+        long temp = firstLong;
         while (result.size() < replicationFactor) {
-             temp = findAllPointFor(temp + 1);
+            temp = findAllPointFor(temp + 1);
             String positionServer = allConsistentBuckets.get(temp);
             if (!result.contains(positionServer)
                     && !server.equals(positionServer)) {
@@ -401,6 +398,10 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
         return allServers;
     }
 
+    /**
+     * 设置所有的server
+     * @param allServers
+     */
     public synchronized void setAllServers(List<String> allServers) {
         this.allServers = allServers;
         TreeMap<Long, String> newConsistentBuckets = getConsistentBuckets(allServers);
@@ -422,9 +423,6 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
         for (Map.Entry<String, Long> map : serverFirstToHash.entrySet()) {
             List<String> servers = getResponseServers(map.getKey());
             serverResponseServers.put(map.getKey(), servers);
-
         }
-
     }
-
 }

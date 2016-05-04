@@ -17,13 +17,13 @@ public class NetworkPoolInitial {
     public void testInitial() throws LoadBalanceException {
 
         LoadBalanceConsistentHash networkPool = new LoadBalanceConsistentHash();
+        networkPool.setNumOfVirtualNode(33);
         List<String> servers = new ArrayList<>();
         for (Integer i = 0; i < 3; i++) {
-            servers.add("192.168.10.131" + (2181 + i));
+            servers.add("192.168.10.131:" + (2181 + i));
         }
         networkPool.setServers(servers);
-        networkPool.initialize();
-        Assert.assertEquals(Integer.valueOf(3), networkPool.getServerSize());
+        Assert.assertEquals(Integer.valueOf(99), networkPool.getServerSize());
 
     }
 

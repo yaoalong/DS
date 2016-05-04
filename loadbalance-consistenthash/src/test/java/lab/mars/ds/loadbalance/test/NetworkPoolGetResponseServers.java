@@ -1,5 +1,6 @@
 package lab.mars.ds.loadbalance.test;
 
+import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import org.junit.Test;
 
@@ -13,12 +14,13 @@ import java.util.Map;
 public class NetworkPoolGetResponseServers {
 
     @Test
-    public void testGetResponseServers() {
+    public void testGetResponseServers() throws LoadBalanceException {
         LoadBalanceConsistentHash networkPool = new LoadBalanceConsistentHash();
         List<String> servers = new ArrayList<>();
         for (Integer i = 0; i < 3; i++) {
             servers.add("192.168.10.131:" + (2181 + i));
         }
+        networkPool.setNumOfVirtualNode(4);
         networkPool.setAllServers(servers);
 
         for (Map.Entry<Long, String> entry : networkPool
