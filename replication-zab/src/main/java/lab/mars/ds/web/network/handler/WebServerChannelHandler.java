@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -88,7 +89,24 @@ public class WebServerChannelHandler extends
                     webTcpClient.write(m2mPacket);
                 }
                 System.out.println("GGG");
-            } else if (operateType == WebOperateType.lookReplicationServers.getCode()) {
+            }
+            else if(operateType==WebOperateType.retriveRemoteKey.getCode()){
+                m2mPacket.getM2mRequestHeader().setType(WebOperateType.retriveLocalKey.getCode());
+                int cid=zxid.getAndIncrement();
+                m2mPacket.getM2mRequestHeader().setXid(cid);
+                System.out.println("cid:"+cid+" channel:"+ctx.toString());
+                retriveServerAndCtxConcurrentHashMap.put(cid,new RetriveServerAndCtx(ctx,new HashSet<String>()));
+                serverResult.put(cid,0);
+                for(Map.Entry<Long,String> entry:nettyServerCnxnFactory.getWebServer().entrySet()){
+                    WebTcpClient webTcpClient=new WebTcpClient(null);
+                    System.out.println("fvx"+entry.getValue());
+                    String[] value=spilitString(entry.getValue());
+                    webTcpClient.connectionOne(value[0],Integer.valueOf(value[1]));
+                    webTcpClient.write(m2mPacket);
+                }
+                System.out.println("GGG");
+            }
+            else if (operateType == WebOperateType.lookReplicationServers.getCode()) {
                 String server = m2mPacket.getM2mRequestHeader().getKey();
                 List<String> servers = networkInterface.getReplicationServer(server);
                 List<M2mServerStatusDO> result = new ArrayList<>();
@@ -115,6 +133,7 @@ public class WebServerChannelHandler extends
                  new M2mWebServerLoadResponse(m2mServerLoadDOs));
                 ctx.writeAndFlush(m2mWebPacket);
             }
+
             // } else if (operateType ==
             // WebOperateType.retriveLocalKey.getCode()) { // 查看本地是否包含一个key
             // String key = m2mPacket.getM2mRequestHeader().getKey();

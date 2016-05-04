@@ -80,7 +80,6 @@ public class WebClientChannelHandler extends
                                         .getM2mServerLoadDOs()));
                 WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.get(m2mRequestHeader.getXid())
                         .getCtx().writeAndFlush(m2mWebPacket);
-                System.out.println("啊哦那个弯沉个"+m2mRequestHeader.getXid());
                 System.out.println("cid:"+m2mRequestHeader.getXid()+" channel:"+ WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.get(m2mRequestHeader.getXid())
                         .getCtx().toString());
                 WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.remove(m2mRequestHeader.getXid());
