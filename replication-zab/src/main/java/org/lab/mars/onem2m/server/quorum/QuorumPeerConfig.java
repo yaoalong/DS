@@ -84,19 +84,18 @@ public class QuorumPeerConfig {
     public Integer numberOfConnections;
     public Integer zabClientPort;
     public String zooKeeperServerString;
-    public HashMap<Long, Integer> sidAndWebPort = new HashMap<Long, Integer>();
     /**
      * defaults to -1 if not set explicitly
      */
     protected int minSessionTimeout = -1;
-    protected  List<String> webServers=new ArrayList<>();
-    protected HashMap<Long, String> webIdToServers = new HashMap<>();
+    protected List<String> webServers = new ArrayList<>();
+    protected HashMap<Long, Integer> webIdToPort = new HashMap<>();
+    protected  HashMap<Long,String> webIdToServer=new HashMap<>();
     M2mQuorumServer m2mQuorumServers = new M2mQuorumServer();
     /**
      * 不同机器实例对应的客户端端口号
      */
     private HashMap<Long, Integer> sidToClientPort = new HashMap<>();
-    private Integer webPort;
 
     /**
      * Parse a ZooKeeper configuration file
@@ -210,16 +209,13 @@ public class QuorumPeerConfig {
             } else if (key.equals("zooKeeperServer")) {
                 System.out.println("ZooKeeperServer:" + value);
                 zooKeeperServerString = value;
-            } else if (key.startsWith("webPort")) {
-                int dot = key.indexOf('.');
-                long sid = Long.parseLong(key.substring(dot + 1));
-                webPort = Integer.valueOf(value);
-                sidAndWebPort.put(sid, webPort);
             } else if (key.startsWith("webServer")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
-                webIdToServers.put(sid, value);
+                String parts[] = value.split(":");
+                webIdToPort.put(sid, Integer.valueOf(parts[1]));
                 webServers.add(value);
+                webIdToServer.put(sid,value);
             } else {
                 System.setProperty("zookeeper." + key, value);
             }
@@ -483,14 +479,6 @@ public class QuorumPeerConfig {
 
     public LoadBalanceConsistentHash getNetworkPool() {
         return networkPool;
-    }
-
-    public Integer getWebPort() {
-        return webPort;
-    }
-
-    public void setWebPort(Integer webPort) {
-        this.webPort = webPort;
     }
 
     @SuppressWarnings("serial")

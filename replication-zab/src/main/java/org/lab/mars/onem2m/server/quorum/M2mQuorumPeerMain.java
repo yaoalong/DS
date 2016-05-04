@@ -143,10 +143,10 @@ public class M2mQuorumPeerMain extends Thread {
 
             }
             cnxnFactory.setWebServers(config.webServers);
-            cnxnFactory.setMyWebIp(config.webIdToServers.get(config.serverId));
+            cnxnFactory.setMyWebIp(config.webIdToServer.get(config.serverId));
             WebTcpServer webTcpServer = new WebTcpServer(cnxnFactory);
             webTcpServer.bind(config.getMyIp(),
-                    config.sidAndWebPort.get(config.serverId));
+                    config.webIdToPort.get(config.serverId));
             for (M2mQuorumPeer quorumPeer : quorumPeers) {
                 quorumPeer.join();
             }
