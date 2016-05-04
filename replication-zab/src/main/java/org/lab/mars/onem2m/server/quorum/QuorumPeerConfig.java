@@ -358,7 +358,7 @@ public class QuorumPeerConfig {
 
                 Integer firstPort = quorumServer.addr.getPort();
                 Integer secondPort = quorumServer.electionAddr.getPort();
-                int distance = Integer.valueOf(""
+                int distance = Integer.parseInt(""
                         + networkPool.getServerResponseForAnthorSerer(
                         responseServer, server));
                 InetSocketAddress firstInetSocketAddress = new InetSocketAddress(

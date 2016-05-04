@@ -100,7 +100,7 @@ public class WebServerChannelHandler extends
                 for (String server : nettyServerCnxnFactory.getWebServers()) {
                     WebTcpClient webTcpClient = new WebTcpClient(null);
                     String[] value = spilitString(server);
-                    webTcpClient.connectionOne(value[0], Integer.valueOf(value[1]));
+                    webTcpClient.connectionOne(value[0], Integer.parseInt(value[1]));
                     webTcpClient.write(m2mPacket);
                 }
                 System.out.println("GGG");

@@ -59,7 +59,7 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
     public static long md5HashingAlg(String key) {
         MessageDigest md5 = MD5.get();
         md5.reset();
-        md5.update(key.getBytes());
+        md5.update(key.getBytes(Charset.forName("utf-8")));
         byte[] bKey = md5.digest();
         long res = ((long) (bKey[3] & 0xFF) << 24)
                 | ((long) (bKey[2] & 0xFF) << 16)
@@ -397,7 +397,7 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
     }
 
     @Override
-    public List<String> getAllServers() {
+    public synchronized List<String> getAllServers() {
         return allServers;
     }
 
@@ -412,7 +412,7 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
             }
             allserverToPosition.put(map.getValue(), position);
             allpositionToServer.put(position, map.getValue());
-            if (!serverFirstToPosition.contains(map.getValue())) {
+            if (!serverFirstToPosition.containsKey(map.getValue())) {
                 serverFirstToPosition.put(map.getValue(), position);
             }
             position++;
