@@ -1,14 +1,13 @@
 package lab.mars.ds.loadbalance.test;
 
+import lab.mars.ds.loadbalance.LoadBalanceException;
+import lab.mars.ds.loadbalance.RangeDO;
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import lab.mars.ds.loadbalance.LoadBalanceException;
-import lab.mars.ds.loadbalance.RangeDO;
-import lab.mars.ds.loadbalance.impl.NetworkPool;
-
-import org.junit.Test;
 
 /**
  * Author:yaoalong. Date:2016/3/7. Email:yaoalong@foxmail.com
@@ -16,7 +15,7 @@ import org.junit.Test;
 public class NetworkPoolGetRanges {
     @Test
     public void testGetRanges() throws LoadBalanceException {
-        NetworkPool networkPool = new NetworkPool();
+        LoadBalanceConsistentHash networkPool = new LoadBalanceConsistentHash();
         List<String> servers = new ArrayList<>();
         for (Integer i = 0; i < 3; i++) {
             servers.add("192.168.10.131:" + (2181 + i));

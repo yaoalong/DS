@@ -18,7 +18,7 @@
 
 package org.lab.mars.onem2m.server;
 
-import lab.mars.ds.loadbalance.impl.NetworkPool;
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeerMain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public abstract class ServerCnxnFactory {
     protected ConcurrentHashMap<String, ZooKeeperServer> zkServers = new ConcurrentHashMap<String, ZooKeeperServer>();
     protected M2mQuorumPeerMain m2mQuorumPeerMain;
 
-    protected  Long packetCount=0L;
+    protected Long packetCount = 0L;
     Logger LOG = LoggerFactory.getLogger(ServerCnxnFactory.class);
 
     public ServerCnxnFactory(M2mQuorumPeerMain m2mQuorumPeerMain) {
@@ -142,7 +142,7 @@ public abstract class ServerCnxnFactory {
 
     public abstract InetSocketAddress getLocalAddress();
 
-    public abstract NetworkPool getNetworkPool();
+    public abstract LoadBalanceConsistentHash getNetworkPool();
 
     public abstract Integer getReplicationFactor();
 
@@ -150,13 +150,14 @@ public abstract class ServerCnxnFactory {
         return zkServers;
     }
 
-    public void addPacketCount(){
-        synchronized (packetCount){
+    public void addPacketCount() {
+        synchronized (packetCount) {
             packetCount++;
         }
     }
-    public Long getPacketCount(){
-        synchronized (packetCount){
+
+    public Long getPacketCount() {
+        synchronized (packetCount) {
             return packetCount;
         }
     }

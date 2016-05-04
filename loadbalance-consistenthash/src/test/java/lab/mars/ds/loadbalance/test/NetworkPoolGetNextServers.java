@@ -1,7 +1,7 @@
 package lab.mars.ds.loadbalance.test;
 
 import lab.mars.ds.loadbalance.LoadBalanceException;
-import lab.mars.ds.loadbalance.impl.NetworkPool;
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
  * Email:yaoalong@foxmail.com
  */
 public class NetworkPoolGetNextServers {
-    public static final NetworkPool network = new NetworkPool();
+    public static final LoadBalanceConsistentHash network = new LoadBalanceConsistentHash();
 
     static {
         List<String> servers = new ArrayList<String>();

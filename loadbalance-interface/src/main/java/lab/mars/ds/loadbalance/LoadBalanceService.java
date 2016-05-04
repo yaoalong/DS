@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
  */
-public interface NetworkInterface {
+public interface LoadBalanceService {
 
     void initialize();
 

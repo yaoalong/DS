@@ -1,30 +1,25 @@
 package lab.mars.ds.loadbalance.impl;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-
 import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.LoadBalanceException.Code;
 import lab.mars.ds.loadbalance.LoadBalanceException.ServerSizeTooBig;
-import lab.mars.ds.loadbalance.NetworkInterface;
+import lab.mars.ds.loadbalance.LoadBalanceService;
 import lab.mars.ds.loadbalance.RangeDO;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
  */
-public class NetworkPool implements NetworkInterface {
+public class LoadBalanceConsistentHash implements LoadBalanceService {
 
-    private static Logger LOG = LoggerFactory.getLogger(NetworkPool.class);
+    private static Logger LOG = LoggerFactory.getLogger(LoadBalanceConsistentHash.class);
     private static ThreadLocal<MessageDigest> MD5 = new ThreadLocal<MessageDigest>() {
         @Override
         protected final MessageDigest initialValue() {
@@ -118,31 +113,6 @@ public class NetworkPool implements NetworkInterface {
             }
         }
         return newConsistentBuckets;
-    }
-
-    public synchronized void setAllServers(List<String> allServers) {
-        this.allServers = allServers;
-        TreeMap<Long, String> newConsistentBuckets = getConsistentBuckets(allServers);
-        long position = 0;
-        for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
-
-            if (!serverFirstToHash.contains(map.getValue())) {
-                serverFirstToHash.put(map.getValue(), map.getKey());
-            }
-            allserverToPosition.put(map.getValue(), position);
-            allpositionToServer.put(position, map.getValue());
-            if (!serverFirstToPosition.contains(map.getValue())) {
-                serverFirstToPosition.put(map.getValue(), position);
-            }
-            position++;
-        }
-        this.allConsistentBuckets = newConsistentBuckets;
-        for (Map.Entry<String, Long> map : serverFirstToHash.entrySet()) {
-            List<String> servers = getResponseServers(map.getKey());
-            serverResponseServers.put(map.getKey(), servers);
-
-        }
-
     }
 
     @Override
@@ -321,7 +291,7 @@ public class NetworkPool implements NetworkInterface {
      */
     @Override
     public long getServerResponseForAnthorSerer(String server,
-            String reponseServer) {
+                                                String reponseServer) {
         Long position = serverFirstToPosition.get(server);
         long responsePosition = serverFirstToPosition.get(reponseServer);
         return responsePosition - position;
@@ -426,6 +396,31 @@ public class NetworkPool implements NetworkInterface {
     @Override
     public List<String> getAllServers() {
         return allServers;
+    }
+
+    public synchronized void setAllServers(List<String> allServers) {
+        this.allServers = allServers;
+        TreeMap<Long, String> newConsistentBuckets = getConsistentBuckets(allServers);
+        long position = 0;
+        for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
+
+            if (!serverFirstToHash.contains(map.getValue())) {
+                serverFirstToHash.put(map.getValue(), map.getKey());
+            }
+            allserverToPosition.put(map.getValue(), position);
+            allpositionToServer.put(position, map.getValue());
+            if (!serverFirstToPosition.contains(map.getValue())) {
+                serverFirstToPosition.put(map.getValue(), position);
+            }
+            position++;
+        }
+        this.allConsistentBuckets = newConsistentBuckets;
+        for (Map.Entry<String, Long> map : serverFirstToHash.entrySet()) {
+            List<String> servers = getResponseServers(map.getKey());
+            serverResponseServers.put(map.getKey(), servers);
+
+        }
+
     }
 
 }

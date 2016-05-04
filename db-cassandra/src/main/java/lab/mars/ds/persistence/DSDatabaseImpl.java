@@ -1,20 +1,12 @@
 package lab.mars.ds.persistence;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
+import com.datastax.driver.core.*;
+import com.datastax.driver.core.querybuilder.Insert;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import lab.mars.ds.loadbalance.RangeDO;
-import lab.mars.ds.loadbalance.impl.NetworkPool;
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import lab.mars.ds.reflection.ResourceReflection;
-
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.ds.server.ProcessTxnResult;
 import org.lab.mars.onem2m.M2mKeeperException;
@@ -27,17 +19,9 @@ import org.lab.mars.onem2m.txn.M2mDeleteTxn;
 import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.ColumnDefinitions;
-import com.datastax.driver.core.Host;
-import com.datastax.driver.core.Metadata;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.Insert;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
+import java.util.*;
+
+import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 
 /**
  * Author:yaoalong. Date:2016/3/3. Email:yaoalong@foxmail.com
@@ -57,7 +41,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     }
 
     public DSDatabaseImpl(boolean clean, String keyspace, String table,
-            String node) {
+                          String node) {
         this.clean = clean;
         this.keyspace = keyspace;
         this.table = table;
@@ -150,7 +134,6 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     }
 
     /**
-     *
      * @param object
      * @return
      * @throws M2mKeeperException
@@ -246,28 +229,28 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             processTxnResult.zxid = header.getZxid();
             processTxnResult.err = 0;
             switch (header.getType()) {
-            case ZooDefs.OpCode.create:
-                M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
-                processTxnResult.id = createTxn.getPath();
-                M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
-                        .deserializeKryo(createTxn.getData());
-                m2mDataNode.setValue(NetworkPool.md5HashingAlg(m2mDataNode
-                        .getId()));
-                m2mDataNode.setZxid(header.getZxid());
-                create(m2mDataNode);
-                break;
-            case ZooDefs.OpCode.delete:
-                M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;
-                processTxnResult.id = deleteTxn.getPath();
-                delete(deleteTxn.getPath());
-                break;
-            case ZooDefs.OpCode.setData:
-                M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
-                processTxnResult.id = m2mSetDataTxn.getId();
-                M2mDataNode object = (M2mDataNode) ResourceReflection
-                        .deserializeKryo(m2mSetDataTxn.getData());
-                update(m2mSetDataTxn.getId(), object);
-                break;
+                case ZooDefs.OpCode.create:
+                    M2mCreateTxn createTxn = (M2mCreateTxn) m2mRecord;
+                    processTxnResult.id = createTxn.getPath();
+                    M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
+                            .deserializeKryo(createTxn.getData());
+                    m2mDataNode.setValue(LoadBalanceConsistentHash.md5HashingAlg(m2mDataNode
+                            .getId()));
+                    m2mDataNode.setZxid(header.getZxid());
+                    create(m2mDataNode);
+                    break;
+                case ZooDefs.OpCode.delete:
+                    M2mDeleteTxn deleteTxn = (M2mDeleteTxn) m2mRecord;
+                    processTxnResult.id = deleteTxn.getPath();
+                    delete(deleteTxn.getPath());
+                    break;
+                case ZooDefs.OpCode.setData:
+                    M2mSetDataTxn m2mSetDataTxn = (M2mSetDataTxn) m2mRecord;
+                    processTxnResult.id = m2mSetDataTxn.getId();
+                    M2mDataNode object = (M2mDataNode) ResourceReflection
+                            .deserializeKryo(m2mSetDataTxn.getData());
+                    update(m2mSetDataTxn.getId(), object);
+                    break;
             }
         } catch (M2mKeeperException e) {
             processTxnResult.err = e.getCode().intValue();

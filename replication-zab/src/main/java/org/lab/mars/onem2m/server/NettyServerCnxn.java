@@ -2,20 +2,17 @@ package org.lab.mars.onem2m.server;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-
-import java.net.InetSocketAddress;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-
 import lab.mars.ds.loadbalance.LoadBalanceException;
-import lab.mars.ds.loadbalance.impl.NetworkPool;
-
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import org.lab.mars.onem2m.M2mKeeperException.Code;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.proto.M2mReplyHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NettyServerCnxn extends ServerCnxn {
 
@@ -35,7 +32,7 @@ public class NettyServerCnxn extends ServerCnxn {
     /**
      * 一致性hash环
      */
-    private NetworkPool networkPool;
+    private LoadBalanceConsistentHash networkPool;
 
     public NettyServerCnxn(Channel channel,
             ConcurrentHashMap<String, ZooKeeperServer> zooKeeperServers,
@@ -134,7 +131,7 @@ public class NettyServerCnxn extends ServerCnxn {
         return null;
     }
 
-    public void setNetworkPool(NetworkPool networkPool) {
+    public void setNetworkPool(LoadBalanceConsistentHash networkPool) {
         this.networkPool = networkPool;
     }
 

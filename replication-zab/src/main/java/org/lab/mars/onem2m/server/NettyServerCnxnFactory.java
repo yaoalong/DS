@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 
-import lab.mars.ds.loadbalance.impl.NetworkPool;
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import lab.mars.ds.network.TcpServer;
 
 import lab.mars.ds.util.Statistics;
@@ -40,7 +40,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
      * 获取本机的ip地址
      */
     private String myIp;
-    private NetworkPool networkPool;
+    private LoadBalanceConsistentHash networkPool;
     private Integer replicationFactor;
     private String myWebIp;
 
@@ -138,11 +138,11 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
         this.myIp = myIp;
     }
 
-    public NetworkPool getNetworkPool() {
+    public LoadBalanceConsistentHash getNetworkPool() {
         return networkPool;
     }
 
-    public void setNetworkPool(NetworkPool networkPool) {
+    public void setNetworkPool(LoadBalanceConsistentHash networkPool) {
         this.networkPool = networkPool;
     }
 

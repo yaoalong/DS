@@ -3,16 +3,10 @@ package lab.mars.ds.network.handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
 import lab.mars.ds.connectmanage.LRUManage;
 import lab.mars.ds.loadbalance.LoadBalanceException;
-import lab.mars.ds.loadbalance.impl.NetworkPool;
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import lab.mars.ds.network.TcpClient;
-
 import org.lab.mars.onem2m.jute.M2mRecord;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.proto.M2mReplyHeader;
@@ -22,6 +16,10 @@ import org.lab.mars.onem2m.server.quorum.M2mHandler;
 import org.lab.mars.onem2m.server.quorum.M2mHandlerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PacketServerChannelHandler extends
         SimpleChannelInboundHandler<Object> {
@@ -33,7 +31,7 @@ public class PacketServerChannelHandler extends
     private ServerCnxnFactory serverCnxnFactory;
     private ConcurrentHashMap<String, TcpClient> ipAndTcpClient = new ConcurrentHashMap<>();
     private String self;
-    private NetworkPool networkPool;
+    private LoadBalanceConsistentHash networkPool;
     private M2mHandler m2mHandler;
 
     private LRUManage lruManage;

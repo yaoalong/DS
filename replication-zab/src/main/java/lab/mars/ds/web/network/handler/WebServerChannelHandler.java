@@ -3,7 +3,7 @@ package lab.mars.ds.web.network.handler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import lab.mars.ds.loadbalance.NetworkInterface;
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import lab.mars.ds.web.network.WebTcpClient;
 import lab.mars.ds.web.network.constant.WebOperateType;
 import lab.mars.ds.web.protocol.*;
@@ -27,17 +27,18 @@ public class WebServerChannelHandler extends
         SimpleChannelInboundHandler<Object> {
     private static final ConcurrentHashMap<String, Channel> webAddressAndPortToChannel = new ConcurrentHashMap<String, Channel>();
     static ConcurrentHashMap<Integer, RetriveServerAndCtx> retriveServerAndCtxConcurrentHashMap = new ConcurrentHashMap<Integer, RetriveServerAndCtx>();
-    static ConcurrentHashMap<Integer,ServerLoadAndCtx> serverLoadAndCtxConcurrentHashMap=new ConcurrentHashMap<>();
+    static ConcurrentHashMap<Integer, ServerLoadAndCtx> serverLoadAndCtxConcurrentHashMap = new ConcurrentHashMap<>();
     static ConcurrentHashMap<Integer, Integer> serverResult = new ConcurrentHashMap<Integer, Integer>();
 
-    static ConcurrentHashMap<Integer,Integer> serverLoadResult=new ConcurrentHashMap<>();
+    static ConcurrentHashMap<Integer, Integer> serverLoadResult = new ConcurrentHashMap<>();
     private static Logger LOG = LoggerFactory
             .getLogger(WebServerChannelHandler.class);
-    private NetworkInterface networkInterface;
+    private LoadBalanceConsistentHash networkInterface;
     private AtomicInteger zxid = new AtomicInteger(0);
     private NettyServerCnxnFactory nettyServerCnxnFactory;
+
     public WebServerChannelHandler(NettyServerCnxnFactory nettyServerCnxnFactory) {
-        this.nettyServerCnxnFactory=nettyServerCnxnFactory;
+        this.nettyServerCnxnFactory = nettyServerCnxnFactory;
         this.networkInterface = nettyServerCnxnFactory.getNetworkPool();
     }
 
@@ -76,37 +77,35 @@ public class WebServerChannelHandler extends
             } else if (operateType == WebOperateType.lookRemoteServerLoad.getCode()) {
                 System.out.println("开始处理远程serverLoad");
                 m2mPacket.getM2mRequestHeader().setType(WebOperateType.lookServerLoad.getCode());
-                int cid=zxid.getAndIncrement();
+                int cid = zxid.getAndIncrement();
                 m2mPacket.getM2mRequestHeader().setXid(cid);
-                System.out.println("cid:"+cid+" channel:"+ctx.toString());
-                serverLoadAndCtxConcurrentHashMap.put(cid,new ServerLoadAndCtx(ctx,new ArrayList<M2mServerLoadDO>()));
-                serverLoadResult.put(cid,0);
-                for(Map.Entry<Long,String> entry:nettyServerCnxnFactory.getWebServer().entrySet()){
-                    WebTcpClient webTcpClient=new WebTcpClient(null);
-                    System.out.println("fvx"+entry.getValue());
-                    String[] value=spilitString(entry.getValue());
-                    webTcpClient.connectionOne(value[0],Integer.valueOf(value[1]));
+                System.out.println("cid:" + cid + " channel:" + ctx.toString());
+                serverLoadAndCtxConcurrentHashMap.put(cid, new ServerLoadAndCtx(ctx, new ArrayList<M2mServerLoadDO>()));
+                serverLoadResult.put(cid, 0);
+                for (Map.Entry<Long, String> entry : nettyServerCnxnFactory.getWebServer().entrySet()) {
+                    WebTcpClient webTcpClient = new WebTcpClient(null);
+                    System.out.println("fvx" + entry.getValue());
+                    String[] value = spilitString(entry.getValue());
+                    webTcpClient.connectionOne(value[0], Integer.valueOf(value[1]));
                     webTcpClient.write(m2mPacket);
                 }
                 System.out.println("GGG");
-            }
-            else if(operateType==WebOperateType.retriveRemoteKey.getCode()){
+            } else if (operateType == WebOperateType.retriveRemoteKey.getCode()) {
                 m2mPacket.getM2mRequestHeader().setType(WebOperateType.retriveLocalKey.getCode());
-                int cid=zxid.getAndIncrement();
+                int cid = zxid.getAndIncrement();
                 m2mPacket.getM2mRequestHeader().setXid(cid);
-                System.out.println("cid:"+cid+" channel:"+ctx.toString());
-                retriveServerAndCtxConcurrentHashMap.put(cid,new RetriveServerAndCtx(ctx,new HashSet<String>()));
-                serverResult.put(cid,0);
-                for(Map.Entry<Long,String> entry:nettyServerCnxnFactory.getWebServer().entrySet()){
-                    WebTcpClient webTcpClient=new WebTcpClient(null);
-                    System.out.println("fvx"+entry.getValue());
-                    String[] value=spilitString(entry.getValue());
-                    webTcpClient.connectionOne(value[0],Integer.valueOf(value[1]));
+                System.out.println("cid:" + cid + " channel:" + ctx.toString());
+                retriveServerAndCtxConcurrentHashMap.put(cid, new RetriveServerAndCtx(ctx, new HashSet<String>()));
+                serverResult.put(cid, 0);
+                for (Map.Entry<Long, String> entry : nettyServerCnxnFactory.getWebServer().entrySet()) {
+                    WebTcpClient webTcpClient = new WebTcpClient(null);
+                    System.out.println("fvx" + entry.getValue());
+                    String[] value = spilitString(entry.getValue());
+                    webTcpClient.connectionOne(value[0], Integer.valueOf(value[1]));
                     webTcpClient.write(m2mPacket);
                 }
                 System.out.println("GGG");
-            }
-            else if (operateType == WebOperateType.lookReplicationServers.getCode()) {
+            } else if (operateType == WebOperateType.lookReplicationServers.getCode()) {
                 String server = m2mPacket.getM2mRequestHeader().getKey();
                 List<String> servers = networkInterface.getReplicationServer(server);
                 List<M2mServerStatusDO> result = new ArrayList<>();
@@ -119,18 +118,17 @@ public class WebServerChannelHandler extends
                         m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                         new M2mWebReplicationServersResponse(result));
                 ctx.writeAndFlush(m2mWebPacket);
-            }
-            else if(operateType== WebOperateType.lookServerLoad.getCode()){
-                    System.out.println("开始处理本地serverLoad");
-                 List<M2mServerLoadDO> m2mServerLoadDOs=new ArrayList<>();
-                    M2mServerLoadDO m2mServerLoadDO=new M2mServerLoadDO();
-                 m2mServerLoadDO.setLabel(nettyServerCnxnFactory.getMyWebIp());
+            } else if (operateType == WebOperateType.lookServerLoad.getCode()) {
+                System.out.println("开始处理本地serverLoad");
+                List<M2mServerLoadDO> m2mServerLoadDOs = new ArrayList<>();
+                M2mServerLoadDO m2mServerLoadDO = new M2mServerLoadDO();
+                m2mServerLoadDO.setLabel(nettyServerCnxnFactory.getMyWebIp());
                 m2mServerLoadDO.setY(nettyServerCnxnFactory.getPacketCount());
                 m2mServerLoadDOs.add(m2mServerLoadDO);
-                 M2mWebPacket m2mWebPacket = new M2mWebPacket(
-                 m2mPacket.getM2mRequestHeader(),
-                 m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
-                 new M2mWebServerLoadResponse(m2mServerLoadDOs));
+                M2mWebPacket m2mWebPacket = new M2mWebPacket(
+                        m2mPacket.getM2mRequestHeader(),
+                        m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
+                        new M2mWebServerLoadResponse(m2mServerLoadDOs));
                 ctx.writeAndFlush(m2mWebPacket);
             }
 
@@ -242,7 +240,7 @@ public class WebServerChannelHandler extends
             m2mServerStatusDOs.add(m2mServerStatusDO);
         });
         allServers.forEach(t -> {
-            if (!survivalServers.contains(t)){
+            if (!survivalServers.contains(t)) {
                 M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
                 m2mServerStatusDO.setIp(t);
                 m2mServerStatusDO.setStatus(M2mServerStatus.STARTED

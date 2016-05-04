@@ -1,13 +1,12 @@
 package lab.mars.ds.loadbalance.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import junit.framework.Assert;
 import lab.mars.ds.loadbalance.LoadBalanceException;
-import lab.mars.ds.loadbalance.impl.NetworkPool;
-
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Author:yaoalong. Date:2016/3/7. Email:yaoalong@foxmail.com
@@ -17,7 +16,7 @@ public class NetworkPoolInitial {
     @Test
     public void testInitial() throws LoadBalanceException {
 
-        NetworkPool networkPool = new NetworkPool();
+        LoadBalanceConsistentHash networkPool = new LoadBalanceConsistentHash();
         List<String> servers = new ArrayList<>();
         for (Integer i = 0; i < 3; i++) {
             servers.add("192.168.10.131" + (2181 + i));
@@ -30,7 +29,7 @@ public class NetworkPoolInitial {
 
     @Test
     public void testSetFactorAndInitial() throws LoadBalanceException {
-        NetworkPool networkPool = new NetworkPool();
+        LoadBalanceConsistentHash networkPool = new LoadBalanceConsistentHash();
         List<String> servers = new ArrayList<String>();
         for (Integer i = 0; i < 3; i++) {
             servers.add("192.168.10.131" + (2181 + i));

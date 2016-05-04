@@ -1,18 +1,11 @@
 package org.lab.mars.onem2m.server.quorum;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import lab.mars.ds.collaboration.ZKRegisterAndMonitorService;
 import lab.mars.ds.ds.persistence.FileTxnLog;
 import lab.mars.ds.loadbalance.LoadBalanceException;
-import lab.mars.ds.loadbalance.impl.NetworkPool;
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import lab.mars.ds.util.Statistics;
 import lab.mars.ds.web.network.WebTcpServer;
-
 import org.lab.mars.onem2m.OneM2m;
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.lab.mars.onem2m.server.DSDatabase;
@@ -22,6 +15,12 @@ import org.lab.mars.onem2m.server.quorum.QuorumPeerConfig.ConfigException;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumMaj;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class M2mQuorumPeerMain extends Thread {
     private static final Logger LOG = LoggerFactory
@@ -40,8 +39,7 @@ public class M2mQuorumPeerMain extends Thread {
      * To start the replicated server specify the configuration file name on the
      * command line.
      *
-     * @param args
-     *            path to the configfile
+     * @param args path to the configfile
      */
     public static void main(String[] args) {
         M2mQuorumPeerMain main = new M2mQuorumPeerMain();
@@ -86,8 +84,8 @@ public class M2mQuorumPeerMain extends Thread {
         myAddress = config.getMyIp();
         LOG.info("Starting quorum peer");
         try {
-            NetworkPool networkPool = new NetworkPool();
-            Statistics statistics=new Statistics();
+            LoadBalanceConsistentHash networkPool = new LoadBalanceConsistentHash();
+            Statistics statistics = new Statistics();
             networkPool.setReplicationFactor(config.replication_factor);
             networkPool.setNumOfVirtualNode(config.numOfVirtualNode);
             networkPool.setAllServers(config.allServerStrings);

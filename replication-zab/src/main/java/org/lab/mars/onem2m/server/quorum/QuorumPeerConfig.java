@@ -18,26 +18,10 @@
 
 package org.lab.mars.onem2m.server.quorum;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-
 import lab.mars.ds.loadbalance.LoadBalanceException;
-import lab.mars.ds.loadbalance.impl.NetworkPool;
+import lab.mars.ds.loadbalance.impl.LoadBalanceConsistentHash;
 import lab.mars.ds.persistence.DSDatabaseImpl;
 import lab.mars.ds.persistence.DSDatabaseInterface;
-
 import org.lab.mars.onem2m.server.ZooKeeperServer;
 import org.lab.mars.onem2m.server.quorum.M2mQuorumPeer.QuorumServer;
 import org.lab.mars.onem2m.server.quorum.flexible.M2mQuorumMaj;
@@ -46,28 +30,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.io.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.*;
+import java.util.Map.Entry;
+
 public class QuorumPeerConfig {
     private static final Logger LOG = LoggerFactory
             .getLogger(QuorumPeerConfig.class);
     public final HashMap<Long, QuorumServer> servers = new HashMap<Long, QuorumServer>(); // sid、服务器选举的配置信息
     /**
-     * 将所有机器拆分成不同的zab集群
-     */
-    protected final List<HashMap<Long, QuorumServer>> quorumServersList = new ArrayList<>();
-    /**
      * 一个服务器对应的sid
      */
 
     public final Map<String, Long> allServerToSids = new HashMap<String, Long>();
+    /**
+     * 将所有机器拆分成不同的zab集群
+     */
+    protected final List<HashMap<Long, QuorumServer>> quorumServersList = new ArrayList<>();
     public InetSocketAddress clientPortAddress;
     public String dataDir;
     public String dataLogDir;
     public int tickTime = ZooKeeperServer.DEFAULT_TICK_TIME;
     public int maxClientCnxns = 60;
-    /**
-     * defaults to -1 if not set explicitly
-     */
-    protected int minSessionTimeout = -1;
     /**
      * defaults to -1 if not set explicitly
      */
@@ -91,9 +77,19 @@ public class QuorumPeerConfig {
     /**
      * 用这个来判断自己在环中的位置
      */
-    public NetworkPool networkPool;
+    public LoadBalanceConsistentHash networkPool;
     public List<M2mAddressToId> addressToSid = new ArrayList<>();
     public List<String> allServerStrings = new ArrayList<String>();
+    public Integer numOfVirtualNode;
+    public Integer numberOfConnections;
+    public Integer zabClientPort;
+    public String zooKeeperServerString;
+    public HashMap<Long, Integer> sidAndWebPort = new HashMap<Long, Integer>();
+    /**
+     * defaults to -1 if not set explicitly
+     */
+    protected int minSessionTimeout = -1;
+    protected HashMap<Long, String> webServers = new HashMap<>();
     M2mQuorumServer m2mQuorumServers = new M2mQuorumServer();
     /**
      * 不同机器实例对应的客户端端口号
@@ -101,25 +97,11 @@ public class QuorumPeerConfig {
     private HashMap<Long, Integer> sidToClientPort = new HashMap<>();
     private Integer webPort;
 
-    public Integer numOfVirtualNode;
-
-    public Integer numberOfConnections;
-
-    public Integer zabClientPort;
-
-    public String zooKeeperServerString;
-
-    public HashMap<Long, Integer> sidAndWebPort = new HashMap<Long, Integer>();
-
-
-    protected HashMap<Long,String> webServers=new HashMap<>();
     /**
      * Parse a ZooKeeper configuration file
      *
-     * @param path
-     *            the patch of the configuration file
-     * @throws ConfigException
-     *             error processing configuration
+     * @param path the patch of the configuration file
+     * @throws ConfigException      error processing configuration
      * @throws LoadBalanceException
      */
     public void parse(String path) throws ConfigException, LoadBalanceException {
@@ -153,8 +135,7 @@ public class QuorumPeerConfig {
     /**
      * Parse config from a Properties.
      *
-     * @param zkProp
-     *            Properties to parse from.
+     * @param zkProp Properties to parse from.
      * @throws IOException
      * @throws ConfigException
      * @throws LoadBalanceException
@@ -226,18 +207,17 @@ public class QuorumPeerConfig {
             } else if (key.equals("numberOfConnections")) {
                 numberOfConnections = Integer.valueOf(value);
             } else if (key.equals("zooKeeperServer")) {
-                System.out.println("ZooKeeperServer:"+value);
+                System.out.println("ZooKeeperServer:" + value);
                 zooKeeperServerString = value;
             } else if (key.startsWith("webPort")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
                 webPort = Integer.valueOf(value);
                 sidAndWebPort.put(sid, webPort);
-            }
-            else if (key.startsWith("webServer")) {
+            } else if (key.startsWith("webServer")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
-                webServers.put(sid,value);
+                webServers.put(sid, value);
             } else {
                 System.setProperty("zookeeper." + key, value);
             }
@@ -344,11 +324,11 @@ public class QuorumPeerConfig {
 
     /**
      * 设置不同zab集群的server
-     * 
+     *
      * @throws LoadBalanceException
      */
     public void setAllReplicationServers() throws LoadBalanceException {
-        networkPool = new NetworkPool();
+        networkPool = new LoadBalanceConsistentHash();
         // TODO 将allServerString这里修改为函数式
         for (M2mAddressToId m2mAddressToId : addressToSid) {
             Long sid = m2mAddressToId.getSid();
@@ -382,7 +362,7 @@ public class QuorumPeerConfig {
                 Integer secondPort = quorumServer.electionAddr.getPort();
                 int distance = Integer.valueOf(""
                         + networkPool.getServerResponseForAnthorSerer(
-                                responseServer, server));
+                        responseServer, server));
                 InetSocketAddress firstInetSocketAddress = new InetSocketAddress(
                         address, firstPort - distance);
                 InetSocketAddress secondInetSocketAddress = new InetSocketAddress(
@@ -499,7 +479,7 @@ public class QuorumPeerConfig {
         this.m2mQuorumServers = m2mQuorumServers;
     }
 
-    public NetworkPool getNetworkPool() {
+    public LoadBalanceConsistentHash getNetworkPool() {
         return networkPool;
     }
 
