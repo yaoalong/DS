@@ -25,7 +25,6 @@ public abstract class TcpClientNetwork {
     private ChannelInitializer<SocketChannel> socketChannelChannelInitializer;
 
     public void connectionOne(String host, int port) {
-        System.out.println("开始连接host:" + host + "port" + port);
         this.port = port;
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(NetworkEventLoopGroup.workerGroup)
@@ -34,9 +33,9 @@ public abstract class TcpClientNetwork {
                 .handler(socketChannelChannelInitializer);
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
             if (future.isSuccess()) {
-                System.out.println("XXXXX"+port);
+                System.out.println("connect sucess"+port);
             } else {
-                System.out.println("MEM");
+                System.out.println("error connect:"+port);
             }
             reentrantLock.lock();
             channel = future.channel();
