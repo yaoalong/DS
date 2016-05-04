@@ -89,7 +89,8 @@ public class QuorumPeerConfig {
      * defaults to -1 if not set explicitly
      */
     protected int minSessionTimeout = -1;
-    protected HashMap<Long, String> webServers = new HashMap<>();
+    protected  List<String> webServers=new ArrayList<>();
+    protected HashMap<Long, String> webIdToServers = new HashMap<>();
     M2mQuorumServer m2mQuorumServers = new M2mQuorumServer();
     /**
      * 不同机器实例对应的客户端端口号
@@ -217,7 +218,8 @@ public class QuorumPeerConfig {
             } else if (key.startsWith("webServer")) {
                 int dot = key.indexOf('.');
                 long sid = Long.parseLong(key.substring(dot + 1));
-                webServers.put(sid, value);
+                webIdToServers.put(sid, value);
+                webServers.add(value);
             } else {
                 System.setProperty("zookeeper." + key, value);
             }
