@@ -72,7 +72,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     private List<M2mDataNode> getM2mDataNodes(ResultSet resultSet)
             throws M2mKeeperException {
         List<M2mDataNode> m2mDataNodes = new ArrayList<>();
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
         for (Row row : resultSet.all()) {
             ColumnDefinitions columnDefinitions = resultSet
                     .getColumnDefinitions();
@@ -150,6 +150,9 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             throw new NodeExistsException();
         }
         Map<String, Object> map = ResourceReflection.serialize(object);
+        if(map==null){
+            throw new M2mKeeperException(Code.PARAM_ERROR, "M2mDataNode 参数错误");
+        }
         Insert insert = query().insertInto(keyspace, table);
         map.forEach(insert::value);
         session.execute(insert);
@@ -174,9 +177,9 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             session.execute(delete);
         } catch (Exception ex) {
             ex.printStackTrace();
-            return Long.valueOf(0);
+            return 0L;
         }
-        return Long.valueOf(1);
+        return 1L;
     }
 
     @Override
@@ -184,7 +187,6 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             throws M2mKeeperException {
         try {
             System.out.println("key:" + key);
-            System.out.println("updated" + updated == null);
             if (key == null || updated == null) {
                 throw new M2mKeeperException(Code.PARAM_ERROR,
                         "key or updated is error");
@@ -251,9 +253,11 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                             .deserializeKryo(m2mSetDataTxn.getData());
                     update(m2mSetDataTxn.getId(), object);
                     break;
+                default:
+                    processTxnResult.err = Code.UN_SUPPORT_OPERATE.getCode();
             }
         } catch (M2mKeeperException e) {
-            processTxnResult.err = e.getCode().intValue();
+            processTxnResult.err = e.getCode();
         }
 
         return processTxnResult;
@@ -348,10 +352,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         Long position = (tmap.isEmpty()) ? this.endRangeDOMap.firstKey() : tmap
                 .firstKey();
         RangeDO rangeDO = endRangeDOMap.get(position);
-        if (rangeDO != null && rangeDO.getStart() < zxid) {
-            return true;
-        }
-        return false;
+        return rangeDO != null && rangeDO.getStart() < zxid;
     }
 
     @Override
