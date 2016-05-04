@@ -138,7 +138,7 @@ public class PacketServerChannelHandler extends
                         TcpClient tcpClient = new TcpClient(pendingQueue);
                         String[] splitStrings = spilitString(responseServer);
                         tcpClient.connectionOne(splitStrings[0],
-                                Integer.valueOf(splitStrings[1]));
+                                Integer.parseInt(splitStrings[1]));
 
                         tcpClient.write(m2mPacket);
                         ctx.writeAndFlush(m2mPacket);

@@ -7,9 +7,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,17 +19,12 @@
 
 package org.lab.mars.onem2m.txn;
 
-import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
-import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-import org.lab.mars.onem2m.jute.M2mCsvOutputArchive;
-import org.lab.mars.onem2m.jute.M2mInputArchive;
-import org.lab.mars.onem2m.jute.M2mOutputArchive;
-import org.lab.mars.onem2m.jute.M2mRecord;
+import org.lab.mars.onem2m.jute.*;
 
 public class M2mSetDataTxn implements M2mRecord {
     /**
-	 * 
-	 */
+     *
+     */
     private static final long serialVersionUID = 4862502698383171029L;
     private String id;
     private byte[] data;
@@ -40,6 +35,10 @@ public class M2mSetDataTxn implements M2mRecord {
     public M2mSetDataTxn(String id, byte[] data) {
         this.id = id;
         this.data = data;
+    }
+
+    public static String signature() {
+        return "LSetDataTxn(sBi)";
     }
 
     public String getId() {
@@ -99,53 +98,6 @@ public class M2mSetDataTxn implements M2mRecord {
         deserialize(archive, "");
     }
 
-    public int compareTo(Object peer_) throws ClassCastException {
-        if (!(peer_ instanceof M2mSetDataTxn)) {
-            throw new ClassCastException(
-                    "Comparing different types of records.");
-        }
-        M2mSetDataTxn peer = (M2mSetDataTxn) peer_;
-        int ret;
-        ret = id.compareTo(peer.id);
 
-        if (ret != 0)
-            return ret;
-        if (ret != 0)
-            return ret;
-        return ret;
-    }
 
-    public boolean equals(Object peer_) {
-        if (!(peer_ instanceof M2mSetDataTxn)) {
-            return false;
-        }
-        if (peer_ == this) {
-            return true;
-        }
-        M2mSetDataTxn peer = (M2mSetDataTxn) peer_;
-        boolean ret = false;
-        ret = id.equals(peer.id);
-        if (!ret)
-            return ret;
-        if (!ret)
-            return ret;
-        if (!ret)
-            return ret;
-        return ret;
-    }
-
-    public int hashCode() {
-        int result = 17;
-        int ret;
-        ret = id.hashCode();
-        result = 37 * result + ret;
-        ret = java.util.Arrays.toString(data).hashCode();
-        result = 37 * result + ret;
-        result = 37 * result + ret;
-        return result;
-    }
-
-    public static String signature() {
-        return "LSetDataTxn(sBi)";
-    }
 }

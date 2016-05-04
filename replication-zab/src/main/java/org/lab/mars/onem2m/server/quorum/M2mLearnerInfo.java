@@ -19,15 +19,11 @@
 
 package org.lab.mars.onem2m.server.quorum;
 
-import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
-import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-import org.lab.mars.onem2m.jute.M2mInputArchive;
-import org.lab.mars.onem2m.jute.M2mOutputArchive;
-import org.lab.mars.onem2m.jute.M2mRecord;
+import org.lab.mars.onem2m.jute.*;
 
 public class M2mLearnerInfo implements M2mRecord {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -8382915221680967079L;
     private long serverid;
@@ -93,21 +89,4 @@ public class M2mLearnerInfo implements M2mRecord {
         return ret;
     }
 
-    public boolean equals(Object peer_) {
-        if (!(peer_ instanceof M2mLearnerInfo)) {
-            return false;
-        }
-        if (peer_ == this) {
-            return true;
-        }
-        M2mLearnerInfo peer = (M2mLearnerInfo) peer_;
-        boolean ret = false;
-        ret = (serverid == peer.serverid);
-        if (!ret)
-            return ret;
-        ret = (protocolVersion == peer.protocolVersion);
-        if (!ret)
-            return ret;
-        return ret;
-    }
 }

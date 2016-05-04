@@ -411,6 +411,9 @@ public class DSDatabase implements M2mRecord {
         } catch (M2mKeeperException e) {
             e.printStackTrace();
         }
+        if(dataNodes==null){
+            return;
+        }
         archive.writeInt(dataNodes.size(), "count");
         for (M2mDataNode m2mDataNode : dataNodes) {
             archive.writeString(m2mDataNode.getId(), "key");

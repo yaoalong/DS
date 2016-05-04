@@ -86,7 +86,7 @@ public class WebServerChannelHandler extends
                     WebTcpClient webTcpClient = new WebTcpClient(null);
                     System.out.println("fvx" + server);
                     String[] value = spilitString(server);
-                    webTcpClient.connectionOne(value[0], Integer.valueOf(value[1]));
+                    webTcpClient.connectionOne(value[0], Integer.parseInt(value[1]));
                     webTcpClient.write(m2mPacket);
                 }
                 System.out.println("GGG");

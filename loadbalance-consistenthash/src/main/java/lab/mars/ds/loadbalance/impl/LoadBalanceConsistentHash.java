@@ -8,6 +8,7 @@ import lab.mars.ds.loadbalance.RangeDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -101,7 +102,7 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
         MessageDigest md5 = MD5.get();
         for (int i = 0; i < servers.size(); i++) {
             for (long j = 0; j < numOfVirtualNode; j++) {
-                byte[] d = md5.digest((servers.get(i) + "-" + j).getBytes());
+                byte[] d = md5.digest((servers.get(i) + "-" + j).getBytes(Charset.forName("utf-8")));
                 for (int h = 0; h < 1; h++) {
                     Long k = ((long) (d[3 + h * 4] & 0xFF) << 24)
                             | ((long) (d[2 + h * 4] & 0xFF) << 16)
@@ -362,8 +363,10 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
     }
 
     @Override
-    public List<String> getServers() {
+    public synchronized List<String> getServers() {
+
         return servers;
+
     }
 
     @Override
@@ -404,7 +407,7 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
         long position = 0;
         for (Map.Entry<Long, String> map : newConsistentBuckets.entrySet()) {
 
-            if (!serverFirstToHash.contains(map.getValue())) {
+            if (!serverFirstToHash.containsKey(map.getValue())) {
                 serverFirstToHash.put(map.getValue(), map.getKey());
             }
             allserverToPosition.put(map.getValue(), position);
@@ -413,6 +416,7 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
                 serverFirstToPosition.put(map.getValue(), position);
             }
             position++;
+
         }
         this.allConsistentBuckets = newConsistentBuckets;
         for (Map.Entry<String, Long> map : serverFirstToHash.entrySet()) {

@@ -117,27 +117,7 @@ public class M2mQuorumPacket implements M2mRecord {
                 "comparing QuorumPacket is unimplemented");
     }
 
-    public boolean equals(Object peer_) {
-        if (!(peer_ instanceof M2mQuorumPacket)) {
-            return false;
-        }
-        if (peer_ == this) {
-            return true;
-        }
-        M2mQuorumPacket peer = (M2mQuorumPacket) peer_;
-        boolean ret = false;
-        ret = (type == peer.type);
-        if (!ret)
-            return ret;
-        ret = (zxid == peer.zxid);
-        if (!ret)
-            return ret;
-        if (!ret)
-            return ret;
-        if (!ret)
-            return ret;
-        return ret;
-    }
+
 
     public int hashCode() {
         int result = 17;

@@ -1,16 +1,10 @@
 package org.lab.mars.onem2m.proto;
 
+import org.lab.mars.onem2m.jute.*;
+
 import java.io.IOException;
 
-import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
-import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-import org.lab.mars.onem2m.jute.M2mCsvOutputArchive;
-import org.lab.mars.onem2m.jute.M2mInputArchive;
-import org.lab.mars.onem2m.jute.M2mOutputArchive;
-import org.lab.mars.onem2m.jute.M2mRecord;
-
 /**
- * 
  * @author yaoalong
  * @Date 2016年1月26日
  * @Email yaoalong@foxmail.com Get data response
@@ -18,7 +12,7 @@ import org.lab.mars.onem2m.jute.M2mRecord;
 public class M2mGetDataResponse implements M2mRecord {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 9126015763824123503L;
     private byte[] data;
@@ -28,6 +22,10 @@ public class M2mGetDataResponse implements M2mRecord {
 
     public M2mGetDataResponse(byte[] data) {
         this.data = data;
+    }
+
+    public static String signature() {
+        return "LGetDataResponse(BLStat(lllliiiliil))";
     }
 
     public byte[] getData() {
@@ -87,9 +85,6 @@ public class M2mGetDataResponse implements M2mRecord {
 
         if (ret != 0)
             return ret;
-
-        if (ret != 0)
-            return ret;
         return ret;
     }
 
@@ -103,22 +98,7 @@ public class M2mGetDataResponse implements M2mRecord {
         boolean ret = false;
         if (!ret)
             return ret;
-        if (!ret)
-            return ret;
         return ret;
-    }
-
-    public int hashCode() {
-        int result = 17;
-        int ret;
-        ret = java.util.Arrays.toString(data).hashCode();
-        result = 37 * result + ret;
-        result = 37 * result + ret;
-        return result;
-    }
-
-    public static String signature() {
-        return "LGetDataResponse(BLStat(lllliiiliil))";
     }
 
 }

@@ -1,15 +1,10 @@
 package org.lab.mars.onem2m.proto;
 
-import org.lab.mars.onem2m.jute.M2mBinaryInputArchive;
-import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
-import org.lab.mars.onem2m.jute.M2mCsvOutputArchive;
-import org.lab.mars.onem2m.jute.M2mInputArchive;
-import org.lab.mars.onem2m.jute.M2mOutputArchive;
-import org.lab.mars.onem2m.jute.M2mRecord;
+import org.lab.mars.onem2m.jute.*;
 
 public class M2mGetDataRequest implements M2mRecord {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -3945786396384809466L;
     private String path;
@@ -19,6 +14,10 @@ public class M2mGetDataRequest implements M2mRecord {
 
     public M2mGetDataRequest(String path) {
         this.path = path;
+    }
+
+    public static String signature() {
+        return "LGetDataRequest(sz)";
     }
 
     public String getPath() {
@@ -73,10 +72,6 @@ public class M2mGetDataRequest implements M2mRecord {
                     "Comparing different types of records.");
         }
         int ret = 0;
-        if (ret != 0)
-            return ret;
-        if (ret != 0)
-            return ret;
         return ret;
     }
 
@@ -90,8 +85,6 @@ public class M2mGetDataRequest implements M2mRecord {
         boolean ret = false;
         if (!ret)
             return ret;
-        if (!ret)
-            return ret;
         return ret;
     }
 
@@ -100,11 +93,6 @@ public class M2mGetDataRequest implements M2mRecord {
         int ret;
         ret = path.hashCode();
         result = 37 * result + ret;
-        result = 37 * result + ret;
         return result;
-    }
-
-    public static String signature() {
-        return "LGetDataRequest(sz)";
     }
 }

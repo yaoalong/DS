@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class ServerCnxnFactory {
 
@@ -42,7 +43,7 @@ public abstract class ServerCnxnFactory {
     protected ConcurrentHashMap<String, ZooKeeperServer> zkServers = new ConcurrentHashMap<String, ZooKeeperServer>();
     protected M2mQuorumPeerMain m2mQuorumPeerMain;
 
-    protected Long packetCount = 0L;
+    protected AtomicLong packetCount = new AtomicLong();
     Logger LOG = LoggerFactory.getLogger(ServerCnxnFactory.class);
 
     public ServerCnxnFactory(M2mQuorumPeerMain m2mQuorumPeerMain) {
@@ -151,15 +152,11 @@ public abstract class ServerCnxnFactory {
     }
 
     public void addPacketCount() {
-        synchronized (packetCount) {
-            packetCount++;
-        }
+        packetCount.getAndIncrement();
     }
 
     public Long getPacketCount() {
-        synchronized (packetCount) {
-            return packetCount;
-        }
+        return packetCount.get();
     }
 
 }
