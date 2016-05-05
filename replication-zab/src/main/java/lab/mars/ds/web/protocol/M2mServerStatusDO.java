@@ -1,5 +1,7 @@
 package lab.mars.ds.web.protocol;
 
+import java.io.Serializable;
+
 /**
  * 
  * @author yaoalong
@@ -9,8 +11,9 @@ package lab.mars.ds.web.protocol;
 /*
  * 用来向web展示的DO
  */
-public class M2mServerStatusDO {
+public class M2mServerStatusDO  implements Serializable{
 
+    private static final long serialVersionUID = 7929067295236794068L;
     private long id;
 
     private String ip;

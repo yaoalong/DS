@@ -111,6 +111,7 @@ public class WebServerChannelHandler extends
                 servers.forEach(t -> {
                     M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
                     m2mServerStatusDO.setIp(t);
+                    result.add(m2mServerStatusDO);
                 });
                 M2mWebPacket m2mWebPacket = new M2mWebPacket(
                         m2mPacket.getM2mRequestHeader(),

@@ -265,7 +265,7 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
 
     @Override
     public List<String> getReplicationServer(String server) {
-        long firstLong = serverFirstToHash.get(server);
+        long firstLong = serverFirstToHash.get(server);//TODO 有抛异常的可能
         List<String> result = new ArrayList<>();
         result.add(server);
         long temp = firstLong;
