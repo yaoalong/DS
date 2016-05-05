@@ -504,7 +504,6 @@ public class M2mLeader {
             }
         }
         isShutdown = true;
-        System.out.println("关闭完全");
     }
 
     /**
@@ -686,8 +685,6 @@ public class M2mLeader {
 
     /**
      * Create an inform packet and send it to all observers.
-     * 
-     * @param zxid
      * @param proposal
      */
     public void inform(Proposal proposal) {
@@ -733,8 +730,6 @@ public class M2mLeader {
             shutdown(msg);
             throw new XidRolloverException(msg);
         }
-        System.out.println("开始处理投票数据包" + request.type + "::" + request.zxid
-                + request);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
         try {
@@ -790,8 +785,7 @@ public class M2mLeader {
 
     /**
      * Sends a sync message to the appropriate server
-     * 
-     * @param f
+     *
      * @param r
      */
 

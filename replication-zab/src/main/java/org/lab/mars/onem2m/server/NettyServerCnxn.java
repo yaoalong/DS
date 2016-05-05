@@ -91,9 +91,6 @@ public class NettyServerCnxn extends ServerCnxn {
             throws LoadBalanceException {
         String server = networkPool.getServer(m2mPacket.getM2mRequestHeader()
                 .getKey());
-        for (Entry<String, ZooKeeperServer> entry : zookeeperServers.entrySet()) {
-            System.out.println("逐渐:" + entry.getKey());
-        }
         if (zookeeperServers.get(server) == null) {
             for (int i = 0; i < 5; i++) {// 重新尝试五次
                 try {

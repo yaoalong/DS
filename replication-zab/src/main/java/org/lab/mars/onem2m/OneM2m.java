@@ -52,7 +52,6 @@ public class OneM2m {
                 m2mCreateRequest, m2mCreateResponse);
         tcpClient.write(m2mPacket);
         int i = m2mPacket.getM2mReplyHeader().getErr();
-        System.out.println(i);
         return "";
     }
 

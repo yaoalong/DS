@@ -105,7 +105,6 @@ public class M2mBinaryOutputArchive implements M2mOutputArchive {
             return;
         }
         ByteBuffer bb = stringToByteBuffer(s);
-        System.out.println("长度是:"+bb.remaining());
         writeInt(bb.remaining(), "len");
         out.write(bb.array(), bb.position(), bb.limit());
     }
