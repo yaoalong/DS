@@ -15,7 +15,6 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
- * 
  * @author yaoalong
  * @Date 2016年1月24日
  * @Email yaoalong@foxmail.com
@@ -55,38 +54,33 @@ public class WebClientChannelHandler extends
             return;
         }
         M2mWebPacket m2mPacket = (M2mWebPacket) msg;
-        if(m2mPacket.getM2mRequestHeader().getType()== WebOperateType.lookServerLoad.getCode()){
+        if (m2mPacket.getM2mRequestHeader().getType() == WebOperateType.lookServerLoad.getCode()) {
 
             M2mWebServerLoadResponse m2mWebServerLoadResponse = (M2mWebServerLoadResponse) m2mPacket
                     .getResponse();
             M2mRequestHeader m2mRequestHeader = m2mPacket.getM2mRequestHeader();
-            System.out.println("yaoalong"+m2mPacket.getM2mRequestHeader().getXid());
-            for (M2mServerLoadDO index: m2mWebServerLoadResponse.getM2mServerLoadDOs()) {
+            for (M2mServerLoadDO index : m2mWebServerLoadResponse.getM2mServerLoadDOs()) {
                 WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap
                         .get(m2mPacket.getM2mRequestHeader().getXid()).getM2mServerLoadDOs()
                         .add(index);
 
             }
             WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader.getXid()).getAndIncrement();
-            System.out.println("FFFF"+WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader.getXid()));
             if (WebServerChannelHandler.serverLoadResult.get(m2mRequestHeader.getXid()).get() >= 3) {
                 M2mWebPacket m2mWebPacket = new M2mWebPacket(m2mRequestHeader,
                         m2mPacket.getM2mReplyHeader(), m2mPacket.getRequest(),
                         new M2mWebServerLoadResponse(
-                                 WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.get(
+                                WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.get(
                                         m2mPacket.getM2mRequestHeader().getXid())
                                         .getM2mServerLoadDOs()));
                 WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.get(m2mRequestHeader.getXid())
                         .getCtx().writeAndFlush(m2mWebPacket);
-                System.out.println("cid:"+m2mRequestHeader.getXid()+" channel:"+ WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.get(m2mRequestHeader.getXid())
-                        .getCtx().toString());
                 WebServerChannelHandler.serverLoadAndCtxConcurrentHashMap.remove(m2mRequestHeader.getXid());
                 WebServerChannelHandler.serverLoadResult.remove(m2mRequestHeader
                         .getXid());
 
             }
-        }
-        else{
+        } else {
             M2mWebRetriveKeyResponse m2mWebRetriveKeyResponse = (M2mWebRetriveKeyResponse) m2mPacket
                     .getResponse();
             M2mRequestHeader m2mRequestHeader = m2mPacket.getM2mRequestHeader();
