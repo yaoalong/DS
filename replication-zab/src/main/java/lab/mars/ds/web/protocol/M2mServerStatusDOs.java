@@ -42,10 +42,11 @@ public class M2mServerStatusDOs implements M2mRecord {
     public void deserialize(M2mInputArchive archive, String tag)
             throws IOException {
         List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<M2mServerStatusDO>();
-        M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
+
         archive.startRecord(tag);
         Integer length = archive.readInt("length");
         for (int i = 0; i < length; i++) {
+            M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
             m2mServerStatusDO.setId(archive.readLong("id"));
             m2mServerStatusDO.setIp(archive.readString("ip"));
             m2mServerStatusDO.setStatus(archive.readInt("status"));

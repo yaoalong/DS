@@ -152,20 +152,22 @@ public class WebServerChannelHandler extends
         List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<>();
         List<String> survivalServers = networkInterface.getServers();
         List<String> allServers = networkInterface.getAllServers();
-        survivalServers.forEach(t -> {
+        survivalServers.forEach(server -> {
             M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-            m2mServerStatusDO.setIp(t);
+            m2mServerStatusDO.setIp(server);
             m2mServerStatusDO.setStatus(M2mServerStatus.STARTED
                     .getStatus());
             m2mServerStatusDOs.add(m2mServerStatusDO);
+            System.out.println("survivalServer:"+server);
         });
-        allServers.forEach(t -> {
-            if (!survivalServers.contains(t)) {
+        allServers.forEach(server -> {
+            if (!survivalServers.contains(server)) {
                 M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-                m2mServerStatusDO.setIp(t);
-                m2mServerStatusDO.setStatus(M2mServerStatus.STARTED
+                m2mServerStatusDO.setIp(server);
+                m2mServerStatusDO.setStatus(M2mServerStatus.STOPED
                         .getStatus());
                 m2mServerStatusDOs.add(m2mServerStatusDO);
+                System.out.println("deadServer:"+server);
             }
         });
 
