@@ -18,9 +18,9 @@ public class NetworkPoolGetResponseServers {
         LoadBalanceConsistentHash networkPool = new LoadBalanceConsistentHash();
         List<String> servers = new ArrayList<>();
         for (Integer i = 0; i < 3; i++) {
-            servers.add("192.168.10.131:" + (2181 + i));
+            servers.add("192.168.10.131:" + (2183 + i));
         }
-        networkPool.setNumOfVirtualNode(4);
+        networkPool.setNumOfVirtualNode(3);
         networkPool.setAllServers(servers);
 
         for (Map.Entry<Long, String> entry : networkPool
@@ -28,17 +28,18 @@ public class NetworkPoolGetResponseServers {
             System.out.println(entry.getKey() + "::::" + entry.getValue());
 
         }
-        for (String server : networkPool
-                .getReponseServers("192.168.10.131:2181")) {
-            System.out.println("192.168.10.131:2181:" + server);
-        }
-        for (String server : networkPool
-                .getReponseServers("192.168.10.131:2182")) {
-            System.out.println("192.168.10.131:2182:" + server);
-        }
+
         for (String server : networkPool
                 .getReponseServers("192.168.10.131:2183")) {
             System.out.println("192.168.10.131:2183:" + server);
+        }
+        for (String server : networkPool
+                .getReponseServers("192.168.10.131:2184")) {
+            System.out.println("192.168.10.131:2184:" + server);
+        }
+        for (String server : networkPool
+                .getReponseServers("192.168.10.131:2185")) {
+            System.out.println("192.168.10.131:2185:" + server);
         }
 
     }

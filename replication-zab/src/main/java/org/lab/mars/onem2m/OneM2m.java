@@ -109,7 +109,7 @@ public class OneM2m {
 
     public static void main(String args[]) throws IOException {
         OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
-        String key = "ddd32fds";
+        String key = "ddd32f234234ds";
         oneM2m.create(key, "111".getBytes());
         oneM2m.setData(key, "5555".getBytes());
         System.out.println(oneM2m.getData(key));

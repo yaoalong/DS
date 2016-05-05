@@ -37,14 +37,12 @@ public class ZKRegisterAndMonitorService implements RegisterAndMonitorService, W
             registerIntoZooKeeper.start();
             if (registerIntoZooKeeper != null) {
                 registerIntoZooKeeper.join();
-
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (KeeperException e) {
             e.printStackTrace();
         }
-
         ZooKeeper_Monitor zooKeeper_monitor = new ZooKeeper_Monitor(zooKeeper);
         zooKeeper_monitor.setLoadBalanceService(loadBalanceService);
         zooKeeper_monitor.start();

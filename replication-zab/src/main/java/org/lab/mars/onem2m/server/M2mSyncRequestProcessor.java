@@ -27,6 +27,8 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static org.lab.mars.onem2m.server.M2mRequest.requestOfDeath;
+
 /**
  * This RequestProcessor logs requests to disk. It batches the requests to do
  * the io efficiently. The request is not passed to the next RequestProcessor
@@ -89,6 +91,9 @@ public class M2mSyncRequestProcessor extends Thread implements RequestProcessor 
                         continue;
                     }
                 }
+                if (si == requestOfDeath) {
+                    break;
+                }
                 if (si != null) {
                     // track the number of records written to the log
                     if (zks.getDSDatabase().append(si)) {
@@ -145,7 +150,7 @@ public class M2mSyncRequestProcessor extends Thread implements RequestProcessor 
 
     public void shutdown() {
         LOG.info("Shutting down");
-        queuedRequests.add(M2mRequest.requestOfDeath);
+        queuedRequests.add(requestOfDeath);
         try {
             if (running) {
                 this.join();

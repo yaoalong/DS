@@ -279,7 +279,7 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
         }
         return result;
     }
-
+    //TODO 有空指针的可能
     @Override
     public List<String> getReponseServers(String server) {
         return serverResponseServers.get(server);
