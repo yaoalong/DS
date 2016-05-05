@@ -32,11 +32,6 @@ public abstract class TcpClientNetwork {
                 .option(ChannelOption.TCP_NODELAY, true)
                 .handler(socketChannelChannelInitializer);
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
-            if (future.isSuccess()) {
-                System.out.println("connect sucess"+port);
-            } else {
-                System.out.println("error connect:"+port);
-            }
             reentrantLock.lock();
             channel = future.channel();
 
