@@ -12,11 +12,15 @@ import java.util.Map;
 public class KryoTest {
     @Test
     public void test() {
-        M2mDataNode m2mDataNode = new M2mDataNode();
-        m2mDataNode.setData("yaoalong".getBytes());
-        m2mDataNode.setId("123");
-        Map<String, Object> objectMap = ResourceReflection.serialize(m2mDataNode);
-        System.out.println(objectMap.get("data"));
+        long startTime=System.nanoTime();
+        for(int i=0;i<100000;i++){
+            M2mDataNode m2mDataNode = new M2mDataNode();
+            m2mDataNode.setData("yaoalong".getBytes());
+            m2mDataNode.setId("123");
+            Map<String, Object> objectMap = ResourceReflection.serialize(m2mDataNode);
+           // System.out.println(objectMap.get("data"));
+        }
+        System.out.println("cost time:"+(System.nanoTime()-startTime));
 
     }
 

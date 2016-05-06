@@ -1,14 +1,7 @@
 package test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import lab.mars.ds.loadbalance.RangeDO;
 import lab.mars.ds.persistence.DSDatabaseImpl;
-
 import org.junit.Test;
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.onem2m.M2mKeeperException;
@@ -17,9 +10,26 @@ import org.lab.mars.onem2m.jute.M2mBinaryOutputArchive;
 import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class M2mDataBaseTest {
-    DSDatabaseImpl m2mDataBase = new DSDatabaseImpl(false, "tests", "onem2m1",
+    static DSDatabaseImpl m2mDataBase = new DSDatabaseImpl(false, "tests", "onem2m1",
             "192.168.10.124");
+
+    static {
+        Random random = new Random();
+        List<RangeDO> rangeDOs = new ArrayList<RangeDO>();
+        rangeDOs.add(new RangeDO(0L, Long.MAX_VALUE));
+        try {
+            m2mDataBase.getMaxZxid(rangeDOs);
+        } catch (M2mKeeperException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void test() throws M2mKeeperException {
@@ -28,14 +38,12 @@ public class M2mDataBaseTest {
 
     @Test
     public void testRetrieve() throws M2mKeeperException {
-        List<RangeDO> rangeDOs = new ArrayList<RangeDO>();
-        rangeDOs.add(new RangeDO(0L, 2429425133L));
-        rangeDOs.add(new RangeDO(2429425133L, 2611217912L));
-        rangeDOs.add(new RangeDO(3582305062L, 3689081781L));
-        rangeDOs.add(new RangeDO(3848679456L, 9223372036854775807L));
-        m2mDataBase.getMaxZxid(rangeDOs);
-        M2mDataNode m2mDataNode = m2mDataBase.retrieve("223232");
-        TraversalAllFields.getObjAttr(m2mDataNode);
+        long startTime = System.nanoTime();
+        for (int i = 0; i < 100000; i++) {
+            M2mDataNode m2mDataNode = m2mDataBase.retrieve("299343596");
+        }
+        System.out.println("cost time:" + (System.nanoTime() - startTime));
+        //  TraversalAllFields.getObjAttr(m2mDataNode);
     }
 
     @Test
@@ -68,18 +76,25 @@ public class M2mDataBaseTest {
     }
 
     @Test
-    public void testCreate() throws M2mKeeperException {
+    public void testCreate() {
+
+        long start = System.nanoTime();
         Random random = new Random();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100000; i++) {
             M2mDataNode m2mDataNode = new M2mDataNode();
 
             m2mDataNode.setZxid(Long.valueOf(1402500 + "") + random.nextLong());
             m2mDataNode.setData("2+".getBytes());
-            m2mDataNode.setId((99333130 + i) + "");
+            m2mDataNode.setId((299333130 + i) + "");
             m2mDataNode.setLabel(0);
             m2mDataNode.setValue(11L + i);
-            m2mDataBase.create(m2mDataNode);
+//            try {
+//                m2mDataBase.create(m2mDataNode);
+//            } catch (M2mKeeperException e) {
+//                e.printStackTrace();
+//            }
         }
+        System.out.println("cost time:" + (System.nanoTime() - start));
 
     }
 

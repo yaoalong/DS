@@ -20,6 +20,7 @@ import org.lab.mars.onem2m.txn.M2mSetDataTxn;
 import org.lab.mars.onem2m.txn.M2mTxnHeader;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 
@@ -33,7 +34,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     private Cluster cluster;
     private Session session;
     private boolean clean = false;
-
+    private ConcurrentHashMap<String, M2mDataNode> dataNodes = new ConcurrentHashMap<>();
     private TreeMap<Long, RangeDO> endRangeDOMap = new TreeMap<Long, RangeDO>();
 
     public DSDatabaseImpl() {
@@ -85,13 +86,11 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                 m2mDataNodes.add(ResourceReflection.deserialize(
                         M2mDataNode.class, result));
             }
-
-            result.clear();
         }
         return m2mDataNodes;
     }
 
-    public void connect() {
+    private void connect() {
         cluster = Cluster.builder().addContactPoint(node).build();
         Metadata metadata = cluster.getMetadata();
         session = cluster.connect();
@@ -106,19 +105,22 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
      */
     @Override
     public M2mDataNode retrieve(String key) {
+        if (dataNodes.get(key) != null) {
+            return dataNodes.get(key);
+        }
+        Select.Selection selection = query().select();
+        Select select = selection.from(keyspace, table);
+        select.where(eq("id", key));
         try {
-            Select.Selection selection = query().select();
-            Select select = selection.from(keyspace, table);
-            select.where(eq("id", key));
-            select.allowFiltering();
             ResultSet resultSet = session.execute(select);
             if (resultSet == null) {
                 return null;
             }
             List<M2mDataNode> m2mDataNodes = getM2mDataNodes(resultSet);
-            if (m2mDataNodes.size() == 0) {
+            if(m2mDataNodes.size()==0){
                 return null;
             }
+            dataNodes.put(key,m2mDataNodes.get(0));
             return m2mDataNodes.get(0);
 
         } catch (Exception ex) {
@@ -144,7 +146,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             throw new NodeExistsException();
         }
         Map<String, Object> map = ResourceReflection.serialize(object);
-        if(map==null){
+        if (map == null) {
             throw new M2mKeeperException(Code.PARAM_ERROR, "M2mDataNode 参数错误");
         }
         Insert insert = query().insertInto(keyspace, table);
@@ -284,14 +286,14 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
      */
     @Override
     public List<M2mDataNode> retrieve(Long zxid) throws M2mKeeperException {
-        if (zxid == null || zxid <= 0) {
+        if (zxid == null) {
             throw new M2mKeeperException(Code.PARAM_ERROR, "zxid can't is null");
         }
+        Select.Selection selection = query().select();
+        Select select = selection.from(keyspace, table);
+        select.where(gt("zxid", zxid));
+        select.allowFiltering();
         try {
-            Select.Selection selection = query().select();
-            Select select = selection.from(keyspace, table);
-            select.where(gt("zxid", zxid));
-            select.allowFiltering();
             ResultSet resultSet = session.execute(select);
             if (resultSet == null) {
                 return null;
