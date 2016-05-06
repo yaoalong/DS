@@ -152,6 +152,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         Insert insert = query().insertInto(keyspace, table);
         map.forEach(insert::value);
         session.execute(insert);
+        dataNodes.put(m2mDataNode.getId(),m2mDataNode);
         return 1L;
     }
 
@@ -171,6 +172,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                     .where(eq("label", 0))
                     .and(eq("zxid", m2mDataNode.getZxid()));
             session.execute(delete);
+            dataNodes.remove(key);
         } catch (Exception ex) {
             ex.printStackTrace();
             return 0L;
@@ -195,6 +197,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             delete(key);
             m2mDataNode.setData(updated.getData());
             create(m2mDataNode);
+            dataNodes.put(key,updated);
         } catch (Exception ex) {
             ex.printStackTrace();
             return 0L;
