@@ -16,8 +16,8 @@ public class OneM2mTestRetrieve {
         OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
         String key = "ddd32f234234ds";
         long startTime = System.nanoTime();
-        for (int i = 0; i < 1000; i++) {
-            oneM2m.getData(key + i);
+        for (int i = 0; i < 10000; i++) {
+            oneM2m.getData(key);
         }
         System.out.println("cost time:" + (System.nanoTime() - startTime));
     }

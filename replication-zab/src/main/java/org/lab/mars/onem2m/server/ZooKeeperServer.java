@@ -498,10 +498,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
         try {
             m2mPacket.getRequest().serialize(boa, "request");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
             baos.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -517,8 +513,10 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      */
     public ProcessTxnResult processTxn(M2mTxnHeader hdr, M2mRecord txn)
             throws M2mKeeperException {
+        long startTime=System.nanoTime();
         ProcessTxnResult rc;
         rc = getDSDatabase().processTxn(hdr, txn);
+        System.out.println("数据库操作:"+(System.nanoTime()-startTime));
         return rc;
     }
 

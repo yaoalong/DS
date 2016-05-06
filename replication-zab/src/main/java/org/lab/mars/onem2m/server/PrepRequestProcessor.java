@@ -153,8 +153,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
             if (deserialize)
                 M2mByteBufferInputStream.byteBuffer2Record(request.request,
                         setDataRequest);
-
-            System.out.println("set Data" + setDataRequest.getKey());
             request.txn = new M2mSetDataTxn(setDataRequest.getKey(),
                     setDataRequest.getData());
             break;

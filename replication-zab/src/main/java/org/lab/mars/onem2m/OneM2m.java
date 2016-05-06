@@ -96,10 +96,11 @@ public class OneM2m {
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mGetDataRequest, m2mGetDataResponse);
         tcpClient.write(m2mPacket);
-        M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
-                .deserializeKryo(((M2mGetDataResponse) m2mPacket.getResponse())
-                        .getData());
-        return new String(m2mDataNode.getData());
+//        M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
+//                .deserializeKryo(((M2mGetDataResponse) m2mPacket.getResponse())
+//                        .getData());
+//        return new String(m2mDataNode.getData());
+        return null;
     }
 
     public void send(M2mPacket m2mPacket) {

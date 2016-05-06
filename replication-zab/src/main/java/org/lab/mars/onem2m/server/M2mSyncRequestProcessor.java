@@ -44,7 +44,6 @@ import static org.lab.mars.onem2m.server.M2mRequest.requestOfDeath;
  * null. This change the semantic of txnlog on the observer since it only
  * contains committed txns.
  */
-//TODO 调研所有的processor如何优雅地关闭
 public class M2mSyncRequestProcessor extends Thread implements RequestProcessor {
     private static final Logger LOG = LoggerFactory
             .getLogger(M2mSyncRequestProcessor.class);
@@ -172,7 +171,7 @@ public class M2mSyncRequestProcessor extends Thread implements RequestProcessor 
 
     public void processRequest(M2mRequest request) {
         // request.addRQRec(">sync");
-        queuedRequests.add(request);
+       queuedRequests.add(request);
     }
 
 }

@@ -62,7 +62,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
     }
 
     public void processRequest(M2mRequest request) {
-
+        long startTime=System.nanoTime();
         if (LOG.isDebugEnabled()) {
             LOG.debug("Processing request:: " + request);
         }
@@ -83,7 +83,6 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 try {
                     rc = zks.processTxn(hdr, txn);
                 } catch (M2mKeeperException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -91,7 +90,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 zks.getDSDatabase().addCommittedProposal(request);
             }
         }
-
+        System.out.println("cost time3:"+(System.nanoTime()-startTime));
         if (request.m2mTxnHeader != null) {
             ServerCnxnFactory scxn = zks.getServerCnxnFactory();
             if (scxn != null && request.channel == null) {
@@ -133,6 +132,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 break;
             }
             case OpCode.getData: {
+                long ha=System.nanoTime();
                 M2mGetDataRequest getDataRequest = new M2mGetDataRequest();
                 M2mByteBufferInputStream.byteBuffer2Record(request.request,
                         getDataRequest);
@@ -142,6 +142,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                     rsp = new M2mGetDataResponse(
                             ResourceReflection.serializeKryo(m2mDataNode));
                 }
+                System.out.println("数据库操作:"+(System.nanoTime()-ha));
                 break;
             }
             }
@@ -159,16 +160,18 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
             err = Code.MARSHALLINGERROR;
         }
         long lastZxid = 0;
-        try {
-            lastZxid = zks.getDSDatabase().getLastProcessedZxid();
-        } catch (M2mKeeperException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        //TODO 这里的lastZxid 必须用更加优化的方式获取
+//        try {
+//            lastZxid = zks.getDSDatabase().getLastProcessedZxid();
+//        } catch (M2mKeeperException e) {
+//            e.printStackTrace();
+//        }
         M2mReplyHeader hdr = new M2mReplyHeader(request.cxid, lastZxid,
                 err.intValue());
         M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);
+        System.out.println("cost time2:"+(System.nanoTime()-startTime));
         channel.writeAndFlush(m2mPacket);
+        System.out.println("cost time:"+(System.nanoTime()-startTime));
     }
 
     public void shutdown() {

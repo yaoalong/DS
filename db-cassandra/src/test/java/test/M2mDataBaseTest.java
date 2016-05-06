@@ -39,8 +39,8 @@ public class M2mDataBaseTest {
     @Test
     public void testRetrieve() throws M2mKeeperException {
         long startTime = System.nanoTime();
-        for (int i = 0; i < 100000; i++) {
-            M2mDataNode m2mDataNode = m2mDataBase.retrieve("299343596");
+        for (int i = 0; i < 1000; i++) {
+            M2mDataNode m2mDataNode = m2mDataBase.retrieve("299343596"+i);
         }
         System.out.println("cost time:" + (System.nanoTime() - startTime));
         //  TraversalAllFields.getObjAttr(m2mDataNode);
