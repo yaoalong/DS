@@ -83,11 +83,18 @@ public class WebServerChannelHandler extends
                 serverLoadAndCtxConcurrentHashMap.put(cid, new ServerLoadAndCtx(ctx, new ArrayList<M2mServerLoadDO>()));
                 serverLoadResult.put(cid, new AtomicInteger(0));
                 for (String server: nettyServerCnxnFactory.getWebServers()) {
-                    WebTcpClient webTcpClient = new WebTcpClient(null);
-                    System.out.println("fvx" + server);
-                    String[] value = spilitString(server);
-                    webTcpClient.connectionOne(value[0], Integer.parseInt(value[1]));
-                    webTcpClient.write(m2mPacket);
+                    if(webAddressAndPortToChannel.containsKey(server)){
+                        webAddressAndPortToChannel.get(server).writeAndFlush(m2mPacket);
+                    }
+                    else{
+                        WebTcpClient webTcpClient = new WebTcpClient(null);
+                        System.out.println("fvx" + server);
+                        String[] value = spilitString(server);
+                        webTcpClient.connectionOne(value[0], Integer.parseInt(value[1]));
+                        webTcpClient.write(m2mPacket);
+                        webAddressAndPortToChannel.put(server,webTcpClient.getChannel());
+                    }
+
                 }
                 System.out.println("GGG");
             } else if (operateType == WebOperateType.retriveRemoteKey.getCode()) {
@@ -185,7 +192,6 @@ public class WebServerChannelHandler extends
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-
         ctx.fireChannelRegistered();
     }
 

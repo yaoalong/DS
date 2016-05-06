@@ -34,7 +34,7 @@ public abstract class TcpClientNetwork {
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
             reentrantLock.lock();
             channel = future.channel();
-
+            System.out.println("连接成功"+port+":server:"+host);
             condition.signalAll();
             reentrantLock.unlock();
         });
