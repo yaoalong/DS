@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,19 +18,23 @@
 
 package org.lab.mars.onem2m.server.quorum;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
 import org.lab.mars.onem2m.ZooDefs.OpCode;
 import org.lab.mars.onem2m.server.M2mRequest;
 import org.lab.mars.onem2m.server.RequestProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 public class M2mCommitProcessor extends Thread implements RequestProcessor {
     private static final Logger LOG = LoggerFactory
             .getLogger(M2mCommitProcessor.class);
 
+/**
+ * 请求保持直到commit 动作到来
+ * 这里所有对外提供的方法都进行了对应的同步
+ */
     /**
      * Requests that we are holding until the commit comes in.
      */
@@ -38,6 +42,7 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
 
     /**
      * Requests that have been committed.
+     * 已经被commit的request
      */
     LinkedList<M2mRequest> committedRequests = new LinkedList<M2mRequest>();
 
@@ -51,15 +56,14 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
      * pipeline.
      */
     boolean matchSyncs;
+    volatile boolean finished = false;
 
     public M2mCommitProcessor(RequestProcessor nextProcessor, String id,
-            boolean matchSyncs) {
+                              boolean matchSyncs) {
         super("CommitProcessor:" + id);
         this.nextProcessor = nextProcessor;
         this.matchSyncs = matchSyncs;
     }
-
-    volatile boolean finished = false;
 
     @Override
     public void run() {
@@ -70,7 +74,7 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
                 for (int i = 0; i < len; i++) {
                     nextProcessor.processRequest(toProcess.get(i));
                 }
-                toProcess.clear();
+                toProcess.clear();//确保toProcess里面的都会被提前处理
                 synchronized (this) {
                     /**
                      * 只有第一个处理过了，后面才能接着处理
@@ -82,6 +86,9 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
                     }
                     // First check and see if the commit came in for the pending
                     // request
+                    /**
+                     * 检查等待队列，将commit的移交给toProcessor中
+                     */
                     if ((queuedRequests.size() == 0 || nextPending != null)
                             && committedRequests.size() > 0) {
                         M2mRequest r = committedRequests.remove();
@@ -93,7 +100,7 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
                          */
                         if (nextPending != null
 
-                        && nextPending.cxid == r.cxid) {
+                                && nextPending.cxid == r.cxid) {
                             // we want to send our version of the request.
                             // the pointer to the connection in the request
                             nextPending.m2mTxnHeader = r.m2mTxnHeader;
@@ -120,20 +127,20 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
                     while (nextPending == null && queuedRequests.size() > 0) {
                         M2mRequest request = queuedRequests.remove();
                         switch (request.type) {
-                        case OpCode.create:
-                        case OpCode.delete:
-                        case OpCode.setData:
-                            nextPending = request;// 因为是事务类型的，所以需要挂起等待
-                            break;
-                        case OpCode.sync:
-                            if (matchSyncs) {
-                                nextPending = request;
-                            } else {
-                                toProcess.add(request);
-                            }
-                            break;
-                        default:
-                            toProcess.add(request); // 如果不是事务的，添加到toProcess队列中，下个循环可以让
+                            case OpCode.create:
+                            case OpCode.delete:
+                            case OpCode.setData:
+                                nextPending = request;// 因为是事务类型的，所以需要挂起等待
+                                break;
+                            case OpCode.sync:
+                                if (matchSyncs) {
+                                    nextPending = request;
+                                } else {
+                                    toProcess.add(request);
+                                }
+                                break;
+                            default:
+                                toProcess.add(request); // 如果不是事务的，添加到toProcess队列中，下个循环可以直接提交个给FinalPorcessor
                         }
                     }
                 }
