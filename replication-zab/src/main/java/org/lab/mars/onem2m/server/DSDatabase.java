@@ -208,7 +208,7 @@ public class DSDatabase implements M2mRecord {
         }
         return highestZxid;
     }
-
+//TODO 这里必须进行修改
     public Long getLastProcessedZxid() throws M2mKeeperException {
         lastProcessedZxid = m2mDataBase.getMaxZxid(rangeDOs);
         return lastProcessedZxid;
@@ -288,9 +288,9 @@ public class DSDatabase implements M2mRecord {
     public ProcessTxnResult processTxn(M2mTxnHeader hdr, M2mRecord txn)
             throws M2mKeeperException {
         ProcessTxnResult processTxnResult = m2mDataBase.processTxn(hdr, txn);
-        if (processTxnResult.zxid > getLastProcessedZxid()) {
+        //if (processTxnResult.zxid > getLastProcessedZxid()) {
             setLastProcessedZxid(processTxnResult.zxid);
-        }
+       // }
         return processTxnResult;
     }
 
