@@ -169,6 +169,7 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
                 err.intValue());
         M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);
         System.out.println("cost time2:"+(System.nanoTime()-startTime));
+        //TODO 根据时间修改
         channel.writeAndFlush(m2mPacket);
         System.out.println("cost time:"+(System.nanoTime()-startTime));
     }

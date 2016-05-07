@@ -11,12 +11,15 @@ import java.io.IOException;
  * Email:yaoalong@foxmail.com
  */
 public class OneM2mTestRetrieve {
+    /**
+     * 读取内存中的数据tps达到数千
+     */
     @Test
     public void testRetrieve() {
-        OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
-        String key = "ddd32f234234ds";
+        OneM2m oneM2m = new OneM2m("192.168.10.131", 2185);
+        String key = "ddd32f234234ds0";
         long startTime = System.nanoTime();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100000; i++) {
             oneM2m.getData(key);
         }
         System.out.println("cost time:" + (System.nanoTime() - startTime));
