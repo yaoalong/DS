@@ -417,7 +417,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         try {
             return dsDB.getLastProcessedZxid();
         } catch (M2mKeeperException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return 0L;

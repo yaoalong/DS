@@ -146,7 +146,6 @@ public class M2mLeaderElection implements M2mElection {
                 self.setCurrentVote(new M2mVote(self.getId(), self
                         .getLastLoggedZxid()));
             } catch (M2mKeeperException e2) {
-                // TODO Auto-generated catch block
                 e2.printStackTrace();
             }
             // We are going to look for a leader by casting a vote for ourself
@@ -235,7 +234,6 @@ public class M2mLeaderElection implements M2mElection {
                         self.setCurrentVote(new M2mVote(self.getId(), self
                                 .getLastLoggedZxid()));
                     } catch (M2mKeeperException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 } else {

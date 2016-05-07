@@ -160,12 +160,11 @@ public class M2mFinalRequestProcessor implements RequestProcessor {
             err = Code.MARSHALLINGERROR;
         }
         long lastZxid = 0;
-        //TODO 这里的lastZxid 必须用更加优化的方式获取
-//        try {
-//            lastZxid = zks.getDSDatabase().getLastProcessedZxid();
-//        } catch (M2mKeeperException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            lastZxid = zks.getDSDatabase().getLastProcessedZxid();
+        } catch (M2mKeeperException e) {
+            e.printStackTrace();
+        }
         M2mReplyHeader hdr = new M2mReplyHeader(request.cxid, lastZxid,
                 err.intValue());
         M2mPacket m2mPacket = new M2mPacket(null, hdr, null, rsp);

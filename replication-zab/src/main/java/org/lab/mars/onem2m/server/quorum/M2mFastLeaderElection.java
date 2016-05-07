@@ -795,7 +795,6 @@ public class M2mFastLeaderElection implements M2mElection {
         try {
             return self.getLastLoggedZxid();
         } catch (M2mKeeperException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return 0L;

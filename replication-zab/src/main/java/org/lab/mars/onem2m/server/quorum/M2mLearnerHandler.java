@@ -354,7 +354,6 @@ public class M2mLearnerHandler extends Thread {
                             LOG.debug("proposals is empty");
                         }
                     } catch (M2mKeeperException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
 
@@ -378,7 +377,6 @@ public class M2mLearnerHandler extends Thread {
                     zxidToSend = leader.zk.getDSDatabase()
                             .getLastProcessedZxid();
                 } catch (M2mKeeperException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }// 获取对应的zxid
             }

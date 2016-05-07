@@ -356,7 +356,6 @@ public class M2mLearner {
                 try {
                     truncated = zk.getDSDatabase().truncateLog(qp.getZxid());
                 } catch (M2mKeeperException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 if (!truncated) {
@@ -413,7 +412,6 @@ public class M2mLearner {
                             try {
                                 zk.processTxn(pif.hdr, pif.rec);
                             } catch (M2mKeeperException e) {
-                                // TODO Auto-generated catch block
                                 e.printStackTrace();
                             }
                             packetsNotCommitted.remove();

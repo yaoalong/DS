@@ -71,7 +71,6 @@ public class M2mFollower extends M2mLearner {
                 try {
                     newEpochZxid = registerWithLeader(M2mLeader.FOLLOWERINFO);
                 } catch (M2mKeeperException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
