@@ -32,6 +32,7 @@ public class M2mServerStatusDOs implements M2mRecord {
         for (M2mServerStatusDO m2mServerStatusDO : m2mServerStatusDOs) {
             archive.writeLong(m2mServerStatusDO.getId(), "id");
             archive.writeString(m2mServerStatusDO.getIp(), "ip");
+            System.out.println("status"+m2mServerStatusDO.getStatus());
             archive.writeInt(m2mServerStatusDO.getStatus(), "status");
         }
         archive.endRecord(this, tag);
@@ -44,14 +45,17 @@ public class M2mServerStatusDOs implements M2mRecord {
         List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<M2mServerStatusDO>();
 
         archive.startRecord(tag);
-        Integer length = archive.readInt("length");
+        int length = archive.readInt("length");
         for (int i = 0; i < length; i++) {
             M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
             m2mServerStatusDO.setId(archive.readLong("id"));
             m2mServerStatusDO.setIp(archive.readString("ip"));
-            m2mServerStatusDO.setStatus(archive.readInt("status"));
+            int status=archive.readInt("status");
+            System.out.println("status:"+status);
+            m2mServerStatusDO.setStatus(status);
             m2mServerStatusDOs.add(m2mServerStatusDO);
         }
+        archive.endRecord(tag);
         this.m2mServerStatusDOs = m2mServerStatusDOs;
     }
 

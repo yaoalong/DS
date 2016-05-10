@@ -11,17 +11,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class M2mWebPacketHandle {
-    static final ByteArrayOutputStream baos;
-    static final M2mBinaryOutputArchive boa;
-    static {
-        baos = new ByteArrayOutputStream();
-        boa = M2mBinaryOutputArchive.getArchive(baos);
-    }
+
 
     public static M2mWebPacket createM2mWebPacket(
             M2mRequestHeader m2mRequestHeader, M2mReplyHeader m2mReplyHeader,
             M2mRecord request, M2mRecord response, M2mRecord m2mRecord,
             String tag) throws IOException {
+        ByteArrayOutputStream  baos = new ByteArrayOutputStream();
+        M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
         if (response instanceof M2mWebServerStatusResponse) {
             M2mWebServerStatusResponse m2mWebServerStatusResponse = new M2mWebServerStatusResponse();
             m2mRecord.serialize(boa, tag);

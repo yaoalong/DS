@@ -18,7 +18,7 @@ public class M2mServerStatusDO  implements Serializable{
 
     private String ip;
 
-    private Integer status;
+    private int status;
 
     public Long getId() {
         return id;
@@ -36,12 +36,11 @@ public class M2mServerStatusDO  implements Serializable{
         this.ip = ip;
     }
 
-    public Integer getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(int status) {
         this.status = status;
     }
-
 }
