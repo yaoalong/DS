@@ -50,7 +50,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         connect();
     }
 
-    private static Long getZxid(ResultSet resultSet) {
+    private static long getZxid(ResultSet resultSet) {
         List<Long> zxids = new ArrayList<Long>();
         for (Row row : resultSet.all()) {
             ColumnDefinitions columnDefinitions = resultSet
@@ -64,7 +64,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             });
         }
         if (zxids.size() == 0) {
-            return 0L;
+            return 0;
         } else {
             return zxids.get(zxids.size() - 1);
         }
@@ -116,10 +116,10 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                 return null;
             }
             List<M2mDataNode> m2mDataNodes = getM2mDataNodes(resultSet);
-            if(m2mDataNodes.size()==0){
+            if (m2mDataNodes.size() == 0) {
                 return null;
             }
-            dataNodes.put(key,m2mDataNodes.get(0));
+            dataNodes.put(key, m2mDataNodes.get(0));
             return m2mDataNodes.get(0);
 
         } catch (Exception ex) {
@@ -136,11 +136,16 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
     @Override
     public Long create(Object object) throws M2mKeeperException {
         M2mDataNode m2mDataNode = (M2mDataNode) object;
-        if (m2mDataNode.getId() == null || m2mDataNode.getData() == null
-                || m2mDataNode.getValue() == 0 || m2mDataNode.getZxid() == 0) {
+        if (m2mDataNode.getData() == null
+                || m2mDataNode.getValue() == 0) {
             throw new M2mKeeperException(Code.PARAM_ERROR, "M2mDataNode 参数错误");
         }
-        M2mDataNode resultM2mDataNode = retrieve(((M2mDataNode) object).getId());
+        M2mDataNode resultM2mDataNode;
+        if (dataNodes.containsKey(m2mDataNode.getId())) {
+            resultM2mDataNode = dataNodes.get(m2mDataNode.getId());
+        } else {
+            resultM2mDataNode = retrieve(m2mDataNode.getId());
+        }
         if (resultM2mDataNode != null && resultM2mDataNode.getId() != null) {
             throw new NodeExistsException();
         }
@@ -151,7 +156,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         Insert insert = query().insertInto(keyspace, table);
         map.forEach(insert::value);
         session.execute(insert);
-        dataNodes.put(m2mDataNode.getId(),m2mDataNode);
+        dataNodes.put(m2mDataNode.getId(), m2mDataNode);
         return 1L;
     }
 
@@ -162,10 +167,16 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                 throw new M2mKeeperException(Code.PARAM_ERROR,
                         "delete key can't is null");
             }
-            M2mDataNode m2mDataNode = retrieve(key);
-            if (m2mDataNode == null) {
-                throw new M2mKeeperException(Code.PARAM_ERROR,
-                        "key is not exists");
+            M2mDataNode m2mDataNode = null;
+            if (dataNodes.containsKey(key)) {
+                m2mDataNode = dataNodes.get(key);
+
+            } else {
+                m2mDataNode = retrieve(key);
+                if (m2mDataNode == null) {
+                    throw new M2mKeeperException(Code.PARAM_ERROR,
+                            "key is not exists");
+                }
             }
             Statement delete = query().delete().from(keyspace, table)
                     .where(eq("label", 0))
@@ -188,15 +199,20 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                 throw new M2mKeeperException(Code.PARAM_ERROR,
                         "key or updated is error");
             }
-            M2mDataNode m2mDataNode = retrieve(key);
-            if (m2mDataNode == null) {
-                throw new M2mKeeperException(Code.PARAM_ERROR,
-                        "key is not exists");
+            M2mDataNode m2mDataNode;
+            if (dataNodes.containsKey(key)) {
+                m2mDataNode = dataNodes.get(key);
+            } else {
+                m2mDataNode = retrieve(key);
+                if (m2mDataNode == null) {
+                    throw new M2mKeeperException(Code.PARAM_ERROR,
+                            "key is not exists");
+                }
             }
             delete(key);
             m2mDataNode.setData(updated.getData());
             create(m2mDataNode);
-            dataNodes.put(key,updated);
+            dataNodes.put(key, updated);
         } catch (Exception ex) {
             ex.printStackTrace();
             return 0L;
