@@ -92,7 +92,6 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
 
     private void connect() {
         cluster = Cluster.builder().addContactPoint(node).build();
-        Metadata metadata = cluster.getMetadata();
         session = cluster.connect();
         if (clean) {
             session.execute("use " + keyspace + ";");

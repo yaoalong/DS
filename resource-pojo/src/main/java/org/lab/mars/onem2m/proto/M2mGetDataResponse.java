@@ -76,29 +76,7 @@ public class M2mGetDataResponse implements M2mRecord {
         deserialize(archive, "");
     }
 
-    public int compareTo(Object peer_) throws ClassCastException {
-        if (!(peer_ instanceof M2mGetDataResponse)) {
-            throw new ClassCastException(
-                    "Comparing different types of records.");
-        }
-        int ret = 0;
 
-        if (ret != 0)
-            return ret;
-        return ret;
-    }
 
-    public boolean equals(Object peer_) {
-        if (!(peer_ instanceof M2mGetDataResponse)) {
-            return false;
-        }
-        if (peer_ == this) {
-            return true;
-        }
-        boolean ret = false;
-        if (!ret)
-            return ret;
-        return ret;
-    }
 
 }

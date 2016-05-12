@@ -16,17 +16,16 @@ public class OneM2mCreateTest {
     @Test
     public void testCreate() {
         OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
-        String key = "ddd32f234234ds";
+        String key = "/cse/ae";
         long startTime = System.nanoTime();
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 100000; i++) {
             try {
-                oneM2m.create(key + i, "111".getBytes());
-                System.out.println("e");
+                oneM2m.create(key+i, "111".getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        System.out.println("cost time:" + (System.nanoTime() - startTime));
+        System.out.println("cost time:" +String.format ("%,d",System.nanoTime() - startTime));
     }
 }
 

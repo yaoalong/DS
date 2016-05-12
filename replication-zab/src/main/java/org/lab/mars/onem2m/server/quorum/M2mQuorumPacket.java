@@ -112,10 +112,6 @@ public class M2mQuorumPacket implements M2mRecord {
         deserialize(archive, "");
     }
 
-    public int compareTo(Object peer_) throws ClassCastException {
-        throw new UnsupportedOperationException(
-                "comparing QuorumPacket is unimplemented");
-    }
 
 
 

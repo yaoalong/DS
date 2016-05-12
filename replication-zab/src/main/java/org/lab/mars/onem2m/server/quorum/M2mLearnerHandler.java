@@ -488,8 +488,6 @@ public class M2mLearnerHandler extends Thread {
                     DataOutputStream dos = new DataOutputStream(bos);
                     dos.writeLong(id);
                     boolean valid = leader.zk.touch(id, to);
-                    if (valid) {
-                    }
                     if (LOG.isTraceEnabled()) {
                         ZooTrace.logTraceMessage(LOG,
                                 ZooTrace.SESSION_TRACE_MASK, "Session 0x"
@@ -545,9 +543,6 @@ public class M2mLearnerHandler extends Thread {
     protected void pRequest2Txn(int type, long zxid, M2mRequest nM2mRequest,
             M2mRecord record) {
 
-        switch (type) {
-        case OpCode.create:
-        }
 
     }
 

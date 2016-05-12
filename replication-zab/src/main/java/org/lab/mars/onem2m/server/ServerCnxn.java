@@ -170,7 +170,6 @@ public abstract class ServerCnxn implements Stats {
      * reason is that if we would, old C client doesn't read it, which results
      * in TCP RST packet, i.e. "connection reset by peer".
      */
-    boolean isOldClient = true;
 
     abstract int getSessionTimeout();
 

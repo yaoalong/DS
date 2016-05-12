@@ -17,11 +17,11 @@ public class OneM2mTestRetrieve {
     @Test
     public void testRetrieve() {
         OneM2m oneM2m = new OneM2m("192.168.10.131", 2185);
-        String key = "ddd32f234234ds0";
+        String key = "/cse/ae";
         long startTime = System.nanoTime();
         for (int i = 0; i < 100000; i++) {
             oneM2m.getData(key);
         }
-        System.out.println("cost time:" + (System.nanoTime() - startTime));
+        System.out.println("cost time:" +String.format ("%,d",System.nanoTime() - startTime));
     }
 }

@@ -16,11 +16,11 @@ public class OneM2mTestSetData {
     @Test
     public void testSetData() {
         OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
-        String key = "ddd32f234234ds";
+        String key = "/cse/ae";
         long startTime = System.nanoTime();
-        for (int i = 0; i < 1000; i++) {
-            oneM2m.setData(key + i, "111".getBytes());
+        for (int i = 0; i < 10000; i++) {
+            oneM2m.setData(key+i , "111".getBytes());
         }
-        System.out.println("cost time:" + (System.nanoTime() - startTime));
+        System.out.println("cost time:" +String.format ("%,d",System.nanoTime() - startTime));
     }
 }

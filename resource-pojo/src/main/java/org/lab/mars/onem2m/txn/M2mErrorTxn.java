@@ -69,10 +69,7 @@ public class M2mErrorTxn implements M2mRecord {
         deserialize(archive, "");
     }
 
-    public int compareTo(Object peer_) throws ClassCastException {
-        int ret = 1;
-        return ret;
-    }
+
 
     public int hashCode() {
         int result = 17;

@@ -71,22 +71,5 @@ public class M2mLearnerInfo implements M2mRecord {
         deserialize(archive, "");
     }
 
-    public int compareTo(Object peer_) throws ClassCastException {
-        if (!(peer_ instanceof M2mLearnerInfo)) {
-            throw new ClassCastException(
-                    "Comparing different types of records.");
-        }
-        M2mLearnerInfo peer = (M2mLearnerInfo) peer_;
-        int ret = 0;
-        ret = (serverid == peer.serverid) ? 0
-                : ((serverid < peer.serverid) ? -1 : 1);
-        if (ret != 0)
-            return ret;
-        ret = (protocolVersion == peer.protocolVersion) ? 0
-                : ((protocolVersion < peer.protocolVersion) ? -1 : 1);
-        if (ret != 0)
-            return ret;
-        return ret;
-    }
 
 }

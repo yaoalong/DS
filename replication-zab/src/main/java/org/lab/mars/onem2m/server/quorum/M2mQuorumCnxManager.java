@@ -146,7 +146,7 @@ public class M2mQuorumCnxManager {
 
         String cnxToValue = System.getProperty("zookeeper.cnxTimeout");
         if (cnxToValue != null) {
-            this.cnxTO = new Integer(cnxToValue);
+            this.cnxTO = Integer.parseInt(cnxToValue);
         }
 
         this.self = self;

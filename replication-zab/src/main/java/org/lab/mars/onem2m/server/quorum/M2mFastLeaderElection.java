@@ -118,13 +118,13 @@ public class M2mFastLeaderElection implements M2mElection {
 
         @Override
         public String toString() {
-            return new String(Long.toHexString(version)
+            return Long.toHexString(version)
                     + " (message format version), " + leader
                     + " (n.leader), 0x" + Long.toHexString(zxid)
                     + " (n.zxid), 0x" + Long.toHexString(electionEpoch)
                     + " (n.round), " + state + " (n.state), " + sid
                     + " (n.sid), 0x" + Long.toHexString(peerEpoch)
-                    + " (n.peerEpoch) ");
+                    + " (n.peerEpoch) ";
         }
     }
 

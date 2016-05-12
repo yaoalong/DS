@@ -14,13 +14,14 @@ import java.io.Serializable;
 public class M2mServerStatusDO  implements Serializable{
 
     private static final long serialVersionUID = 7929067295236794068L;
-    private long id;
+    private Long id;
 
     private String ip;
 
-    private int status;
+    private Integer status;
 
     public Long getId() {
+        if(id==null)return 0L;
         return id;
     }
 
@@ -36,11 +37,11 @@ public class M2mServerStatusDO  implements Serializable{
         this.ip = ip;
     }
 
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 }
