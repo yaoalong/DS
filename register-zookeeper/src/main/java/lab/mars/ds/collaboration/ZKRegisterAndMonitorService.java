@@ -2,6 +2,7 @@ package lab.mars.ds.collaboration;
 
 import lab.mars.ds.loadbalance.LoadBalanceService;
 import lab.mars.ds.register.RegisterAndMonitorService;
+import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -21,47 +22,44 @@ import java.util.concurrent.CountDownLatch;
 /**
  * 基于ZooKeeper实现的注册服务
  */
-public class ZKRegisterAndMonitorService implements RegisterAndMonitorService, Watcher {
+public class ZKRegisterAndMonitorService implements RegisterAndMonitorService {
     private static final Logger LOG = LoggerFactory
             .getLogger(ZKRegisterAndMonitorService.class);
-    private static CountDownLatch countDownLatch = new CountDownLatch(1);
-    private ZooKeeper zooKeeper;
+    private static final String ROOT = "/server/";
+    private ZkClient zkClient;
+
+    protected  Boolean isOk=Boolean.FALSE;
 
     @Override
     public void register(String zooKeeperServer, String value, LoadBalanceService loadBalanceService) throws IOException {
-        zooKeeper = new ZooKeeper(zooKeeperServer, 5000, new ZKRegisterAndMonitorService());
-        try {
-            countDownLatch.await();
-            RegisterIntoZooKeeper registerIntoZooKeeper = new RegisterIntoZooKeeper();
-            registerIntoZooKeeper.register(zooKeeper, value);
-            registerIntoZooKeeper.start();
-            if (registerIntoZooKeeper != null) {
-                registerIntoZooKeeper.join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (KeeperException e) {
-            e.printStackTrace();
+        ZkClient zkClient = new ZkClient(zooKeeperServer, 5000);
+        if(!zkClient.exists(ROOT+value)){
+            zkClient.createEphemeral(ROOT + value);
         }
-        ZooKeeper_Monitor zooKeeper_monitor = new ZooKeeper_Monitor(zooKeeper);
+        else{
+            zkClient.delete(ROOT+value);
+            zkClient.createEphemeral(ROOT + value);
+        }
+        ZooKeeper_Monitor zooKeeper_monitor = new ZooKeeper_Monitor(zkClient,this);
         zooKeeper_monitor.setLoadBalanceService(loadBalanceService);
         zooKeeper_monitor.start();
+        synchronized (isOk){
+
+            try {
+                isOk.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
     }
 
-    @Override
-    public void process(WatchedEvent event) {
-        if (Event.KeeperState.SyncConnected == event.getState()
-                && Event.EventType.NodeChildrenChanged != event.getType()) {
-            countDownLatch.countDown();
-        }
-    }
+
 
     @Override
     public void close() {
-        try {
-            zooKeeper.close();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        zkClient.close();
     }
 }

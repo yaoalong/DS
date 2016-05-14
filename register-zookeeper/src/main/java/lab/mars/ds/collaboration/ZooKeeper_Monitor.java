@@ -2,6 +2,7 @@ package lab.mars.ds.collaboration;
 
 import lab.mars.ds.loadbalance.LoadBalanceException;
 import lab.mars.ds.loadbalance.LoadBalanceService;
+import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -16,20 +17,33 @@ import java.util.concurrent.CountDownLatch;
 /*
  * 监控zookeeper,从而可以获取在线机器列表
  */
-public class ZooKeeper_Monitor extends Thread implements Watcher {
+public class ZooKeeper_Monitor extends Thread {
 
     private static final Logger LOG = LoggerFactory
             .getLogger(ZooKeeper_Monitor.class);
     private static final String ROOT_NODE = "/server";
-    private static CountDownLatch countDownLatch = new CountDownLatch(1);
-    private ZooKeeper zooKeeper;
+    private ZkClient zkClient;
     private LoadBalanceService loadBalanceService;
-    public ZooKeeper_Monitor(ZooKeeper zooKeeper){
-        this.zooKeeper=zooKeeper;
+    private ZKRegisterAndMonitorService registerAndMonitorService;
+    public ZooKeeper_Monitor(ZkClient zkClient,ZKRegisterAndMonitorService registerAndMonitorService){
+        this.zkClient=zkClient;
+        this.registerAndMonitorService=registerAndMonitorService;
     }
+    @Override
     public void run() {
         try {
-            getChildrens();
+            loadBalanceService.setServers(zkClient.getChildren(ROOT_NODE));
+        } catch (LoadBalanceException e) {
+            e.printStackTrace();
+        }
+        synchronized (registerAndMonitorService.isOk){
+            registerAndMonitorService.isOk.notify();
+        }
+
+        try {
+            zkClient.subscribeChildChanges(ROOT_NODE,(path,childList)->{
+                loadBalanceService.setServers(zkClient.getChildren(ROOT_NODE));
+            });
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("zookeepeer_monitor is error because of:",
@@ -37,39 +51,9 @@ public class ZooKeeper_Monitor extends Thread implements Watcher {
         }
     }
 
-    @Override
-    public void process(WatchedEvent event) {
-        if (EventType.NodeChildrenChanged == event.getType()
-                && event.getPath().startsWith(ROOT_NODE)) {
-            try {
-                if (zooKeeper == null) {
-                    return;
-                }
-                try {
-                    getChildrens();
-                } catch (LoadBalanceException e) {
-                    e.printStackTrace();
-                }
-            } catch (KeeperException | InterruptedException e) {
-                LOG.error("error:{}", e.getMessage());
-            }
-        }
-    }
-
-    /*
-     * 去修改networkPool的服务器列表
-     */
-    private void getChildrens() throws KeeperException, InterruptedException, LoadBalanceException {
-        if (zooKeeper == null) {
-            LOG.error("zookeeper is empty");
-            return;
-        }
-        List<String> servers = zooKeeper.getChildren(ROOT_NODE, this);
-        loadBalanceService.setServers(servers);
-    }
 
 
-    public void setLoadBalanceService(LoadBalanceService loadBalanceService) {
+    protected void setLoadBalanceService(LoadBalanceService loadBalanceService) {
         this.loadBalanceService = loadBalanceService;
     }
 }
