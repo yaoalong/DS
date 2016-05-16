@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-
 public class M2mCommitProcessor extends Thread implements RequestProcessor {
     private static final Logger LOG = LoggerFactory
             .getLogger(M2mCommitProcessor.class);
@@ -154,6 +153,7 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
     }
 
     synchronized public void commit(M2mRequest request) {
+        System.out.println("commit :"+(System.nanoTime()-request.createTime));
         if (!finished) {
             if (request == null) {
                 LOG.warn("Committed a null!", new Exception(
@@ -169,6 +169,8 @@ public class M2mCommitProcessor extends Thread implements RequestProcessor {
     }
 
     synchronized public void processRequest(M2mRequest request) {
+
+        System.out.println("commit processor:"+(System.nanoTime()-request.createTime));
         if (LOG.isDebugEnabled()) {
             LOG.debug("Processing request:: " + request);
         }

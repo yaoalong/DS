@@ -14,7 +14,7 @@ public class OneM2mTestDelete {
      */
     @Test
     public void testDelete() {
-        OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
+        OneM2m oneM2m = new OneM2m("192.168.10.131:2183,192.168.10.131:2184,192.168.10.131:2185");
         String key = "/cse/ae";
         long startTime = System.nanoTime();
         for (int i = 0; i < 1; i++) {

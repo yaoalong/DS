@@ -193,7 +193,7 @@ public class M2mQuorumPeerMain extends Thread {
                     e.printStackTrace();
                 }
             }
-            oneM2m = new OneM2m(myAddress, zabClientPort);
+            oneM2m = new OneM2m(myAddress+":"+zabClientPort);
 
         }
 

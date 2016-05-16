@@ -130,7 +130,11 @@ public class PacketServerChannelHandler extends
             }
             if (networkPool.getServers().contains(responseServer)) {
                 if (ipAndTcpClient.containsKey(responseServer)) {
-                    ipAndTcpClient.get(responseServer).write(m2mPacket);
+                    try {
+                        ipAndTcpClient.get(responseServer).write(m2mPacket);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     ctx.writeAndFlush(m2mPacket);
                     return false;
                 } else {

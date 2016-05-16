@@ -41,7 +41,7 @@ public abstract class TcpClientNetwork {
 
     }
 
-    public abstract void write(Object msg);
+    public abstract void write(Object msg)throws Exception;
 
     public void close() {
         if (channel != null) {

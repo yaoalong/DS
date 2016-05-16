@@ -1,7 +1,9 @@
 package org.lab.mars.onem2m;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import lab.mars.ds.network.TcpClient;
 import lab.mars.ds.reflection.ResourceReflection;
@@ -30,12 +32,34 @@ public class OneM2m {
     private static final Logger LOG = LoggerFactory.getLogger(OneM2m.class);
 
     private TcpClient tcpClient;
-
-    public OneM2m(String host, Integer port) {
-        tcpClient = new TcpClient(new LinkedList<M2mPacket>());
-        tcpClient.connectionOne(host, port);
+    private List<IpAndPortDO> ipAndPortDOList=new ArrayList<>();
+    private int currentIndex;
+    public OneM2m(String server){
+        String[] servers=server.split(",");
+        for(String index:servers){
+            String[] serverAndPort=index.split(":");
+            ipAndPortDOList.add(new IpAndPortDO(serverAndPort[0],Integer.parseInt(serverAndPort[1])));
+        }
+        create();
     }
+    public void create() {
+        tcpClient = new TcpClient(new LinkedList<M2mPacket>());
+        tcpClient.connectionOne(ipAndPortDOList.get(currentIndex).getIp(),ipAndPortDOList.get(currentIndex).getPort());
+    }
+    public void write(M2mPacket m2mPacket){
+        while(true){
+            try {
+                tcpClient.write(m2mPacket);
+                break;
+            } catch (Exception e) {
+                e.printStackTrace();
+                currentIndex++;
+                create();
 
+            }
+
+        }
+    }
     public String create(final String path, byte[] data) throws IOException {
         M2mRequestHeader m2mRequestHeader = new M2mRequestHeader();
         m2mRequestHeader.setType(ZooDefs.OpCode.create);
@@ -50,7 +74,8 @@ public class OneM2m {
         m2mCreateRequest.setData(ResourceReflection.serializeKryo(m2mDataNode));
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mCreateRequest, m2mCreateResponse);
-        tcpClient.write(m2mPacket);
+
+       write(m2mPacket);
         int i = m2mPacket.getM2mReplyHeader().getErr();
         return "";
     }
@@ -64,7 +89,7 @@ public class OneM2m {
         m2mDeleteRequest.setKey(path);
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mDeleteRequest, new M2mCreateResponse());
-        tcpClient.write(m2mPacket);
+        write(m2mPacket);
     }
 
     public void setData(final String path, byte[] data) {
@@ -81,7 +106,7 @@ public class OneM2m {
         m2mSetDataRequest.setKey(path);
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mSetDataRequest, new M2mCreateResponse());
-        tcpClient.write(m2mPacket);
+        write(m2mPacket);
 
     }
 
@@ -95,7 +120,7 @@ public class OneM2m {
         M2mGetDataResponse m2mGetDataResponse = new M2mGetDataResponse();
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mGetDataRequest, m2mGetDataResponse);
-        tcpClient.write(m2mPacket);
+        write(m2mPacket);
 //        M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
 //                .deserializeKryo(((M2mGetDataResponse) m2mPacket.getResponse())
 //                        .getData());
@@ -104,11 +129,11 @@ public class OneM2m {
     }
 
     public void send(M2mPacket m2mPacket) {
-        tcpClient.write(m2mPacket);
+        write(m2mPacket);
     }
 
     public static void main(String args[]) throws IOException {
-        OneM2m oneM2m = new OneM2m("192.168.10.131", 2184);
+        OneM2m oneM2m = new OneM2m("192.168.10.131");
         String key = "ddd32f234234ds";
         oneM2m.create(key, "111".getBytes());
         oneM2m.setData(key, "5555".getBytes());

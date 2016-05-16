@@ -18,6 +18,8 @@ public class M2mRequest {
     public final static M2mRequest requestOfDeath = new M2mRequest(null, 0, 0,
             null);
 
+    public long startTime;
+
     /**
      *
      * @param channel
@@ -46,7 +48,7 @@ public class M2mRequest {
 
     public final ByteBuffer request;
 
-    public final long createTime = System.currentTimeMillis();
+    public final long createTime = System.nanoTime();
 
     private KeeperException e;
 
@@ -120,4 +122,7 @@ public class M2mRequest {
         return request;
     }
 
+    public long getCreateTime() {
+        return createTime;
+    }
 }

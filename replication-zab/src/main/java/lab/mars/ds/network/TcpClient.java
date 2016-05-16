@@ -1,6 +1,7 @@
 package lab.mars.ds.network;
 
 import java.util.LinkedList;
+import java.util.concurrent.ExecutionException;
 
 import lab.mars.ds.network.intializer.PacketClientChannelInitializer;
 
@@ -28,7 +29,7 @@ public class TcpClient extends TcpClientNetwork {
 
     }
 
-    public void write(Object msg) {
+    public void write(Object msg)throws Exception {
         while (channel == null) {
             try {
                 reentrantLock.lock();
@@ -45,6 +46,9 @@ public class TcpClient extends TcpClientNetwork {
                 pendingQueue.add((M2mPacket) msg);
             }
 
+        }
+        if(!channel.isActive()){
+            throw  new Exception("channel 已经关闭");
         }
         channel.writeAndFlush(msg);
         synchronized (msg) {

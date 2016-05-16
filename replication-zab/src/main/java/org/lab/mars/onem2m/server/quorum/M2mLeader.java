@@ -981,7 +981,6 @@ public class M2mLeader {
      * sufficient acks.
      *
      * @param sid
-     * @param learnerType
      * @throws InterruptedException
      */
     public void waitForNewLeaderAck(long sid, long zxid)
