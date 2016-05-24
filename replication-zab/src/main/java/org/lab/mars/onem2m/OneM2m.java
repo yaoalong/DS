@@ -43,7 +43,7 @@ public class OneM2m {
         create();
     }
     public void create() {
-        tcpClient = new TcpClient(new LinkedList<M2mPacket>());
+        tcpClient = new TcpClient(new LinkedList<>());
         tcpClient.connectionOne(ipAndPortDOList.get(currentIndex).getIp(),ipAndPortDOList.get(currentIndex).getPort());
     }
     public void write(M2mPacket m2mPacket){
@@ -53,7 +53,9 @@ public class OneM2m {
                 break;
             } catch (Exception e) {
                 e.printStackTrace();
-                currentIndex++;
+                if(currentIndex++>ipAndPortDOList.size()){
+                    currentIndex=0;
+                }
                 create();
 
             }

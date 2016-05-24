@@ -58,7 +58,6 @@ public class M2mFollowerRequestProcessor extends Thread implements
                 if (request == M2mRequest.requestOfDeath) {
                     break;
                 }
-
                 nextProcessor.processRequest(request);
                 switch (request.type) {
                     case OpCode.sync: // sync这个操作可以暂时忽略

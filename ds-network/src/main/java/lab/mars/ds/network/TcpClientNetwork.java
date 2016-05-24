@@ -33,8 +33,13 @@ public abstract class TcpClientNetwork {
                 .handler(socketChannelChannelInitializer);
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
             reentrantLock.lock();
+            if(future.isSuccess()){
+                System.out.println("陈宫");
+            }
+            else{
+                System.out.println("shibai");
+            }
             channel = future.channel();
-            System.out.println("连接成功"+port+":server:"+host);
             condition.signalAll();
             reentrantLock.unlock();
         });

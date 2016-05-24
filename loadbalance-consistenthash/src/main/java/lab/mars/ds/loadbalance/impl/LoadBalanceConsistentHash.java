@@ -100,14 +100,12 @@ public class LoadBalanceConsistentHash implements LoadBalanceService {
         for (int i = 0; i < servers.size(); i++) {
             for (long j = 0; j < numOfVirtualNode; j++) {
                 byte[] d = md5.digest((servers.get(i) + "-" + j).getBytes(Charset.forName("utf-8")));
-                for (int h = 0; h < 1; h++) {
-                    Long k = ((long) (d[3 + h * 4] & 0xFF) << 24)
-                            | ((long) (d[2 + h * 4] & 0xFF) << 16)
-                            | ((long) (d[1 + h * 4] & 0xFF) << 8)
-                            | ((long) (d[0 + h * 4] & 0xFF));
+                    Long k = ((long) (d[3 ] & 0xFF) << 24)
+                            | ((long) (d[2 ] & 0xFF) << 16)
+                            | ((long) (d[1 ] & 0xFF) << 8)
+                            | ((long) (d[0 ] & 0xFF));
 
                     newConsistentBuckets.put(k, servers.get(i));
-                }
             }
         }
         return newConsistentBuckets;

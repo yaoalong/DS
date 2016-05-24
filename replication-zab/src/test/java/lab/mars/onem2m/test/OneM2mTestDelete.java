@@ -17,7 +17,7 @@ public class OneM2mTestDelete {
         OneM2m oneM2m = new OneM2m("192.168.10.131:2183,192.168.10.131:2184,192.168.10.131:2185");
         String key = "/cse/ae";
         long startTime = System.nanoTime();
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 10; i++) {
             oneM2m.delete(key+i);
         }
         System.out.println("cost time:" +String.format ("%,d",System.nanoTime() - startTime));
