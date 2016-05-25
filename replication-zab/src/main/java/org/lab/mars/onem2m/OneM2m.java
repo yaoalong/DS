@@ -112,7 +112,7 @@ public class OneM2m {
 
     }
 
-    public String getData(final String path) {
+    public byte[] getData(final String path) {
         M2mRequestHeader m2mRequestHeader = new M2mRequestHeader();
         m2mRequestHeader.setType(ZooDefs.OpCode.getData);
         m2mRequestHeader.setKey(path);
@@ -123,11 +123,16 @@ public class OneM2m {
         M2mPacket m2mPacket = new M2mPacket(m2mRequestHeader, m2mReplyHeader,
                 m2mGetDataRequest, m2mGetDataResponse);
         write(m2mPacket);
-//        M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
-//                .deserializeKryo(((M2mGetDataResponse) m2mPacket.getResponse())
-//                        .getData());
-//        return new String(m2mDataNode.getData());
-        return null;
+        if(m2mPacket.getResponse()==null){
+            return null;
+        }
+        if(((M2mGetDataResponse) m2mPacket.getResponse()).getData()==null){
+            return null;
+        }
+        M2mDataNode m2mDataNode = (M2mDataNode) ResourceReflection
+                .deserializeKryo(((M2mGetDataResponse) m2mPacket.getResponse())
+                        .getData());
+        return m2mDataNode.getData();
     }
 
     public void send(M2mPacket m2mPacket) {

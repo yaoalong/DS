@@ -82,10 +82,11 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                 Object object = row.getObject(name);
                 result.put(name, object);
             });
-            if (judgeIsHandle((Long) result.get("zxid"))) {
+            System.out.println("一条数据");
+        //    if (judgeIsHandle((Long) result.get("zxid"))) {
                 m2mDataNodes.add(ResourceReflection.deserialize(
                         M2mDataNode.class, result));
-            }
+           // }
         }
         return m2mDataNodes;
     }
@@ -119,6 +120,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             if (m2mDataNodes.size() == 0) {
                 return null;
             }
+            System.out.println("size:"+m2mDataNodes.size());
             dataNodes.put(key, m2mDataNodes.get(0));
             return m2mDataNodes.get(0);
 
@@ -157,6 +159,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         map.forEach(insert::value);
         session.execute(insert);
         dataNodes.put(m2mDataNode.getId(), m2mDataNode);
+        System.out.println("插入成功"+m2mDataNode.getId());
         return 1L;
     }
 
