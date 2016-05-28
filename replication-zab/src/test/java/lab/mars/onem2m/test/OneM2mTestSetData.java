@@ -1,6 +1,7 @@
 package lab.mars.onem2m.test;
 
 import org.junit.Test;
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.OneM2m;
 
 /**
@@ -19,7 +20,11 @@ public class OneM2mTestSetData {
         String key = "/cse/ae";
         long startTime = System.nanoTime();
         for (int i = 0; i < 10000; i++) {
-            oneM2m.setData(key+i , "111".getBytes());
+            try {
+                oneM2m.setData(key , "111".getBytes());
+            } catch (M2mKeeperException e) {
+                e.printStackTrace();
+            }
         }
         System.out.println("cost time:" +String.format ("%,d",System.nanoTime() - startTime));
     }

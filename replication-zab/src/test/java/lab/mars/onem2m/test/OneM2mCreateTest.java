@@ -1,6 +1,7 @@
 package lab.mars.onem2m.test;
 
 import org.junit.Test;
+import org.lab.mars.onem2m.M2mKeeperException;
 import org.lab.mars.onem2m.OneM2m;
 
 import java.io.IOException;
@@ -20,8 +21,10 @@ public class OneM2mCreateTest {
         long startTime = System.nanoTime();
         for (int i = 0; i < 10; i++) {
             try {
-                oneM2m.create(key+i, (i+"2").getBytes());
+                oneM2m.create(key, (i+"2").getBytes());
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (M2mKeeperException e) {
                 e.printStackTrace();
             }
         }
