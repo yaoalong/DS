@@ -197,7 +197,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
         } else {
             m2mDataNode = retrieve(key);
             if (m2mDataNode == null) {
-                throw new M2mKeeperException(Code.PARAM_ERROR,
+                throw new M2mKeeperException(Code.NONODE,
                         "key is not exists");
             }
         }
