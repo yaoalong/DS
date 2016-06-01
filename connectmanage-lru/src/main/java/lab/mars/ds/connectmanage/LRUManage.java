@@ -30,9 +30,6 @@ public class LRUManage implements ConnectManager {
             return false;
         }
     };
-    public LRUManage(){
-
-    }
     public LRUManage(int size) {
         this.size = size;
     }

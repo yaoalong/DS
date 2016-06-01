@@ -163,17 +163,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
             throw new M2mKeeperException(Code.PARAM_ERROR,
                     "delete key can't is null");
         }
-        M2mDataNode m2mDataNode;
-        if (dataNodes.containsKey(key)) {
-            m2mDataNode = dataNodes.get(key);
-
-        } else {
-            m2mDataNode = retrieve(key);
-            if (m2mDataNode == null) {
-                throw new M2mKeeperException(Code.NONODE,
-                        "key is not exists");
-            }
-        }
+        M2mDataNode m2mDataNode=getDataIsExists(key);
         Statement delete = query().delete().from(keyspace, table)
                 .where(eq("label", 0))
                 .and(eq("zxid", m2mDataNode.getZxid()));
@@ -182,15 +172,7 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
 
         return 1L;
     }
-
-    @Override
-    public Long update(String key, M2mDataNode updated)
-            throws M2mKeeperException {
-        System.out.println("key:" + key);
-        if (key == null || updated == null) {
-            throw new M2mKeeperException(Code.PARAM_ERROR,
-                    "key or updated is error");
-        }
+    public M2mDataNode getDataIsExists(String key)  throws M2mKeeperException{
         M2mDataNode m2mDataNode;
         if (dataNodes.containsKey(key)) {
             m2mDataNode = dataNodes.get(key);
@@ -201,6 +183,18 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                         "key is not exists");
             }
         }
+        return m2mDataNode;
+
+    }
+    @Override
+    public Long update(String key, M2mDataNode updated)
+            throws M2mKeeperException {
+        System.out.println("key:" + key);
+        if (key == null || updated == null) {
+            throw new M2mKeeperException(Code.PARAM_ERROR,
+                    "key or updated is error");
+        }
+        M2mDataNode m2mDataNode=getDataIsExists(key);
         delete(key);
         m2mDataNode.setData(updated.getData());
         create(m2mDataNode);
