@@ -17,10 +17,8 @@ import java.util.Set;
 public class TcpServerNetwork {
     private Set<Channel> channels;
     private ChannelInitializer<SocketChannel> channelChannelInitializer;
-    protected  int port;
     public void bind(String host, int port) throws InterruptedException {
         channels = new HashSet<>();
-        this.port=port;
         ServerBootstrap b = new ServerBootstrap();
         b.group(NetworkEventLoopGroup.bossGroup,
                 NetworkEventLoopGroup.workerGroup)

@@ -17,11 +17,11 @@ public class OneM2mTestSetData {
     @Test
     public void testSetData() {
         OneM2m oneM2m = new OneM2m("192.168.10.131:2183,192.168.10.131:2184,192.168.10.131:2185");
-        String key = "/cse/ae";
+        String key = "/cse/ae3";
         long startTime = System.nanoTime();
         for (int i = 0; i < 10000; i++) {
             try {
-                oneM2m.setData(key , "111".getBytes());
+                oneM2m.setData(key+i , "111".getBytes());
             } catch (M2mKeeperException e) {
                 e.printStackTrace();
             }

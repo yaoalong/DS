@@ -21,11 +21,9 @@ public abstract class TcpClientNetwork {
     protected Channel channel;
     protected ReentrantLock reentrantLock = new ReentrantLock();
     protected Condition condition = reentrantLock.newCondition();
-    protected int port;
     private ChannelInitializer<SocketChannel> socketChannelChannelInitializer;
 
     public void connectionOne(String host, int port) {
-        this.port = port;
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(NetworkEventLoopGroup.workerGroup)
                 .channel(NioSocketChannel.class)

@@ -19,12 +19,6 @@ public class M2mSetDataRequest implements M2mRecord {
     public M2mSetDataRequest() {
 
     }
-
-    public M2mSetDataRequest(String key, byte[] data) {
-        this.key = key;
-        this.data = data;
-    }
-
     public String getKey() {
         return key;
     }

@@ -2,7 +2,7 @@ package lab.mars.ds.web.protocol;
 
 import java.io.Serializable;
 
-public class M2mServerLoadDO implements Serializable {
+public class M2mServerLoadDO implements Serializable ,Comparable<M2mServerLoadDO>{
 
     /**
      * 
@@ -25,5 +25,10 @@ public class M2mServerLoadDO implements Serializable {
 
     public void setY(Long y) {
         this.y = y;
+    }
+
+    @Override
+    public int compareTo(M2mServerLoadDO o) {
+       return this.label.compareTo(o.getLabel());
     }
 }

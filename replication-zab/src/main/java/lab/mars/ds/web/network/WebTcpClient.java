@@ -22,9 +22,6 @@ public class WebTcpClient extends TcpClientNetwork {
                 reentrantLock.unlock();
             }
         }
-        System.out.println("继续"+port);
-        System.out.println("开始i"+port);
         channel.writeAndFlush(msg);
-        System.out.println("结束"+port);
     }
 }
