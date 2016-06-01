@@ -32,7 +32,6 @@ public class M2mQuorumPeerMain extends Thread {
     private volatile Integer zabClientPort;
     private volatile String myAddress;
 
-    private String[] configFile;
 
     /**
      * To start the replicated server specify the configuration file name on the
@@ -154,22 +153,6 @@ public class M2mQuorumPeerMain extends Thread {
         }
     }
 
-    @Override
-    public void run() {
-        try {
-            try {
-                initializeAndRun(configFile);
-            } catch (LoadBalanceException e) {
-                e.printStackTrace();
-            }
-        } catch (ConfigException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        LOG.info("Exiting normally");
-        System.exit(0);
-    }
 
     /**
      * 绑定开发者自己定义的Handler
@@ -193,7 +176,7 @@ public class M2mQuorumPeerMain extends Thread {
                     e.printStackTrace();
                 }
             }
-            oneM2m = new OneM2m(myAddress+":"+zabClientPort);
+            oneM2m = new OneM2m(myAddress + ":" + zabClientPort);
 
         }
 
@@ -201,7 +184,4 @@ public class M2mQuorumPeerMain extends Thread {
         return m2mPacket;
     }
 
-    public void setConfigFile(String[] configFile) {
-        this.configFile = configFile;
-    }
 }

@@ -19,9 +19,9 @@ public class OneM2mCreateTest {
         OneM2m oneM2m = new OneM2m("192.168.10.131:2184,192.168.10.131:2183,192.168.10.131:2185");
         String key = "/cse/ae";
         long startTime = System.nanoTime();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 10; i < 20; i++) {
             try {
-                oneM2m.create(key, (i+"2").getBytes());
+                oneM2m.create(key+i, (i+"2").getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (M2mKeeperException e) {

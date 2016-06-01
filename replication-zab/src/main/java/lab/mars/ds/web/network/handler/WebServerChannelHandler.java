@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +35,7 @@ public class WebServerChannelHandler extends
     private static Logger LOG = LoggerFactory
             .getLogger(WebServerChannelHandler.class);
     private LoadBalanceConsistentHash networkInterface;
-    private AtomicInteger zxid = new AtomicInteger(0);
+    private static AtomicInteger zxid = new AtomicInteger(0);
     private NettyServerCnxnFactory nettyServerCnxnFactory;
 
     public WebServerChannelHandler(NettyServerCnxnFactory nettyServerCnxnFactory) {
@@ -91,6 +92,7 @@ public class WebServerChannelHandler extends
                         System.out.println("fvx" + server);
                         String[] value = spilitString(server);
                         webTcpClient.connectionOne(value[0], Integer.parseInt(value[1]));
+                        System.out.println("连接成功"+Integer.parseInt(value[1]));
                         webTcpClient.write(m2mPacket);
                         webAddressAndPortToChannel.put(server,webTcpClient.getChannel());
                     }
@@ -192,6 +194,14 @@ public class WebServerChannelHandler extends
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+
+        if (LOG.isInfoEnabled()) {
+            String host = ((InetSocketAddress) ctx.channel().remoteAddress())
+                    .getAddress().getHostAddress();
+            int port = ((InetSocketAddress) ctx.channel().remoteAddress())
+                    .getPort();
+            LOG.info(" server host:{},port:{}", host, port);
+        }
         ctx.fireChannelRegistered();
     }
 

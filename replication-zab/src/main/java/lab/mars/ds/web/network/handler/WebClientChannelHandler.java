@@ -55,7 +55,7 @@ public class WebClientChannelHandler extends
         }
         M2mWebPacket m2mPacket = (M2mWebPacket) msg;
         if (m2mPacket.getM2mRequestHeader().getType() == WebOperateType.lookServerLoad.getCode()) {
-
+            System.out.println("接收到了"+"XXX");
             M2mWebServerLoadResponse m2mWebServerLoadResponse = (M2mWebServerLoadResponse) m2mPacket
                     .getResponse();
             M2mRequestHeader m2mRequestHeader = m2mPacket.getM2mRequestHeader();
