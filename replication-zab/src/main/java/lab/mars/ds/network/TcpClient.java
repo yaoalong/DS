@@ -1,13 +1,11 @@
 package lab.mars.ds.network;
 
-import java.util.LinkedList;
-import java.util.concurrent.ExecutionException;
-
 import lab.mars.ds.network.intializer.PacketClientChannelInitializer;
-
 import org.lab.mars.onem2m.proto.M2mPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.LinkedList;
 
 /**
  * TCP客户端
@@ -29,7 +27,7 @@ public class TcpClient extends TcpClientNetwork {
 
     }
 
-    public void write(Object msg)throws Exception {
+    public void write(Object msg) throws Exception {
         while (channel == null) {
             try {
                 reentrantLock.lock();
@@ -47,8 +45,8 @@ public class TcpClient extends TcpClientNetwork {
             }
 
         }
-        if(!channel.isActive()){
-            throw  new Exception("channel 已经关闭");
+        if (!channel.isActive()) {
+            throw new Exception("channel 已经关闭");
         }
         channel.writeAndFlush(msg);
         synchronized (msg) {
@@ -66,10 +64,6 @@ public class TcpClient extends TcpClientNetwork {
 
     public LinkedList<M2mPacket> getPendingQueue() {
         return pendingQueue;
-    }
-
-    public void setPendingQueue(LinkedList<M2mPacket> pendingQueue) {
-        this.pendingQueue = pendingQueue;
     }
 
 }

@@ -19,14 +19,6 @@ public class M2mWebPacketHandle {
             String tag) throws IOException {
         ByteArrayOutputStream  baos = new ByteArrayOutputStream();
         M2mBinaryOutputArchive boa = M2mBinaryOutputArchive.getArchive(baos);
-        if (response instanceof M2mWebServerStatusResponse) {
-            M2mWebServerStatusResponse m2mWebServerStatusResponse = new M2mWebServerStatusResponse();
-            m2mRecord.serialize(boa, tag);
-            byte[] bytes = baos.toByteArray();
-            m2mWebServerStatusResponse.setData(bytes);
-            return new M2mWebPacket(m2mRequestHeader, m2mReplyHeader, request,
-                    m2mWebServerStatusResponse);
-        }
         return new M2mWebPacket(m2mRequestHeader, m2mReplyHeader, request,
                 response);
 

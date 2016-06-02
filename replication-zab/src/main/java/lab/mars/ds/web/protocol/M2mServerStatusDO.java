@@ -3,7 +3,6 @@ package lab.mars.ds.web.protocol;
 import java.io.Serializable;
 
 /**
- * 
  * @author yaoalong
  * @Date 2016年1月24日
  * @Email yaoalong@foxmail.com
@@ -11,7 +10,7 @@ import java.io.Serializable;
 /*
  * 用来向web展示的DO
  */
-public class M2mServerStatusDO  implements Serializable{
+public class M2mServerStatusDO implements Serializable {
 
     private static final long serialVersionUID = 7929067295236794068L;
     private Long id;
@@ -19,9 +18,19 @@ public class M2mServerStatusDO  implements Serializable{
     private String ip;
 
     private Integer status;
+    public M2mServerStatusDO(){
+
+    }
+    public M2mServerStatusDO(String ip){
+        this.ip=ip;
+    }
+    public M2mServerStatusDO(String ip, Integer status) {
+        this.ip = ip;
+        this.status = status;
+    }
 
     public Long getId() {
-        if(id==null)return 0L;
+        if (id == null) return 0L;
         return id;
     }
 

@@ -16,7 +16,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -34,8 +33,8 @@ public class WebServerChannelHandler extends
     static ConcurrentHashMap<Integer, AtomicInteger> serverLoadResult = new ConcurrentHashMap<>();
     private static Logger LOG = LoggerFactory
             .getLogger(WebServerChannelHandler.class);
-    private LoadBalanceConsistentHash networkInterface;
     private static AtomicInteger zxid = new AtomicInteger(0);
+    private LoadBalanceConsistentHash networkInterface;
     private NettyServerCnxnFactory nettyServerCnxnFactory;
 
     public WebServerChannelHandler(NettyServerCnxnFactory nettyServerCnxnFactory) {
@@ -83,18 +82,17 @@ public class WebServerChannelHandler extends
                 System.out.println("cid:" + cid + " channel:" + ctx.toString());
                 serverLoadAndCtxConcurrentHashMap.put(cid, new ServerLoadAndCtx(ctx, new ArrayList<M2mServerLoadDO>()));
                 serverLoadResult.put(cid, new AtomicInteger(0));
-                for (String server: nettyServerCnxnFactory.getWebServers()) {
-                    if(webAddressAndPortToChannel.containsKey(server)){
+                for (String server : nettyServerCnxnFactory.getWebServers()) {
+                    if (webAddressAndPortToChannel.containsKey(server)) {
                         webAddressAndPortToChannel.get(server).writeAndFlush(m2mPacket);
-                    }
-                    else{
+                    } else {
                         WebTcpClient webTcpClient = new WebTcpClient(null);
                         System.out.println("fvx" + server);
                         String[] value = spilitString(server);
                         webTcpClient.connectionOne(value[0], Integer.parseInt(value[1]));
-                        System.out.println("连接成功"+Integer.parseInt(value[1]));
+                        System.out.println("连接成功" + Integer.parseInt(value[1]));
                         webTcpClient.write(m2mPacket);
-                        webAddressAndPortToChannel.put(server,webTcpClient.getChannel());
+                        webAddressAndPortToChannel.put(server, webTcpClient.getChannel());
                     }
 
                 }
@@ -117,9 +115,8 @@ public class WebServerChannelHandler extends
                 String server = m2mPacket.getM2mRequestHeader().getKey();
                 List<String> servers = networkInterface.getReplicationServer(server);
                 List<M2mServerStatusDO> result = new ArrayList<>();
-                servers.forEach(t -> {
-                    M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-                    m2mServerStatusDO.setIp(t);
+                servers.forEach(ip -> {
+                    M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO(ip);
                     result.add(m2mServerStatusDO);
                 });
                 M2mWebPacket m2mWebPacket = new M2mWebPacket(
@@ -156,37 +153,26 @@ public class WebServerChannelHandler extends
      */
     public void lookAllServerStatus(M2mWebPacket m2mWebPacket, Channel channel)
             throws IOException {
-        M2mServerStatusDOs m2mServerStatuses = new M2mServerStatusDOs();
-//        final TreeMap<Long, String> survivalServers = networkInterface
-//                .getConsistentBuckets();
         List<M2mServerStatusDO> m2mServerStatusDOs = new ArrayList<>();
         List<String> survivalServers = networkInterface.getServers();
         List<String> allServers = networkInterface.getAllServers();
         survivalServers.forEach(server -> {
-            M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-            m2mServerStatusDO.setIp(server);
-            m2mServerStatusDO.setStatus(M2mServerStatus.STARTED
-                    .getStatus());
+            M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO(server,M2mServerStatus.STARTED.getStatus());
             m2mServerStatusDOs.add(m2mServerStatusDO);
-            System.out.println("survivalServer:"+server);
         });
         allServers.forEach(server -> {
             if (!survivalServers.contains(server)) {
-                M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
-                m2mServerStatusDO.setIp(server);
-                m2mServerStatusDO.setStatus(M2mServerStatus.STOPED
-                        .getStatus());
+                M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO(server,M2mServerStatus.STOPED.getStatus());
                 m2mServerStatusDOs.add(m2mServerStatusDO);
-                System.out.println("deadServer:"+server);
             }
         });
 
-        m2mServerStatuses.setM2mServerStatusDOs(m2mServerStatusDOs);
         M2mWebServerStatusResponse m2mWebServerStatusResponse = new M2mWebServerStatusResponse();
+        m2mWebServerStatusResponse.setM2mServerStatusDOList(m2mServerStatusDOs);
         M2mWebPacket m2mPacket = M2mWebPacketHandle.createM2mWebPacket(
                 m2mWebPacket.getM2mRequestHeader(),
                 m2mWebPacket.getM2mReplyHeader(), m2mWebPacket.getRequest(),
-                m2mWebServerStatusResponse, m2mServerStatuses,
+                m2mWebServerStatusResponse, null,
                 "m2mWebServerStatuses");
         channel.writeAndFlush(m2mPacket);
 
@@ -200,7 +186,7 @@ public class WebServerChannelHandler extends
                     .getAddress().getHostAddress();
             int port = ((InetSocketAddress) ctx.channel().remoteAddress())
                     .getPort();
-            LOG.info(" server host:{},port:{}", host, port);
+            LOG.info(" host:{},port:{}", host, port);
         }
         ctx.fireChannelRegistered();
     }
@@ -218,9 +204,6 @@ public class WebServerChannelHandler extends
         ctx.close();
     }
 
-    public int getNextZxid() {
-        return zxid.getAndIncrement();
-    }
 
     /*
      * 将server拆分为ip以及port

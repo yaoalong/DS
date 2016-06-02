@@ -46,7 +46,7 @@ public class M2mServerStatusDOs implements M2mRecord {
 
         archive.startRecord(tag);
         int length = archive.readInt("length");
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++){
             M2mServerStatusDO m2mServerStatusDO = new M2mServerStatusDO();
             m2mServerStatusDO.setId(archive.readLong("id"));
             m2mServerStatusDO.setIp(archive.readString("ip"));

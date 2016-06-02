@@ -17,7 +17,6 @@ public class WebTcpClient extends TcpClientNetwork {
                 reentrantLock.lock();
                 condition.await();
             } catch (InterruptedException e) {
-                e.printStackTrace();
             } finally {
                 reentrantLock.unlock();
             }
