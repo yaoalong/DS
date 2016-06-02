@@ -4,8 +4,6 @@ import lab.mars.ds.network.TcpClient;
 import lab.mars.ds.reflection.ResourceReflection;
 import org.lab.mars.ds.server.M2mDataNode;
 import org.lab.mars.onem2m.proto.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +20,6 @@ import static org.lab.mars.onem2m.M2mKeeperException.Code.*;
  * 客户端入口
  */
 public class OneM2m {
-    private static final Logger LOG = LoggerFactory.getLogger(OneM2m.class);
 
     private TcpClient tcpClient;
     private List<IpAndPortDO> ipAndPortDOList = new ArrayList<>();
@@ -37,18 +34,13 @@ public class OneM2m {
         create();
     }
 
-    public static void main(String args[]) throws IOException, M2mKeeperException {
-        OneM2m oneM2m = new OneM2m("192.168.10.131");
-        String key = "ddd32f234234ds";
-        oneM2m.create(key, "111".getBytes());
-        oneM2m.setData(key, "5555".getBytes());
-        System.out.println(oneM2m.getData(key));
-
-    }
-
     public void create() {
         tcpClient = new TcpClient(new LinkedList<>());
-        tcpClient.connectionOne(ipAndPortDOList.get(currentIndex).getIp(), ipAndPortDOList.get(currentIndex).getPort());
+        try {
+            tcpClient.connectionOne(ipAndPortDOList.get(currentIndex).getIp(), ipAndPortDOList.get(currentIndex).getPort());
+        } catch (IOException e) {
+            create();
+        }
     }
 
     public void write(M2mPacket m2mPacket) {

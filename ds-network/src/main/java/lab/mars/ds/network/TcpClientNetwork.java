@@ -8,6 +8,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.io.IOException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -17,13 +18,12 @@ import java.util.concurrent.locks.ReentrantLock;
  * Email:yaoalong@foxmail.com
  */
 public abstract class TcpClientNetwork {
-
     protected Channel channel;
     protected ReentrantLock reentrantLock = new ReentrantLock();
     protected Condition condition = reentrantLock.newCondition();
     private ChannelInitializer<SocketChannel> socketChannelChannelInitializer;
 
-    public void connectionOne(String host, int port) {
+    public void connectionOne(String host, int port) throws IOException{
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(NetworkEventLoopGroup.workerGroup)
                 .channel(NioSocketChannel.class)
@@ -31,11 +31,8 @@ public abstract class TcpClientNetwork {
                 .handler(socketChannelChannelInitializer);
         bootstrap.connect(host, port).addListener((ChannelFuture future) -> {
             reentrantLock.lock();
-            if(future.isSuccess()){
-                System.out.println("陈宫");
-            }
-            else{
-                System.out.println("shibai");
+            if(!future.isSuccess()){
+                throw new IOException("connection confused!");
             }
             channel = future.channel();
             condition.signalAll();
