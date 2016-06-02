@@ -1,10 +1,10 @@
 package org.lab.mars.ds.server;
 
-import java.io.IOException;
-
 import org.lab.mars.onem2m.jute.M2mInputArchive;
 import org.lab.mars.onem2m.jute.M2mOutputArchive;
 import org.lab.mars.onem2m.jute.M2mRecord;
+
+import java.io.IOException;
 
 /**
  * Author:yaoalong.
@@ -81,14 +81,6 @@ public class M2mDataNode implements M2mRecord {
 
     public void setValue(long value) {
         this.value = value;
-    }
-
-    public int getFlag() {
-        return flag;
-    }
-
-    public void setFlag(int flag) {
-        this.flag = flag;
     }
 
     public byte[] getData() {

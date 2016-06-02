@@ -82,7 +82,6 @@ public class DSDatabaseImpl implements DSDatabaseInterface {
                 Object object = row.getObject(name);
                 result.put(name, object);
             });
-            System.out.println("一条数据");
             //    if (judgeIsHandle((Long) result.get("zxid"))) {
             m2mDataNodes.add(ResourceReflection.deserialize(
                     M2mDataNode.class, result));
